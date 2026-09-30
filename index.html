@@ -145,15 +145,33 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 /* ===================== Home ===================== */
 .home-head { padding: 8px 0 0; }
 /* Mini hero: la nota del dia, amb una llum suau darrere */
-.hero-mini { position: relative; isolation: isolate; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 4px 0 16px; }
-.hero-mini::before {
-  content: ""; position: absolute; z-index: -1; left: -60px; top: -40px; width: 320px; height: 200px; pointer-events: none;
-  background: radial-gradient(closest-side, var(--accent-soft), transparent);
+.hero-mini {
+  position: relative; isolation: isolate; overflow: hidden;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 16px 24px; flex-wrap: wrap;
+  margin: 6px 0 14px; padding: 22px 24px 24px; border-radius: var(--r-lg); border: 1px solid var(--line);
+  background:
+    radial-gradient(460px 240px at 8% -10%, var(--accent-soft), transparent 70%),
+    radial-gradient(360px 220px at 100% 120%, var(--bg-glow-2), transparent 70%),
+    linear-gradient(135deg, var(--card-top), var(--card));
+  box-shadow: inset 0 1px 0 var(--edge-hi), var(--shadow);
 }
+/* Quatre cordes molt tènues al fons, de gruixudes (a baix) a fines */
+.hero-strings {
+  position: absolute; z-index: -1; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: .3;
+  /* només a la dreta, perquè no travessin la nota ni el text */
+  -webkit-mask-image: linear-gradient(90deg, transparent 35%, #000 80%);
+          mask-image: linear-gradient(90deg, transparent 35%, #000 80%);
+}
+.hero-strings line { stroke: var(--string); }
 .hero-mini .kicker { margin: 0; font-size: 14px; font-weight: 700; color: var(--muted); }
-.hero-mini h1 { margin: 4px 0 6px; display: flex; align-items: baseline; gap: 12px; font-size: clamp(46px, 9vw, 64px); line-height: 1; color: var(--accent); }
-.hero-mini h1 small { font-size: .42em; font-weight: 600; color: var(--muted); }
+.hero-mini h1 {
+  margin: 2px 0 8px; display: flex; align-items: baseline; gap: 14px;
+  font-size: clamp(64px, 12vw, 96px); line-height: .95; letter-spacing: -.02em; color: var(--accent);
+  text-shadow: 0 0 32px var(--accent-soft);
+}
+.hero-mini h1 small { font-size: .36em; font-weight: 600; color: var(--muted); letter-spacing: 0; text-shadow: none; }
 .hero-sub { margin: 0; color: var(--muted); font-size: 15px; max-width: 62ch; }
+@media (max-width: 640px) { .hero-mini { padding: 18px 16px 18px; } .hero-mini .btn { width: 100%; } }
 .btn.ghost { background: transparent; }
 .fb .dg.appear { animation: appear .42s cubic-bezier(.3,1.5,.5,1) both; transform-box: fill-box; transform-origin: center; }
 @keyframes appear { from { opacity: 0; transform: scale(.4); } }
@@ -450,6 +468,12 @@ body.in-quiz .topbar { display: none; }
   <section id="view-home">
     <div class="home-head">
       <div class="hero-mini" id="heroMini">
+        <svg class="hero-strings" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <line x1="0" x2="100" y1="30" y2="30" style="stroke-width:1.2px" vector-effect="non-scaling-stroke"/>
+          <line x1="0" x2="100" y1="48" y2="48" style="stroke-width:1.7px" vector-effect="non-scaling-stroke"/>
+          <line x1="0" x2="100" y1="66" y2="66" style="stroke-width:2.2px" vector-effect="non-scaling-stroke"/>
+          <line x1="0" x2="100" y1="84" y2="84" style="stroke-width:2.8px" vector-effect="non-scaling-stroke"/>
+        </svg>
         <div>
           <p class="kicker">Nota del dia</p>
           <h1 id="dayNote"></h1>
@@ -1907,7 +1931,7 @@ function dayNote() {
   h = Math.imul(h ^ (h >>> 16), 0x45d9f3b); h = Math.imul(h ^ (h >>> 16), 0x45d9f3b); h ^= h >>> 16; // barreja: dies seguits, notes diferents
   return pcs[Math.abs(h) % pcs.length];
 }
-let heroPos = [];
+let heroPos = [], heroIntroDone = false;
 function renderHero() {
   const pc = dayNote();
   $('#heroMini').hidden = pc == null;
@@ -1922,6 +1946,11 @@ function renderHero() {
   const label = pcShort(pc, cfg.notation === 'english' ? 'english' : 'latin');
   const dots = heroPos.map((p, i) => ({ s: p.s, f: p.f, cls: 'day', label, delay: reduceMotion() ? null : 150 + i * 90 }));
   renderFretboard($('#homeBoard'), { dots });
+  // Només el primer cop que s'obre l'app: cada posició fa vibrar la seva corda en encendre's
+  if (!heroIntroDone) {
+    heroIntroDone = true;
+    heroPos.forEach((p, i) => setTimeout(() => { if (!$('#view-home').hidden) vibrate($('#homeBoard'), p.s, p.f); }, 180 + i * 90));
+  }
 }
 // Escolta-la: totes les posicions de la nota, de greu a agut, amb la corda vibrant
 function playDayNote() {
