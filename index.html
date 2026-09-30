@@ -30,7 +30,7 @@
   --err: #d64545; --err-soft: rgba(214,69,69,.12);
   --board: #fbfcfe; --board-edge: #f0f4f9; --board-line: #cfdae7;
   --fret-edge: #8e99a7; --fret-mid: #b9c2cd; --fret-hi: #ffffff; --fret-shadow: rgba(40,60,90,.14); --nut: #cfc6b4; --string: #7d8fa5;
-  --marker: #e1e8f1; --out: rgba(243,246,250,.78); --dot-text: #ffffff;
+  --marker: #e1e8f1; --pearl-op: 1; --pearl-stroke: rgba(40,60,90,.18); --out: rgba(243,246,250,.78); --dot-text: #ffffff;
   --open-bg: #e3ecf7; --open-line: #b9cbe0;
   --r-lg: 18px; --r-md: 12px; --r-sm: 10px;
   --shadow: 0 1px 2px rgba(10,30,60,.05), 0 8px 24px rgba(10,30,60,.06);
@@ -52,7 +52,7 @@
   --err: #f87171; --err-soft: rgba(248,113,113,.14);
   --board: #07111e; --board-edge: #0c1b30; --board-line: #1b3049;
   --fret-edge: #3b4757; --fret-mid: #7f8b9a; --fret-hi: #d3dbe5; --fret-shadow: rgba(0,0,0,.55); --nut: #b9b09e; --string: #5b7190;
-  --marker: #14263c; --out: rgba(4,10,20,.72); --dot-text: #04121f;
+  --marker: #14263c; --pearl-op: .82; --pearl-stroke: rgba(0,0,0,.4); --out: rgba(4,10,20,.72); --dot-text: #04121f;
   --open-bg: #13294a; --open-line: #28497a;
   --shadow: 0 1px 0 rgba(0,0,0,.35), 0 18px 40px -14px rgba(0,0,0,.7);
 }
@@ -181,7 +181,7 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 .fb .nut { stroke: var(--nut); stroke-width: 6; stroke-linecap: round; }
 .fb .string { stroke: var(--string); stroke-linecap: round; }
 .fb .string.off { opacity: .25; stroke-dasharray: 3 6; }
-.fb .marker { fill: var(--marker); }
+.fb .marker { opacity: var(--pearl-op); stroke: var(--pearl-stroke); stroke-width: .75; }
 .fb .out { fill: var(--out); pointer-events: none; }
 .fb text { font-family: var(--font-display); }
 .fb .slabel { fill: var(--muted); font-size: 13px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
@@ -720,7 +720,11 @@ function renderFretboard(host, opts = {}) {
     </linearGradient><linearGradient id="fret-${host.id}" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" style="stop-color:var(--fret-edge)"/><stop offset=".42" style="stop-color:var(--fret-hi)"/>
       <stop offset=".62" style="stop-color:var(--fret-mid)"/><stop offset="1" style="stop-color:var(--fret-edge)"/>
-    </linearGradient><linearGradient id="sheen-${host.id}" x1="0" y1="0" x2="0" y2="1">
+    </linearGradient><radialGradient id="pearl-${host.id}" cx=".38" cy=".34" r=".72">
+      <stop offset="0" stop-color="#ffffff"/><stop offset=".22" stop-color="#f7eedc"/>
+      <stop offset=".45" stop-color="#bfe2f6"/><stop offset=".66" stop-color="#e4c6f0"/>
+      <stop offset=".84" stop-color="#c3f0dc"/><stop offset="1" stop-color="#95a8c0"/>
+    </radialGradient><linearGradient id="sheen-${host.id}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".3" stop-color="#fff" stop-opacity="0"/>
       <stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/>
     </linearGradient><filter id="${glowId}" x="-60%" y="-60%" width="220%" height="220%">
@@ -732,10 +736,10 @@ function renderFretboard(host, opts = {}) {
 
   // Marcadors
   for (let f = firstFret; f <= to; f++) {
-    if (SINGLE_MARKERS.includes(f)) svg += `<circle class="marker" cx="${cx(f)}" cy="${padT + boardH / 2}" r="6"/>`;
+    if (SINGLE_MARKERS.includes(f)) svg += `<circle class="marker" fill="url(#pearl-${host.id})" cx="${cx(f)}" cy="${padT + boardH / 2}" r="7"/>`;
     if (DOUBLE_MARKERS.includes(f)) {
-      svg += `<circle class="marker" cx="${cx(f)}" cy="${padT + boardH * 0.25}" r="6"/>`;
-      svg += `<circle class="marker" cx="${cx(f)}" cy="${padT + boardH * 0.75}" r="6"/>`;
+      svg += `<circle class="marker" fill="url(#pearl-${host.id})" cx="${cx(f)}" cy="${padT + boardH * 0.25}" r="7"/>`;
+      svg += `<circle class="marker" fill="url(#pearl-${host.id})" cx="${cx(f)}" cy="${padT + boardH * 0.75}" r="7"/>`;
     }
   }
   // Trasts (el primer és la celleta si es veu el trast 0)
