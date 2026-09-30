@@ -143,6 +143,20 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 
 /* ===================== Home ===================== */
 .home-head { padding: 8px 0 0; }
+/* Mini hero: la nota del dia, amb una llum suau darrere */
+.hero-mini { position: relative; isolation: isolate; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 4px 0 16px; }
+.hero-mini::before {
+  content: ""; position: absolute; z-index: -1; left: -60px; top: -40px; width: 320px; height: 200px; pointer-events: none;
+  background: radial-gradient(closest-side, var(--accent-soft), transparent);
+}
+.hero-mini .kicker { margin: 0; font-size: 14px; font-weight: 700; color: var(--muted); }
+.hero-mini h1 { margin: 4px 0 6px; display: flex; align-items: baseline; gap: 12px; font-size: clamp(46px, 9vw, 64px); line-height: 1; color: var(--accent); }
+.hero-mini h1 small { font-size: .42em; font-weight: 600; color: var(--muted); }
+.hero-sub { margin: 0; color: var(--muted); font-size: 15px; max-width: 62ch; }
+.btn.ghost { background: transparent; }
+.fb .dg.appear { animation: appear .42s cubic-bezier(.3,1.5,.5,1) both; transform-box: fill-box; transform-origin: center; }
+@keyframes appear { from { opacity: 0; transform: scale(.4); } }
+@media (prefers-reduced-motion: reduce) { .fb .dg.appear { animation: none; } }
 .practice { display: grid; gap: 14px; }
 .practice .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .practice .row > span { min-width: 58px; font-size: 14px; font-weight: 700; color: var(--muted); }
@@ -431,7 +445,17 @@ body.in-quiz .topbar { display: none; }
   <!-- ============ INICI ============ -->
   <section id="view-home">
     <div class="home-head">
-      <h1>Què practiquem avui?</h1>
+      <div class="hero-mini" id="heroMini">
+        <div>
+          <p class="kicker">Nota del dia</p>
+          <h1 id="dayNote"></h1>
+          <p class="hero-sub" id="daySub"></p>
+        </div>
+        <button class="btn ghost" id="dayPlay">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>
+          Escolta-la
+        </button>
+      </div>
     </div>
 
     <div class="card practice">
@@ -1169,7 +1193,9 @@ function renderFretboard(host, opts = {}) {
   for (const dt of dots) {
     const x = cx(dt.f), y = yOf(dt.s);
     if (y == null || isNaN(y) || dt.f < from || dt.f > to) continue;
-    d += `<g class="dg"${dt.key ? ` data-key="${dt.key}" data-x="${x}" data-y="${y}"` : ''}>`;
+    const appear = dt.delay != null ? ` appear" style="animation-delay:${dt.delay}ms` : '';
+    d += `<g class="dg${appear}"${dt.key ? ` data-key="${dt.key}" data-x="${x}" data-y="${y}"` : ''}>`;
+    dt.delay = null; // l'aparició esglaonada només es fa un cop
     if (dt.anim === 'shake') d += `<rect class="flash" x="${cellX(dt.f)}" y="${y - gap / 2}" width="${cellW(dt.f)}" height="${gap}" rx="6"/>`;
     if (dt.cls === 'target' || dt.cls === 'reveal') d += `<circle class="ring${dt.cls === 'reveal' ? ' soft' : ''}" cx="${x}" cy="${y}" r="${r}"/>`;
     if (dt.cls === 'ok' && dt.anim === 'pop') d += `<circle class="burst" cx="${x}" cy="${y}" r="${r}"/>`;
@@ -1780,6 +1806,40 @@ function syncSegs() {
   });
 }
 
+// Nota del dia: la mateixa durant tot el dia, entre les notes que permet la configuració
+function dayNote() {
+  const pos = positionsInRange();
+  const pcs = ALL_PCS.filter(pc => allowedPc(pc) && pos.some(p => pcOf(p.midi) === pc));
+  if (!pcs.length) return null;
+  const d = new Date();
+  let h = d.getFullYear() * 400 + (d.getMonth() + 1) * 32 + d.getDate();
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b); h = Math.imul(h ^ (h >>> 16), 0x45d9f3b); h ^= h >>> 16; // barreja: dies seguits, notes diferents
+  return pcs[Math.abs(h) % pcs.length];
+}
+let heroPos = [];
+function renderHero() {
+  const pc = dayNote();
+  $('#heroMini').hidden = pc == null;
+  if (pc == null) { heroPos = []; renderFretboard($('#homeBoard'), {}); return; }
+  $('#dayNote').innerHTML = `${pcLabel(pc, 'latin')}<small>${pcLabel(pc, 'english')}</small>`;
+  heroPos = positionsInRange().filter(p => pcOf(p.midi) === pc).sort((a, b) => a.midi - b.midi || a.f - b.f);
+  const octs = new Set(heroPos.map(p => Math.floor(p.midi / 12))).size;
+  const mods = Object.values(stats.modules);
+  const n = mods.reduce((a, m) => a + m.n, 0), ok = mods.reduce((a, m) => a + m.ok, 0);
+  $('#daySub').textContent = `Surt ${heroPos.length} ${heroPos.length === 1 ? 'vegada' : 'vegades'} al teu rang${octs > 1 ? `, en ${octs} octaves` : ''}.`
+    + (n ? ` Portes ${n} respostes, amb un ${Math.round((ok / n) * 100)}% d'encerts.` : ' Busca-la al màstil abans de començar.');
+  const label = pcShort(pc, cfg.notation === 'english' ? 'english' : 'latin');
+  const dots = heroPos.map((p, i) => ({ s: p.s, f: p.f, cls: 'day', label, delay: reduceMotion() ? null : 150 + i * 90 }));
+  renderFretboard($('#homeBoard'), { dots });
+}
+// Escolta-la: totes les posicions de la nota, de greu a agut, amb la corda vibrant
+function playDayNote() {
+  const host = $('#homeBoard');
+  (host._seqs || []).forEach(clearTimeout);
+  if (!cfg.sound) toast('El so està desactivat. Activa\'l amb la icona de l\'altaveu.');
+  host._seqs = heroPos.map((p, i) => setTimeout(() => { playMidi(p.midi); vibrate(host, p.s, p.f); }, i * 340));
+}
+
 function renderHome() {
   syncSegs();
   const isPreset = RANGE_PRESETS.concat(ZONE_PRESETS).some(([a, b]) => cfg.fretMin === a && cfg.fretMax === b);
@@ -1787,7 +1847,7 @@ function renderHome() {
   $('#homeZones').innerHTML = rangeChips(ZONE_PRESETS);
   $('#homeSummary').innerHTML = `Baix de ${cfg.strings} cordes (${activeStringIds().map(stringLabel).join(' ')}), ${ACC_LABEL[cfg.accidentals]}, ${
     NOT_LABEL[cfg.notation]}${cfg.allPositions ? ', totes les posicions' : ''}. <button class="link" data-go="config">Canvia</button>`;
-  renderFretboard($('#homeBoard'), {});
+  renderHero();
 
   $('#modules').innerHTML = Object.entries(MODULES).map(([id, M]) => {
     const st = stats.modules[id];
@@ -1998,6 +2058,7 @@ function requestExit() {
 }
 $('#quizExit').addEventListener('click', requestExit);
 $('#sumAgain').addEventListener('click', () => startSession(sess ? sess.mid : 'm1'));
+$('#dayPlay').addEventListener('click', playDayNote);
 
 document.addEventListener('keydown', e => {
   if ($('#view-quiz').hidden || !sess) return;
