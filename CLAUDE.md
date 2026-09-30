@@ -128,3 +128,12 @@ Alteracions: ♯ = sostingut, ♭ = bemoll (Do♯ = C♯, Re♭ = D♭). En mode
 - Detecció de notes pel micròfon.
 - Cançons, tabs o contingut amb drets d'autor.
 - Comptes d'usuari, sincronització o backend.
+
+## Pendent (anotat el 30/09/2026, per ordre de prioritat)
+1. **Exportar i importar el progrés** (configuració, pesos, estadístiques i historial) com a fitxer JSON des de la configuració. Motiu: Safari esborra el `localStorage` després de 7 dies sense visitar la web; també serveix per passar el progrés entre aparells.
+2. **Afinador pel micròfon** (excepció a "Detecció de notes pel micròfon"): YIN, suposant la corda a l'aire més propera per evitar errors d'octava, mode "harmònic del trast 12", agulla de ±50 cèntims i verd a ±3. Desactivar echoCancellation, noiseSuppression i autoGainControl. Apagar el micròfon en sortir de la pantalla.
+3. **Escales i arpegis al màstil**: escala major i menor, i arpegis d'acords, a qualsevol tonalitat i zona; veure-les i exercitar-s'hi ("toca la tercera de Sol").
+4. **Lectura de frases curtes**: 4–8 notes en clau de fa per llegir i tocar seguides.
+5. **Intervals al màstil**: la forma de cada interval, enllaçada amb l'exercici d'oïda.
+
+Pendent de l'usuari: fer-la servir una setmana, provar-la al mòbil real i escoltar el so amb auriculars.
