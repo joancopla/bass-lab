@@ -160,6 +160,28 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
 
+/* ===================== Estadístiques ===================== */
+.stats-grid { display: grid; gap: 12px; }
+.mod-stats { display: grid; margin-top: 8px; }
+.mod-stats > div { display: grid; grid-template-columns: 1fr 64px 72px 60px; gap: 8px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.mod-stats > div:last-child { border-bottom: 0; }
+.mod-stats b { font-family: var(--font-display); font-weight: 600; font-size: 18px; color: var(--accent); font-variant-numeric: tabular-nums; text-align: right; }
+.mod-stats span { color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.mod-stats span:first-child { color: var(--text); text-align: left; font-weight: 650; }
+.mod-stats span.none { grid-column: 2 / -1; }
+.history { list-style: none; margin: 8px 0 0; padding: 0; display: grid; max-height: 360px; overflow-y: auto; }
+.history li { display: grid; grid-template-columns: 110px 1fr auto; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.history li span:first-child { color: var(--muted); font-variant-numeric: tabular-nums; }
+.history li.empty { display: block; color: var(--muted); border-bottom: 0; }
+.history li b { font-family: var(--font-display); font-weight: 600; font-variant-numeric: tabular-nums; }
+.btn.danger { color: var(--err); }
+.btn.danger.armed { background: var(--err-soft); border-color: var(--err); }
+@media (max-width: 640px) {
+  .mod-stats > div { grid-template-columns: 1fr 52px 60px; }
+  .mod-stats > div span:last-child { display: none; }
+  .history li { grid-template-columns: 92px 1fr auto; }
+}
+
 /* ===================== Config ===================== */
 .page-head { display: flex; align-items: center; gap: 12px; padding: 16px 0 14px; }
 .page-head h2 { margin: 0; }
@@ -331,6 +353,9 @@ body.in-quiz .topbar { display: none; }
   </button>
   <div class="icons">
     <button class="icon-btn js-sound" aria-label="So"></button>
+    <button class="icon-btn" data-go="stats" aria-label="Estadístiques">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V11M12 20V5M19 20v-6"/></svg>
+    </button>
     <button class="icon-btn" data-go="config" aria-label="Configuració">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
     </button>
@@ -443,6 +468,38 @@ body.in-quiz .topbar { display: none; }
           <button data-val="10">10 preguntes</button><button data-val="20">20</button><button data-val="50">50</button><button data-val="0">Lliure</button>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ ESTADÍSTIQUES ============ -->
+  <section id="view-stats" hidden>
+    <div class="page-head">
+      <button class="icon-btn" data-go="home" aria-label="Tornar a l'inici">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <h2>Estadístiques</h2>
+    </div>
+    <div class="stats-grid">
+      <div class="card">
+        <div class="figures" id="statsTotals"></div>
+      </div>
+      <div class="card">
+        <h3>On falles més</h3>
+        <div class="board-wrap" id="heatBoard" style="margin-top:10px"></div>
+        <p class="board-hint" hidden>Llisca per veure més trasts</p>
+        <p class="small" id="heatInfo">Toca una posició per veure'n el detall. Com més vermella, més errors.</p>
+      </div>
+      <div class="card">
+        <h3>Per mòdul</h3>
+        <div class="mod-stats" id="statsModules"></div>
+      </div>
+      <div class="card">
+        <h3>Historial de sessions</h3>
+        <ul class="history" id="statsHistory"></ul>
+      </div>
+    </div>
+    <div class="actions" style="margin-top:14px">
+      <button class="btn danger" id="btnReset">Reinicia les estadístiques</button>
     </div>
   </section>
 
@@ -707,14 +764,21 @@ const pcShort = (pc, notation, spelling) =>
 /* =====================================================================
    4. ESTADÍSTIQUES I PESOS
    ===================================================================== */
+const emptyStats = () => ({ v: 1, modules: {}, items: {}, sessions: [], pos: {} });
 function loadStats() {
   const s = LS.get(K_STATS, null);
-  if (!s || s.v !== 1) return { v: 1, modules: {}, items: {}, sessions: [] };
-  s.modules = s.modules || {}; s.items = s.items || {}; s.sessions = s.sessions || [];
+  if (!s || s.v !== 1) return emptyStats();
+  s.modules = s.modules || {}; s.items = s.items || {}; s.sessions = s.sessions || []; s.pos = s.pos || {};
   return s;
 }
 let stats = loadStats();
 const saveStats = () => LS.set(K_STATS, stats);
+
+// Encerts i errors per posició del màstil (per al mapa de calor). Es desa amb la resposta.
+function recordPos(s, f, correct) {
+  const p = stats.pos[s + f] || (stats.pos[s + f] = { n: 0, err: 0 });
+  p.n++; if (!correct) p.err++;
+}
 
 const W_MIN = 0.25, W_MAX = 8, FAST_MS = 2000, SLOW_MS = 4000;
 
@@ -761,23 +825,51 @@ function ensureAudio() {
 // Els navegadors només deixen iniciar l'àudio després d'un gest de l'usuari
 document.addEventListener('pointerdown', () => { if (cfg.sound) ensureAudio(); }, { passive: true });
 
+// Veu de baix: serra filtrada (brillantor que s'apaga), triangle (cos), 2n harmònic suau
+// i un clic curt de pua. Als altaveus petits la fonamental (31–100 Hz) gairebé no se sent,
+// però l'oïda la reconstrueix a partir dels harmònics: per això el 2n harmònic hi és reforçat.
+function bassVoice(c, dest, f, t, dur = 1.8) {
+  const out = c.createGain(); out.connect(dest);
+  const osc = (type, fr) => { const o = c.createOscillator(); o.type = type; o.frequency.value = fr; return o; };
+  const gain = v => { const g = c.createGain(); g.gain.value = v; return g; };
+
+  const saw = osc('sawtooth', f), tri = osc('triangle', f), h2 = osc('sine', f * 2);
+  const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 1.4;
+  lp.frequency.setValueAtTime(Math.min(f * 16, 3500), t);
+  lp.frequency.exponentialRampToValueAtTime(Math.max(f * 3, 200), t + 0.35);
+  const env = c.createGain();
+  env.gain.setValueAtTime(0.0001, t);
+  env.gain.exponentialRampToValueAtTime(0.55, t + 0.005);
+  env.gain.exponentialRampToValueAtTime(0.24, t + 0.3);
+  env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  saw.connect(gain(0.45)).connect(lp); tri.connect(lp); h2.connect(gain(0.18)).connect(lp);
+  lp.connect(env).connect(out);
+
+  // Pua: 25 ms de soroll filtrat
+  if (!c._noise) {
+    c._noise = c.createBuffer(1, Math.floor(c.sampleRate * 0.03), c.sampleRate);
+    const d = c._noise.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const pick = c.createBufferSource(); pick.buffer = c._noise;
+  const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1400; bp.Q.value = 0.8;
+  const pg = c.createGain();
+  pg.gain.setValueAtTime(0.14, t); pg.gain.exponentialRampToValueAtTime(0.0001, t + 0.025);
+  pick.connect(bp).connect(pg).connect(out);
+
+  for (const o of [saw, tri, h2]) { o.start(t); o.stop(t + dur + 0.05); }
+  pick.start(t);
+  return { stop(at) { out.gain.setTargetAtTime(0, at, 0.012); } };
+}
+
+// Monofònic, com un baix: una nota nova apaga l'anterior
+let voice = null;
 function playMidi(midi) {
   if (!cfg.sound || midi == null) return;
   const c = ensureAudio(); if (!c) return;
-  const f = freq(midi), t = c.currentTime;
-  const saw = c.createOscillator(); saw.type = 'sawtooth'; saw.frequency.value = f;
-  const tri = c.createOscillator(); tri.type = 'triangle'; tri.frequency.value = f;
-  const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 2;
-  lp.frequency.setValueAtTime(Math.min(f * 14, 3000), t);
-  lp.frequency.exponentialRampToValueAtTime(Math.max(f * 2.5, 180), t + 0.5);
-  const sawGain = c.createGain(); sawGain.gain.value = 0.5;
-  const env = c.createGain();
-  env.gain.setValueAtTime(0.0001, t);
-  env.gain.exponentialRampToValueAtTime(0.5, t + 0.008);
-  env.gain.exponentialRampToValueAtTime(0.18, t + 0.25);
-  env.gain.exponentialRampToValueAtTime(0.0001, t + 1.6);
-  saw.connect(sawGain); sawGain.connect(lp); tri.connect(lp); lp.connect(env); env.connect(master);
-  saw.start(t); tri.start(t); saw.stop(t + 1.7); tri.stop(t + 1.7);
+  const t = c.currentTime + 0.005;
+  if (voice) voice.stop(t);
+  voice = bassVoice(c, master, freq(midi), t);
 }
 
 /* =====================================================================
@@ -788,16 +880,18 @@ const DOUBLE_MARKERS = [12, 24];
 
 // opts: { dots:[{s,f,cls,label}], onTap(s,f), focus:fret }
 function renderFretboard(host, opts = {}) {
-  const { dots = [], links = [], onTap = null, focus = null } = opts;
+  const { dots = [], links = [], heat = [], onTap = null, focus = null } = opts;
+  // El mapa de calor mostra tot el màstil amb dades, no només el rang configurat
+  const [rMin, rMax] = opts.range || [cfg.fretMin, cfg.fretMax];
   host._fb = opts;
   const strs = instrumentStrings(cfg.strings).slice().reverse(); // aguda a dalt, greu a baix
-  const active = new Set(activeStringIds());
+  const active = new Set(opts.range ? instrumentStrings(cfg.strings).map(x => x.id) : activeStringIds());
   const W = host.clientWidth || 600;
   const narrow = W < 700;
 
   // Trasts visibles: en pantalla estreta, només el rang actiu ± 1
-  const from = narrow ? Math.max(0, cfg.fretMin - 1) : 0;
-  const to = narrow ? Math.min(MAX_FRET, cfg.fretMax + 1) : Math.min(MAX_FRET, Math.max(12, cfg.fretMax + 1));
+  const from = narrow ? Math.max(0, rMin - 1) : 0;
+  const to = narrow ? Math.min(MAX_FRET, rMax + 1) : Math.min(MAX_FRET, Math.max(12, rMax + 1));
   const hasOpen = from === 0;
   const firstFret = Math.max(from, 1);
   const nFrets = to - firstFret + 1;
@@ -819,7 +913,7 @@ function renderFretboard(host, opts = {}) {
   const cellW = f => (f === 0 ? openW : fw);
   const rowY = i => padT + gap / 2 + i * gap;
   const yOf = id => rowY(strs.findIndex(s => s.id === id));
-  const inRange = f => f >= cfg.fretMin && f <= cfg.fretMax;
+  const inRange = f => f >= rMin && f <= rMax;
   const thick = { B: 3.4, E: 3, A: 2.4, D: 1.9, G: 1.4 };
   const glowId = 'glow-' + host.id;
 
@@ -885,6 +979,13 @@ function renderFretboard(host, opts = {}) {
       }
     });
   }
+  // Capa de calor: vermell segons la proporció d'errors, verd si no n'hi ha
+  for (const h of heat) {
+    const i = strs.findIndex(x => x.id === h.s);
+    if (i < 0 || h.f < from || h.f > to) continue;
+    const fillV = h.v > 0 ? 'var(--err)' : 'var(--ok)', op = h.v > 0 ? 0.18 + 0.72 * h.v : 0.18;
+    svg += `<rect class="heat" x="${cellX(h.f) + 2}" y="${rowY(i) - gap / 2 + 3}" width="${cellW(h.f) - 4}" height="${gap - 6}" rx="7" fill="${fillV}" fill-opacity="${op.toFixed(2)}"/>`;
+  }
   // Connexions entre posicions (formes d'octava)
   for (const l of links) {
     const ya = yOf(l.a.s), yb = yOf(l.b.s);
@@ -918,7 +1019,7 @@ function renderFretboard(host, opts = {}) {
   }
   // Si el màstil no hi cap, centra la zona que interessa
   if (totalW > W) {
-    const fx = focus != null ? cx(focus) : cx(Math.max(from, cfg.fretMin)) + W / 2 - fw;
+    const fx = focus != null ? cx(focus) : cx(Math.max(from, rMin)) + W / 2 - fw;
     host.scrollLeft = Math.max(0, fx - W / 2);
   }
   if (!host._fadeBound) { host.addEventListener('scroll', () => updateFade(host), { passive: true }); host._fadeBound = true; }
@@ -1023,6 +1124,7 @@ const MODULES = {
       promptEl.innerHTML = `<h2>Quina nota és?</h2><div class="sub">${posText(s, f)}</div>`;
       renderFretboard(boardEl, { dots: [{ s, f, cls: 'target' }], focus: f });
       pcButtons(q, pc, ok => {
+        recordPos(s, f, ok);
         renderFretboard(boardEl, { dots: [{ s, f, cls: ok ? 'ok' : 'reveal', anim: ok ? 'pop' : 'shake', label: pcShort(pc, q.notation) }], focus: f });
         const name = pcLabel(pc, q.notation);
         resolve(ok, midi, ok ? `Correcte: ${name}` : `És ${name} (${posText(s, f, true)})`);
@@ -1068,6 +1170,7 @@ const MODULES = {
         if (hit) {
           if (found.has(k)) return;
           found.add(k);
+          recordPos(s, f, true);
           dots.push({ s, f, cls: 'ok', anim: 'pop', label: name });
           if (all) $('#foundCnt').textContent = found.size;
           keepScroll(draw);
@@ -1076,7 +1179,7 @@ const MODULES = {
         } else {
           const wrongName = pcShort(pcOf(m), q.notation, spelling);
           dots.push({ s, f, cls: 'err', anim: 'shake', label: wrongName });
-          for (const t of targets) if (!found.has(t.s + t.f)) dots.push({ s: t.s, f: t.f, cls: 'reveal', label: label(t) });
+          for (const t of targets) if (!found.has(t.s + t.f)) { recordPos(t.s, t.f, false); dots.push({ s: t.s, f: t.f, cls: 'reveal', label: label(t) }); }
           keepScroll(draw);
           const near = nearest(targets, s, f);
           resolve(false, near.midi, `Has tocat ${wrongName}. ${name} és a les posicions marcades.`);
@@ -1139,6 +1242,7 @@ const MODULES = {
         if (q.done) return;
         const m = midiAt(s, f);
         if (m === midi) {
+          recordPos(s, f, true);
           dots.push({ s, f, cls: 'ok', anim: 'pop', label: name });
           draw();
           renderStaff(staffEl, { midi, spelling, cls: 'ok', label: name, anim: 'pop' });
@@ -1147,7 +1251,7 @@ const MODULES = {
         }
         const tapped = pcShort(pcOf(m), q.notation, spelling);
         dots.push({ s, f, cls: 'err', anim: 'shake', label: tapped });
-        for (const t of targets) dots.push({ s: t.s, f: t.f, cls: 'reveal', label: name });
+        for (const t of targets) { recordPos(t.s, t.f, false); dots.push({ s: t.s, f: t.f, cls: 'reveal', label: name }); }
         draw();
         renderStaff(staffEl, { midi, spelling, cls: 'err', label: name });
         const msg = pcOf(m) === pc
@@ -1218,11 +1322,13 @@ const MODULES = {
         if (Math.abs(m - midi) === 12) {
           dots.push({ s: ts, f: tf, cls: 'ok', anim: 'pop', label: name });
           links.push({ a: { s, f }, b: { s: ts, f: tf }, cls: 'ok' });
+          recordPos(s, f, true);
           draw();
           resolve(true, m, `Correcte: una octava ${m > midi ? 'amunt' : 'avall'} (${posText(ts, tf, true)})`);
           return;
         }
         const tapped = pcShort(pcOf(m), q.notation, q.spelling);
+        recordPos(s, f, false);
         dots.push({ s: ts, f: tf, cls: 'err', anim: 'shake', label: tapped });
         for (const t of targets) { dots.push({ s: t.s, f: t.f, cls: 'reveal', label: name }); links.push({ a: { s, f }, b: t }); }
         draw();
@@ -1332,11 +1438,12 @@ function setFeedback(cls, text) {
 const fmtSec = ms => (ms / 1000).toFixed(1).replace('.', ',') + ' s';
 
 function show(view) {
-  for (const v of ['home', 'config', 'explore', 'quiz', 'summary']) $('#view-' + v).hidden = v !== view;
+  for (const v of ['home', 'config', 'explore', 'stats', 'quiz', 'summary']) $('#view-' + v).hidden = v !== view;
   document.body.classList.toggle('in-quiz', view === 'quiz');
   if (view === 'home') renderHome();
   if (view === 'config') syncConfig();
   if (view === 'explore') renderExplore();
+  if (view === 'stats') renderStats();
   window.scrollTo(0, 0);
 }
 
@@ -1399,6 +1506,61 @@ function renderExplore() {
   renderFretboard($('#exploreBoard'), { dots, links, onTap: (s, f) => playMidi(midiAt(s, f)) });
   const en = spell(explorePc, cfg.accidentals === 'flat' ? 'flat' : 'sharp', 'english');
   $('#exploreLegend').innerHTML = octs.map(o => `<span><i style="background:var(--oct-${o % 4})"></i>${en}${o}</span>`).join('');
+}
+
+function renderStats() {
+  // Totals
+  const mods = Object.values(stats.modules);
+  const n = mods.reduce((a, m) => a + m.n, 0), ok = mods.reduce((a, m) => a + m.ok, 0), ms = mods.reduce((a, m) => a + m.ms, 0);
+  $('#statsTotals').innerHTML = n
+    ? `<div><b>${n}</b><span>respostes</span></div><div><b>${Math.round((ok / n) * 100)}%</b><span>d'encerts</span></div><div><b>${fmtSec(ms / n)}</b><span>de mitjana</span></div><div><b>${stats.sessions.length}</b><span>sessions</span></div>`
+    : '<p class="small">Encara no hi ha respostes. Fes una sessió i aquí veuràs el teu progrés.</p>';
+
+  // Mapa de calor
+  $('#heatInfo').textContent = "Toca una posició per veure'n el detall. Com més vermella, més errors.";
+  const heat = Object.entries(stats.pos).map(([k, v]) => ({ s: k[0], f: +k.slice(1), v: v.err / v.n, n: v.n, err: v.err }))
+    .filter(h => instrumentStrings(cfg.strings).some(x => x.id === h.s));
+  const maxF = Math.min(MAX_FRET, Math.max(12, cfg.fretMax, ...heat.map(h => h.f)));
+  renderFretboard($('#heatBoard'), {
+    heat, range: [0, maxF],
+    onTap: (s, f) => {
+      const p = stats.pos[s + f];
+      $('#heatInfo').textContent = p
+        ? `${posText(s, f)}: ${p.err} ${p.err === 1 ? 'error' : 'errors'} de ${p.n} (${Math.round((p.err / p.n) * 100)}%)`
+        : `${posText(s, f)}: encara sense dades`;
+    },
+  });
+
+  // Per mòdul
+  $('#statsModules').innerHTML = Object.entries(MODULES).map(([id, M]) => {
+    const st = stats.modules[id];
+    return st && st.n
+      ? `<div><span>${M.title}</span><b>${Math.round((st.ok / st.n) * 100)}%</b><span>${fmtSec(st.ms / st.n)}</span><span>${st.n}</span></div>`
+      : `<div><span>${M.title}</span><span class="none">Sense dades</span></div>`;
+  }).join('');
+
+  // Historial
+  const fmtDate = d => new Date(d).toLocaleString('ca-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  const hist = stats.sessions.slice().reverse().slice(0, 50);
+  $('#statsHistory').innerHTML = hist.length
+    ? hist.map(h => `<li><span>${fmtDate(h.d)}</span><span>${MODULES[h.m] ? MODULES[h.m].title : h.m}</span><b>${h.ok}/${h.n}</b></li>`).join('')
+    : '<li class="empty">Encara no hi ha sessions.</li>';
+}
+
+let resetArmed = null;
+function resetStats() {
+  const b = $('#btnReset');
+  if (!resetArmed) {
+    b.textContent = 'Toca de nou per esborrar-ho tot';
+    b.classList.add('armed');
+    resetArmed = setTimeout(() => { resetArmed = null; b.textContent = 'Reinicia les estadístiques'; b.classList.remove('armed'); }, 4000);
+    return;
+  }
+  clearTimeout(resetArmed); resetArmed = null;
+  b.textContent = 'Reinicia les estadístiques'; b.classList.remove('armed');
+  stats = emptyStats(); saveStats();
+  renderStats();
+  toast('Estadístiques reiniciades.');
 }
 
 function syncConfig() {
@@ -1475,6 +1637,7 @@ $('#fretMin').addEventListener('change', e => { cfg.fretMin = +e.target.value; i
 $('#fretMax').addEventListener('change', e => { cfg.fretMax = +e.target.value; if (cfg.fretMax < cfg.fretMin) cfg.fretMin = cfg.fretMax; afterCfg(); });
 
 $('#btnNext').addEventListener('click', () => nextQuestion());
+$('#btnReset').addEventListener('click', resetStats);
 $('#quizExit').addEventListener('click', () => endSession());
 $('#sumAgain').addEventListener('click', () => startSession(sess ? sess.mid : 'm1'));
 
@@ -1487,7 +1650,7 @@ document.addEventListener('keydown', e => {
 let resizeTimer = null;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => ['board', 'previewBoard', 'homeBoard', 'sumBoard', 'exploreBoard'].forEach(id => redraw($('#' + id))), 150);
+  resizeTimer = setTimeout(() => ['board', 'previewBoard', 'homeBoard', 'sumBoard', 'exploreBoard', 'heatBoard'].forEach(id => redraw($('#' + id))), 150);
 });
 
 selfTest();
