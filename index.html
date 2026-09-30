@@ -29,6 +29,7 @@
   --ok: #0f9d67; --ok-soft: rgba(15,157,103,.12);
   --err: #d64545; --err-soft: rgba(214,69,69,.12);
   --board: #fbfcfe; --board-edge: #f0f4f9; --board-line: #cfdae7;
+  --staff-line: #7d8ea3; --staff-ink: #0b1829;
   --fret-edge: #8e99a7; --fret-mid: #b9c2cd; --fret-hi: #ffffff; --fret-shadow: rgba(40,60,90,.14); --nut: #cfc6b4; --string: #7d8fa5;
   --marker: #e1e8f1; --pearl-op: 1; --pearl-stroke: rgba(40,60,90,.18); --out: rgba(243,246,250,.78); --dot-text: #ffffff;
   --open-bg: #e3ecf7; --open-line: #b9cbe0;
@@ -51,6 +52,7 @@
   --ok: #34d399; --ok-soft: rgba(52,211,153,.14);
   --err: #f87171; --err-soft: rgba(248,113,113,.14);
   --board: #07111e; --board-edge: #0c1b30; --board-line: #1b3049;
+  --staff-line: #5f7593; --staff-ink: #e6eef8;
   --fret-edge: #3b4757; --fret-mid: #7f8b9a; --fret-hi: #d3dbe5; --fret-shadow: rgba(0,0,0,.55); --nut: #b9b09e; --string: #5b7190;
   --marker: #14263c; --pearl-op: .82; --pearl-stroke: rgba(0,0,0,.4); --out: rgba(4,10,20,.72); --dot-text: #04121f;
   --open-bg: #13294a; --open-line: #28497a;
@@ -205,6 +207,22 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 @keyframes pop { 0% { transform: scale(.6); } 100% { transform: scale(1); } }
 @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 
+/* ===================== Staff (clau de fa) ===================== */
+.staff-card { padding: 10px 12px; margin-bottom: 12px; display: grid; place-items: center; }
+.staff-card svg { display: block; width: 100%; max-width: 460px; height: auto; }
+.st .line { stroke: var(--staff-line); stroke-width: 1.1; }
+.st .ledger { stroke: var(--staff-ink); stroke-width: 1.3; }
+.st .clef, .st .clef-dot { fill: var(--staff-line); }
+.st .head, .st .acc-fill { fill: var(--staff-ink); }
+.st .stem, .st .acc-line { stroke: var(--staff-ink); fill: none; }
+.st .note.ok .head, .st .note.ok .acc-fill { fill: var(--ok); }
+.st .note.ok .stem, .st .note.ok .acc-line, .st .note.ok .ledger { stroke: var(--ok); }
+.st .note.err .head, .st .note.err .acc-fill { fill: var(--err); }
+.st .note.err .stem, .st .note.err .acc-line, .st .note.err .ledger { stroke: var(--err); }
+.st .note-label { font-family: var(--font-display); font-weight: 700; font-size: 13px; fill: var(--ok); dominant-baseline: central; }
+.st .note.err .note-label { fill: var(--err); }
+.st .note.pop { animation: pop .32s cubic-bezier(.3,1.6,.5,1); transform-box: fill-box; transform-origin: center; }
+
 /* ===================== Quiz ===================== */
 .quiz-bar { display: flex; align-items: center; gap: 12px; padding: 12px 0 10px; }
 .quiz-title { flex: 1; min-width: 0; display: grid; }
@@ -332,7 +350,7 @@ body.in-quiz .topbar { display: none; }
     </div>
 
     <div class="modules" id="modules"></div>
-    <p class="soon">Properament: lectura en clau de fa, notació i connexions del màstil.</p>
+    <p class="soon">Properament: notació i connexions del màstil.</p>
   </section>
 
   <!-- ============ CONFIGURACIÓ ============ -->
@@ -425,7 +443,8 @@ body.in-quiz .topbar { display: none; }
     <div class="progress"><i id="progFill"></i></div>
 
     <div class="prompt" id="prompt" aria-live="polite"></div>
-    <div class="card board-card">
+    <div class="card staff-card" id="staffCard" hidden><div id="staff"></div></div>
+    <div class="card board-card" id="boardCard">
       <div class="board-wrap" id="board"></div>
       <p class="board-hint" id="boardHint" hidden>Llisca per veure més trasts</p>
     </div>
@@ -497,6 +516,27 @@ function spell(pc, spelling, notation) {
 }
 // Notació científica en anglès (E1, C4…)
 const sciName = (m, spelling = 'sharp') => spell(pcOf(m), spelling, 'english') + (Math.floor(m / 12) - 1);
+
+// --- Pentagrama en clau de fa ---
+// El baix és transpositor d'octava: s'escriu 12 semitons per sobre del que sona.
+const WRITTEN_OFFSET = 12;
+const LETTERS = 'CDEFGAB';
+// "step" = posició diatònica (octava·7 + lletra). Línies del pentagrama: G2 B2 D3 F3 A3.
+const STAFF_BOTTOM = 18; // G2, 1a línia
+const STAFF_TOP = 26;    // A3, 5a línia
+function writtenInfo(realMidi, spelling) {
+  const w = realMidi + WRITTEN_OFFSET;
+  const name = (spelling === 'flat' ? PC_FLAT : PC_SHARP)[pcOf(w)];
+  const oct = Math.floor(w / 12) - 1;
+  return { midi: w, letter: name[0], acc: name.slice(1), oct, step: oct * 7 + LETTERS.indexOf(name[0]), sci: name + oct };
+}
+// Línies addicionals que calen per a una posició (per sota: E2, C2…; per sobre: C4, E4…)
+function ledgerSteps(step) {
+  const out = [];
+  for (let s = STAFF_BOTTOM - 2; s >= step; s -= 2) out.push(s);
+  for (let s = STAFF_TOP + 2; s <= step; s += 2) out.push(s);
+  return out;
+}
 // ==END THEORY==
 
 function selfTest() {
@@ -518,8 +558,26 @@ function selfTest() {
   for (const [pc, sp, no, exp] of names) {
     if (spell(pc, sp, no) !== exp) errors.push(`spell(${pc},${sp},${no}) = ${spell(pc, sp, no)}, esperat ${exp}`);
   }
+  // Pentagrama: [altura real, grafia, nota escrita, step, línies addicionals]
+  const staff = [
+    [28, 'sharp', 'E2', 16, [16]],      // corda E a l'aire: 1a línia addicional per sota
+    [48, 'sharp', 'C4', 28, [28]],      // corda G, trast 5: 1a línia addicional per sobre
+    [31, 'sharp', 'G2', 18, []],        // 1a línia
+    [45, 'sharp', 'A3', 26, []],        // 5a línia
+    [29, 'sharp', 'F2', 17, []],        // espai sota el pentagrama
+    [47, 'sharp', 'B3', 27, []],        // espai sobre el pentagrama
+    [26, 'sharp', 'D2', 15, [16]],
+    [24, 'sharp', 'C2', 14, [16, 14]],  // 2a línia addicional per sota
+    [34, 'flat', 'B♭2', 20, []],        // 2a línia amb bemoll
+    [34, 'sharp', 'A♯2', 19, []],       // 1r espai amb sostingut
+  ];
+  for (const [m, sp, sci, step, led] of staff) {
+    const w = writtenInfo(m, sp), l = ledgerSteps(w.step);
+    if (w.sci !== sci || w.step !== step || l.join() !== led.join())
+      errors.push(`pentagrama ${m}/${sp}: ${w.sci} step ${w.step} [${l}], esperat ${sci} step ${step} [${led}]`);
+  }
   if (errors.length) console.error('[Bass Lab] Autotest amb errors:\n' + errors.join('\n'));
-  else console.info('[Bass Lab] Autotest OK: cordes a l\'aire, trast 5, trast 12, freqüències i noms.');
+  else console.info('[Bass Lab] Autotest OK: cordes a l\'aire, trast 5, trast 12, freqüències, noms i pentagrama.');
   return errors;
 }
 
@@ -817,12 +875,82 @@ function updateFade(host) {
 const redraw = host => { if (host._fb && host.offsetParent) renderFretboard(host, host._fb); };
 
 /* =====================================================================
+   6b. PENTAGRAMA EN CLAU DE FA (SVG propi)
+   ===================================================================== */
+// Rang vertical segons la configuració, perquè el pentagrama no canviï de mida entre preguntes
+function staffStepRange() {
+  let lo = STAFF_BOTTOM, hi = STAFF_TOP;
+  for (const p of positionsInRange()) for (const sp of ['sharp', 'flat']) {
+    const st = writtenInfo(p.midi, sp).step; lo = Math.min(lo, st); hi = Math.max(hi, st);
+  }
+  return [lo, hi];
+}
+// Clau de fa en unitats d'espai entre línies; origen a la línia de Fa (F3), vora esquerra
+const CLEF_PATH = 'M0.1,0 C0,-1.45 2.55,-1.75 2.65,-0.1 C2.72,1.4 1.5,2.5 0,2.95 L-0.06,2.72 C1.1,2.25 1.98,1.3 1.95,-0.1 C1.9,-1.25 0.6,-1.25 0.5,-0.4 Z';
+
+// opts: { midi (altura real), spelling, cls: ''|'ok'|'err', label, anim }
+function renderStaff(host, { midi, spelling, cls = '', label = '', anim = '' }) {
+  const sp = 10, half = sp / 2;
+  const [lo, hi] = staffStepRange();
+  const top = Math.max(hi + 3, STAFF_TOP + 4), bot = Math.min(lo - 3, STAFF_BOTTOM - 4);
+  const W = 200, H = (top - bot) * half;
+  const y = st => (top - st) * half;
+  const nx = 128;
+
+  let svg = `<svg class="st" viewBox="0 0 ${W} ${H}" role="img" aria-label="Nota en clau de fa">`;
+  for (let s = STAFF_BOTTOM; s <= STAFF_TOP; s += 2) svg += `<line class="line" x1="6" x2="${W - 6}" y1="${y(s)}" y2="${y(s)}"/>`;
+  svg += `<g transform="translate(12 ${y(24)}) scale(${sp})"><path class="clef" d="${CLEF_PATH}"/>
+    <circle class="clef" cx="0.45" cy="0.02" r="0.42"/><circle class="clef-dot" cx="3.1" cy="-0.5" r="0.19"/><circle class="clef-dot" cx="3.1" cy="0.5" r="0.19"/></g>`;
+
+  const wi = writtenInfo(midi, spelling), ny = y(wi.step);
+  let g = `<g class="note ${cls} ${anim}">`;
+  for (const s of ledgerSteps(wi.step)) g += `<line class="ledger" x1="${nx - 11}" x2="${nx + 11}" y1="${y(s)}" y2="${y(s)}"/>`;
+  // Alteració a l'esquerra de la nota
+  const ax = nx - 17;
+  if (wi.acc === '♯') g += `<g transform="translate(${ax} ${ny})">
+      <line class="acc-line" x1="-1.8" y1="-8" x2="-1.8" y2="9" stroke-width="1.1"/><line class="acc-line" x1="1.8" y1="-9" x2="1.8" y2="8" stroke-width="1.1"/>
+      <path class="acc-fill" d="M-4,-2.3 L4,-4.9 L4,-2.7 L-4,-0.1 Z"/><path class="acc-fill" d="M-4,2.7 L4,0.1 L4,2.3 L-4,4.9 Z"/></g>`;
+  if (wi.acc === '♭') g += `<g transform="translate(${ax} ${ny})">
+      <line class="acc-line" x1="-2.4" y1="-15" x2="-2.4" y2="3.4" stroke-width="1.3"/>
+      <path class="acc-fill" d="M-2.4,3.4 C6,-0.6 5.6,-7.6 -2.4,-3 L-2.4,-1.2 C3.4,-4.6 3.2,-0.6 -2.4,1.9 Z"/></g>`;
+  // Cap i plica (amunt per sota de la 3a línia, avall a partir d'ella)
+  g += `<ellipse class="head" cx="${nx}" cy="${ny}" rx="6.2" ry="4.3" transform="rotate(-22 ${nx} ${ny})"/>`;
+  g += wi.step < 22
+    ? `<line class="stem" x1="${nx + 5.6}" x2="${nx + 5.6}" y1="${ny - 1.5}" y2="${ny - 35}" stroke-width="1.3"/>`
+    : `<line class="stem" x1="${nx - 5.6}" x2="${nx - 5.6}" y1="${ny + 1.5}" y2="${ny + 35}" stroke-width="1.3"/>`;
+  if (label) g += `<text class="note-label" x="${nx + 14}" y="${ny}">${label}</text>`;
+  svg += g + '</g></svg>';
+  host.innerHTML = svg;
+}
+
+/* =====================================================================
    7. MÒDULS
    ===================================================================== */
 const $ = s => document.querySelector(s);
-const boardEl = $('#board'), answersEl = $('#answers'), promptEl = $('#prompt');
+const boardEl = $('#board'), answersEl = $('#answers'), promptEl = $('#prompt'), staffEl = $('#staff');
 
 const failNotation = () => (cfg.notation === 'english' ? 'english' : 'latin');
+
+// Botons de nom de nota (mòduls 1 i 3). onAnswer(ok) es crida un sol cop.
+function pcButtons(q, pc, onAnswer) {
+  const pcs = cfg.accidentals === 'natural' ? NATURAL_PCS : ALL_PCS;
+  answersEl.className = 'answers' + (pcs.length === 12 ? ' n12' : '');
+  answersEl.innerHTML = pcs.map(p =>
+    `<button class="ans${isNatural(p) ? '' : ' acc'}" data-pc="${p}">${pcLabel(p, q.notation)}</button>`).join('');
+  answersEl.onclick = e => {
+    const b = e.target.closest('button[data-pc]');
+    if (!b || q.done) return;
+    const ok = +b.dataset.pc === pc;
+    answersEl.querySelectorAll('button').forEach(x => (x.disabled = true));
+    b.classList.add(ok ? 'ok' : 'err');
+    if (!ok) answersEl.querySelector(`[data-pc="${pc}"]`).classList.add('reveal');
+    onAnswer(ok);
+  };
+}
+// Posicions a l'altura exacta dins el rang, de trast més baix a més alt
+const exactPositions = midi => positionsInRange().filter(p => p.midi === midi).sort((a, b) => a.f - b.f);
+// Notes reals diferents dins el rang (per als mòduls de partitura)
+const distinctMidis = () => [...new Set(positionsInRange().map(p => p.midi))].filter(m => allowedPc(pcOf(m))).sort((a, b) => a - b);
 
 const MODULES = {
   m1: {
@@ -834,21 +962,11 @@ const MODULES = {
       const { s, f, midi } = q.item, pc = pcOf(midi);
       promptEl.innerHTML = `<h2>Quina nota és?</h2><div class="sub">${posText(s, f)}</div>`;
       renderFretboard(boardEl, { dots: [{ s, f, cls: 'target' }], focus: f });
-      const pcs = cfg.accidentals === 'natural' ? NATURAL_PCS : ALL_PCS;
-      answersEl.className = 'answers' + (pcs.length === 12 ? ' n12' : '');
-      answersEl.innerHTML = pcs.map(p =>
-        `<button class="ans${isNatural(p) ? '' : ' acc'}" data-pc="${p}">${pcLabel(p, q.notation)}</button>`).join('');
-      answersEl.onclick = e => {
-        const b = e.target.closest('button[data-pc]');
-        if (!b || q.done) return;
-        const ok = +b.dataset.pc === pc;
-        answersEl.querySelectorAll('button').forEach(x => (x.disabled = true));
-        b.classList.add(ok ? 'ok' : 'err');
-        if (!ok) answersEl.querySelector(`[data-pc="${pc}"]`).classList.add('reveal');
+      pcButtons(q, pc, ok => {
         renderFretboard(boardEl, { dots: [{ s, f, cls: ok ? 'ok' : 'reveal', anim: ok ? 'pop' : 'shake', label: pcShort(pc, q.notation) }], focus: f });
         const name = pcLabel(pc, q.notation);
         resolve(ok, midi, ok ? `Correcte: ${name}` : `És ${name} (${posText(s, f, true)})`);
-      };
+      });
     },
     failLabel(key) {
       const pos = key.split('|')[1], s = pos[0], f = +pos.slice(1);
@@ -915,6 +1033,73 @@ const MODULES = {
         .map(p => ({ s: p.s, f: p.f, cls: 'err', label: pcShort(pc, failNotation()) }));
     },
   },
+
+  m3: {
+    title: 'Partitura → nota', desc: 'Veus una nota en clau de fa i dius quina és.',
+    staff: true, board: false,
+    candidates() { return distinctMidis().map(midi => ({ midi, key: `m3|${midi}` })); },
+    render(q) {
+      const { midi } = q.item, pc = pcOf(midi);
+      const spelling = isNatural(pc) ? 'sharp' : q.spelling;
+      promptEl.innerHTML = `<h2>Quina nota és?</h2><div class="sub">Clau de fa</div>`;
+      renderStaff(staffEl, { midi, spelling });
+      pcButtons(q, pc, ok => {
+        const name = spell(pc, spelling, q.notation);
+        renderStaff(staffEl, { midi, spelling, cls: ok ? 'ok' : 'err', label: name, anim: ok ? 'pop' : '' });
+        const where = exactPositions(midi)[0];
+        resolve(ok, midi, ok ? `Correcte: ${name}` : `És ${name}${where ? ` (${posText(where.s, where.f, true)})` : ''}`);
+      });
+    },
+    failLabel(key) {
+      const midi = +key.split('|')[1];
+      return [pcLabel(pcOf(midi), failNotation()), `(${writtenInfo(midi, cfg.accidentals === 'flat' ? 'flat' : 'sharp').sci} escrita)`];
+    },
+    failDots(key) {
+      const midi = +key.split('|')[1];
+      return exactPositions(midi).map(p => ({ s: p.s, f: p.f, cls: 'err', label: pcShort(pcOf(midi), failNotation()) }));
+    },
+  },
+
+  m4: {
+    title: 'Partitura → màstil', desc: 'Veus una nota en clau de fa i la toques a l\'altura exacta.',
+    staff: true,
+    candidates() { return distinctMidis().map(midi => ({ midi, key: `m4|${midi}` })); },
+    render(q) {
+      const { midi } = q.item, pc = pcOf(midi);
+      const spelling = isNatural(pc) ? 'sharp' : q.spelling;
+      const name = spell(pc, spelling, q.notation);
+      const targets = exactPositions(midi);
+      const dots = [];
+      promptEl.innerHTML = `<h2>Toca aquesta nota</h2><div class="sub">A l'altura exacta: no val la mateixa nota en una altra octava</div>`;
+      answersEl.className = 'answers'; answersEl.innerHTML = ''; answersEl.onclick = null;
+      renderStaff(staffEl, { midi, spelling });
+
+      const draw = () => { const x = boardEl.scrollLeft; renderFretboard(boardEl, { dots, onTap, focus: null }); boardEl.scrollLeft = x; updateFade(boardEl); };
+      function onTap(s, f) {
+        if (q.done) return;
+        const m = midiAt(s, f);
+        if (m === midi) {
+          dots.push({ s, f, cls: 'ok', anim: 'pop', label: name });
+          draw();
+          renderStaff(staffEl, { midi, spelling, cls: 'ok', label: name, anim: 'pop' });
+          resolve(true, m, `Correcte: ${name} (${posText(s, f, true)})`);
+          return;
+        }
+        const tapped = pcShort(pcOf(m), q.notation, spelling);
+        dots.push({ s, f, cls: 'err', anim: 'shake', label: tapped });
+        for (const t of targets) dots.push({ s: t.s, f: t.f, cls: 'reveal', label: name });
+        draw();
+        renderStaff(staffEl, { midi, spelling, cls: 'err', label: name });
+        const msg = pcOf(m) === pc
+          ? `Nota correcta, però una octava massa ${m > midi ? 'aguda' : 'greu'}. Mira les posicions marcades.`
+          : `Has tocat ${tapped}. La nota és ${name}, a les posicions marcades.`;
+        resolve(false, midi, msg);
+      }
+      draw();
+    },
+    failLabel(key) { return MODULES.m3.failLabel(key); },
+    failDots(key) { return MODULES.m3.failDots(key); },
+  },
 };
 
 function nearest(targets, s, f) {
@@ -947,6 +1132,8 @@ function nextQuestion() {
   sess.q = { item, notation: questionNotation(), spelling: questionSpelling(), t0: performance.now(), done: false, units: 1 };
   setFeedback('', '');
   $('#btnNext').hidden = true;
+  $('#staffCard').hidden = !M.staff;
+  $('#boardCard').hidden = M.board === false;
   M.render(sess.q);
   updateQuizBar();
 }
