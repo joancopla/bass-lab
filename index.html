@@ -145,7 +145,7 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
   border: 1px solid var(--line); border-radius: var(--r-lg); padding: 18px 20px;
 }
 .mod:hover { border-color: var(--accent); }
-.mod:active { transform: scale(.99); }
+
 .mod .t { font-family: var(--font-display); font-weight: 700; font-size: 22px; }
 .mod .d { grid-column: 1; color: var(--muted); font-size: 14px; }
 .mod .s { grid-row: 1 / span 2; grid-column: 2; text-align: right; }
@@ -230,7 +230,16 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 .fb .fnum { fill: var(--faint); font-size: 12px; text-anchor: middle; }
 .fb .fnum.mk { fill: var(--muted); font-weight: 700; }
 .fb .fnum.dim { opacity: .4; }
-.fb .hit { fill: transparent; cursor: pointer; }
+.fb .hit { fill: transparent; cursor: pointer; transition: fill .12s; }
+.fb .hit:active { fill: var(--accent-soft); }
+.fb .heat { pointer-events: none; }
+.fb .vib path { fill: none; stroke: var(--string); stroke-linecap: round; }
+.fb .dg { pointer-events: none; }
+.fb .burst { fill: none; stroke: var(--ok); stroke-width: 3; transform-box: fill-box; transform-origin: center; animation: burst .55s ease-out forwards; }
+@keyframes burst { from { transform: scale(1); opacity: .75; } to { transform: scale(2.4); opacity: 0; } }
+.fb .flash { fill: var(--err); opacity: 0; animation: flash .55s ease-out; }
+@keyframes flash { from { opacity: .35; } to { opacity: 0; } }
+.fb .ring.soft { animation-duration: 1.2s; }
 @media (hover: hover) { .fb .hit:hover { fill: var(--accent-soft); } }
 .fb .dot { fill: var(--accent); pointer-events: none; transform-box: fill-box; transform-origin: center; }
 .fb .dot.ok { fill: var(--ok); }
@@ -304,6 +313,31 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 }
 .feedback.ok #fbText { color: var(--ok); }
 .feedback.err #fbText { color: var(--err); }
+
+/* ===================== Moviment ===================== */
+/* Pressió: tot el que es toca s'enfonsa una mica */
+.ans, .btn, .mod, .seg button, .icon-btn, .link { transition: transform .12s ease, border-color .15s, background-color .15s, color .15s; }
+.ans:active:not(:disabled), .btn:active, .mod:active, .seg button:active, .icon-btn:active { transform: scale(.96); }
+/* Canvi de pregunta: surt cap amunt i entra des de baix */
+.prompt, .answers, .staff-card { transition: opacity .17s ease, transform .17s ease; }
+.leaving { opacity: 0 !important; transform: translateY(-6px); }
+.entering { animation: enter .26s cubic-bezier(.2,.7,.2,1); }
+@keyframes enter { from { opacity: 0; transform: translateY(8px); } }
+/* Marcador: el número salta quan canvia */
+.bump { display: inline-block; animation: bump .32s cubic-bezier(.3,1.6,.5,1); }
+@keyframes bump { from { transform: translateY(-6px) scale(1.35); } }
+/* Transicions entre pantalles (View Transitions): fos amb un lleuger desplaçament;
+   el màstil de cada pantalla és el mateix element visual i "viatja" d'una a l'altra */
+::view-transition-old(root) { animation: vt-out .16s ease-in both; }
+::view-transition-new(root) { animation: vt-in .28s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes vt-out { to { opacity: 0; transform: translateY(-6px); } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(10px); } }
+.board-wrap { view-transition-name: fretboard; }
+::view-transition-group(fretboard) { animation-duration: .4s; animation-timing-function: cubic-bezier(.3,.7,.2,1); }
+@media (prefers-reduced-motion: reduce) {
+  .fb .burst, .fb .flash, .entering, .bump { animation: none; }
+  .ans:active:not(:disabled), .btn:active, .mod:active, .seg button:active, .icon-btn:active { transform: none; }
+}
 
 /* ===================== Summary ===================== */
 .summary { max-width: 720px; margin: 20px auto 0; display: grid; gap: 18px; padding: 24px 18px; }
@@ -966,12 +1000,17 @@ function playMidi(midi) {
 const SINGLE_MARKERS = [3, 5, 7, 9, 15, 17, 19, 21];
 const DOUBLE_MARKERS = [12, 24];
 
-// opts: { dots:[{s,f,cls,label}], onTap(s,f), focus:fret }
+// opts: { dots:[{s,f,cls,label,key,anim,fill}], links, heat, onTap(s,f), focus, range }
+// La part fixa (fusta, trasts, cordes) només es redibuixa si canvia la geometria; els punts
+// van en una capa pròpia perquè es puguin moure (el punt amb `key` llisca a la nova posició).
+const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 function renderFretboard(host, opts = {}) {
   const { dots = [], links = [], heat = [], onTap = null, focus = null } = opts;
-  // El mapa de calor mostra tot el màstil amb dades, no només el rang configurat
+  // El mapa de calor i Toca lliure mostren tot el màstil, no només el rang configurat
   const [rMin, rMax] = opts.range || [cfg.fretMin, cfg.fretMax];
   host._fb = opts;
+  host._onTap = onTap;
   const strs = instrumentStrings(cfg.strings).slice().reverse(); // aguda a dalt, greu a baix
   const active = new Set(opts.range ? instrumentStrings(cfg.strings).map(x => x.id) : activeStringIds());
   const W = host.clientWidth || 600;
@@ -1005,7 +1044,11 @@ function renderFretboard(host, opts = {}) {
   const thick = { B: 3.4, E: 3, A: 2.4, D: 1.9, G: 1.4 };
   const glowId = 'glow-' + host.id;
 
-  let svg = `<svg class="fb" width="${totalW}" height="${H}" viewBox="0 0 ${totalW} ${H}" role="img" aria-label="Màstil">
+  // ---- Capa fixa ----
+  const key = [totalW, H, from, to, rMin, rMax, cfg.strings, [...active].join(''), !!onTap, cfg.notation].join('|');
+  const fresh = host._key !== key || !host.querySelector('svg .dyn');
+  if (fresh) {
+    let svg = `<svg class="fb" width="${totalW}" height="${H}" viewBox="0 0 ${totalW} ${H}" role="img" aria-label="Màstil">
     <defs><linearGradient id="bg-${host.id}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" style="stop-color:var(--board-edge)"/><stop offset=".5" style="stop-color:var(--board)"/><stop offset="1" style="stop-color:var(--board-edge)"/>
     </linearGradient><linearGradient id="fret-${host.id}" x1="0" y1="0" x2="1" y2="0">
@@ -1022,96 +1065,157 @@ function renderFretboard(host, opts = {}) {
       <feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter></defs>
     <rect class="board" fill="url(#bg-${host.id})" x="${boardX}" y="${padT}" width="${boardW}" height="${boardH}" rx="6"/>`;
-  // Columna de les cordes a l'aire, amb fons propi perquè no es confongui amb el màstil
-  if (hasOpen) svg += `<rect class="open-bg" x="${padL}" y="${padT}" width="${openW}" height="${boardH}" rx="6"/>`;
-
-  // Marcadors
-  for (let f = firstFret; f <= to; f++) {
-    if (SINGLE_MARKERS.includes(f)) svg += `<circle class="marker" fill="url(#pearl-${host.id})" cx="${cx(f)}" cy="${padT + boardH / 2}" r="7"/>`;
-    if (DOUBLE_MARKERS.includes(f)) {
-      svg += `<circle class="marker" fill="url(#pearl-${host.id})" cx="${cx(f)}" cy="${padT + boardH * 0.25}" r="7"/>`;
-      svg += `<circle class="marker" fill="url(#pearl-${host.id})" cx="${cx(f)}" cy="${padT + boardH * 0.75}" r="7"/>`;
+    // Columna de les cordes a l'aire, amb fons propi perquè no es confongui amb el màstil
+    if (hasOpen) svg += `<rect class="open-bg" x="${padL}" y="${padT}" width="${openW}" height="${boardH}" rx="6"/>`;
+    // Marcadors nacrats
+    for (let f = firstFret; f <= to; f++) {
+      if (SINGLE_MARKERS.includes(f)) svg += `<circle class="marker" fill="url(#pearl-${host.id})" cx="${cx(f)}" cy="${padT + boardH / 2}" r="7"/>`;
+      if (DOUBLE_MARKERS.includes(f)) {
+        svg += `<circle class="marker" fill="url(#pearl-${host.id})" cx="${cx(f)}" cy="${padT + boardH * 0.25}" r="7"/>`;
+        svg += `<circle class="marker" fill="url(#pearl-${host.id})" cx="${cx(f)}" cy="${padT + boardH * 0.75}" r="7"/>`;
+      }
+    }
+    // Trasts (el primer és la celleta si es veu el trast 0)
+    for (let f = firstFret - 1; f <= to; f++) {
+      const x = boardX + (f - firstFret + 1) * fw;
+      if (f === 0) { svg += `<line class="nut" x1="${x}" y1="${padT}" x2="${x}" y2="${padT + boardH}"/>`; continue; }
+      // Filferro de níquel: degradat amb reflex central i una ombra fina al costat
+      svg += `<line class="fret-shadow" x1="${x + 3}" y1="${padT}" x2="${x + 3}" y2="${padT + boardH}"/>`;
+      svg += `<rect class="fret" x="${x - 2}" y="${padT}" width="4" height="${boardH}" rx="1.5" fill="url(#fret-${host.id})"/>`;
+      svg += `<rect x="${x - 2}" y="${padT}" width="4" height="${boardH}" rx="1.5" fill="url(#sheen-${host.id})"/>`;
+    }
+    // Cordes i etiquetes
+    strs.forEach((s, i) => {
+      const y = rowY(i), off = active.has(s.id) ? '' : ' off';
+      svg += `<line class="string${off}" data-s="${s.id}" x1="${hasOpen ? padL : boardX}" y1="${y}" x2="${boardX + boardW}" y2="${y}" stroke-width="${thick[s.id]}"/>`;
+      svg += `<text class="slabel${off}" x="${padL / 2 - 2}" y="${y}">${stringLabel(s.id)}</text>`;
+    });
+    svg += '<g class="vib"></g>';
+    // Zones fora de rang
+    for (let f = from; f <= to; f++) {
+      if (!inRange(f)) svg += `<rect class="out" x="${cellX(f)}" y="${padT - 2}" width="${cellW(f)}" height="${boardH + 4}"/>`;
+    }
+    // Números de trast
+    for (let f = from; f <= to; f++) {
+      const mk = SINGLE_MARKERS.includes(f) || DOUBLE_MARKERS.includes(f) ? ' mk' : '';
+      svg += `<text class="fnum${mk}${inRange(f) ? '' : ' dim'}" x="${cx(f)}" y="${H - 8}">${f}</text>`;
+    }
+    svg += '<g class="dyn"></g>';
+    // Zones tàctils (a sobre de tot; els punts no capturen clics)
+    if (onTap) {
+      strs.forEach((s, i) => {
+        if (!active.has(s.id)) return;
+        for (let f = from; f <= to; f++) {
+          if (!inRange(f)) continue;
+          svg += `<rect class="hit" data-s="${s.id}" data-f="${f}" x="${cellX(f)}" y="${rowY(i) - gap / 2}" width="${cellW(f)}" height="${gap}" rx="6"/>`;
+        }
+      });
+    }
+    svg += '</svg>';
+    host.innerHTML = svg;
+    host._key = key;
+    host._vib = {};
+    if (!host._clickBound) {
+      host.addEventListener('click', e => { const h = e.target.closest('.hit'); if (h && host._onTap) host._onTap(h.dataset.s, +h.dataset.f); });
+      host._clickBound = true;
     }
   }
-  // Trasts (el primer és la celleta si es veu el trast 0)
-  for (let f = firstFret - 1; f <= to; f++) {
-    const x = boardX + (f - firstFret + 1) * fw;
-    if (f === 0) { svg += `<line class="nut" x1="${x}" y1="${padT}" x2="${x}" y2="${padT + boardH}"/>`; continue; }
-    // Filferro de níquel: degradat amb reflex central i una ombra fina al costat
-    svg += `<line class="fret-shadow" x1="${x + 3}" y1="${padT}" x2="${x + 3}" y2="${padT + boardH}"/>`;
-    svg += `<rect class="fret" x="${x - 2}" y="${padT}" width="4" height="${boardH}" rx="1.5" fill="url(#fret-${host.id})"/>`;
-    svg += `<rect x="${x - 2}" y="${padT}" width="4" height="${boardH}" rx="1.5" fill="url(#sheen-${host.id})"/>`;
-  }
-  // Cordes i etiquetes
-  strs.forEach((s, i) => {
-    const y = rowY(i), off = active.has(s.id) ? '' : ' off';
-    svg += `<line class="string${off}" x1="${hasOpen ? padL : boardX}" y1="${y}" x2="${boardX + boardW}" y2="${y}" stroke-width="${thick[s.id]}"/>`;
-    svg += `<text class="slabel${off}" x="${padL / 2 - 2}" y="${y}">${stringLabel(s.id)}</text>`;
-  });
-  // Zones fora de rang
-  for (let f = from; f <= to; f++) {
-    if (!inRange(f)) svg += `<rect class="out" x="${cellX(f)}" y="${padT - 2}" width="${cellW(f)}" height="${boardH + 4}"/>`;
-  }
-  // Números de trast
-  for (let f = from; f <= to; f++) {
-    const mk = SINGLE_MARKERS.includes(f) || DOUBLE_MARKERS.includes(f) ? ' mk' : '';
-    svg += `<text class="fnum${mk}${inRange(f) ? '' : ' dim'}" x="${cx(f)}" y="${H - 8}">${f}</text>`;
-  }
-  // Zones tàctils
-  if (onTap) {
-    strs.forEach((s, i) => {
-      if (!active.has(s.id)) return;
-      for (let f = from; f <= to; f++) {
-        if (!inRange(f)) continue;
-        svg += `<rect class="hit" data-s="${s.id}" data-f="${f}" x="${cellX(f)}" y="${rowY(i) - gap / 2}" width="${cellW(f)}" height="${gap}" rx="6"/>`;
-      }
-    });
-  }
-  // Capa de calor: vermell segons la proporció d'errors, verd si no n'hi ha
+  host._geo = { rowY, strs: strs.map(x => x.id), boardX, boardW, fw, firstFret, from, to };
+
+  // ---- Capa dinàmica ----
+  const dyn = host.querySelector('.dyn');
+  const old = new Map([...dyn.querySelectorAll('[data-key]')].map(g => [g.dataset.key, { x: +g.dataset.x, y: +g.dataset.y }]));
+  let d = '';
+  // Calor: vermell segons la proporció d'errors, verd si no n'hi ha
   for (const h of heat) {
     const i = strs.findIndex(x => x.id === h.s);
     if (i < 0 || h.f < from || h.f > to) continue;
     const fillV = h.v > 0 ? 'var(--err)' : 'var(--ok)', op = h.v > 0 ? 0.18 + 0.72 * h.v : 0.18;
-    svg += `<rect class="heat" x="${cellX(h.f) + 2}" y="${rowY(i) - gap / 2 + 3}" width="${cellW(h.f) - 4}" height="${gap - 6}" rx="7" fill="${fillV}" fill-opacity="${op.toFixed(2)}"/>`;
+    d += `<rect class="heat" x="${cellX(h.f) + 2}" y="${rowY(i) - gap / 2 + 3}" width="${cellW(h.f) - 4}" height="${gap - 6}" rx="7" fill="${fillV}" fill-opacity="${op.toFixed(2)}"/>`;
   }
   // Connexions entre posicions (formes d'octava)
   for (const l of links) {
     const ya = yOf(l.a.s), yb = yOf(l.b.s);
     if ([ya, yb].some(v => v == null || isNaN(v)) || [l.a.f, l.b.f].some(f => f < from || f > to)) continue;
     // A la mateixa corda, un arc per sobre perquè la línia no quedi amagada sota la corda
-    svg += l.a.s === l.b.s
+    d += l.a.s === l.b.s
       ? `<path class="link ${l.cls || ''}" fill="none" d="M${cx(l.a.f)},${ya} Q${(cx(l.a.f) + cx(l.b.f)) / 2},${ya - gap * 0.9} ${cx(l.b.f)},${yb}"/>`
       : `<line class="link ${l.cls || ''}" x1="${cx(l.a.f)}" y1="${ya}" x2="${cx(l.b.f)}" y2="${yb}"/>`;
   }
   // Punts
   const r = Math.min(fw, gap) * 0.36;
-  for (const d of dots) {
-    const x = cx(d.f), y = yOf(d.s);
-    if (y == null || isNaN(y) || d.f < from || d.f > to) continue;
-    if (d.cls === 'target') svg += `<circle class="ring" cx="${x}" cy="${y}" r="${r}"/>`;
-    const glow = d.cls === 'target' || d.cls === 'reveal' ? ` filter="url(#${glowId})"` : '';
-    svg += `<circle class="dot ${d.cls || ''} ${d.anim || ''}" cx="${x}" cy="${y}" r="${r}"${glow}${d.fill ? ` style="fill:${d.fill}"` : ''}/>`;
-    d.anim = null; // l'animació només es fa quan el punt apareix, no en redibuixar
-    if (d.label) {
-      const fs = d.label.length >= 4 ? 10 : d.label.length === 3 ? 11.5 : 13;
-      svg += `<text class="dot-label" x="${x}" y="${y}" font-size="${fs}">${d.label}</text>`;
+  for (const dt of dots) {
+    const x = cx(dt.f), y = yOf(dt.s);
+    if (y == null || isNaN(y) || dt.f < from || dt.f > to) continue;
+    d += `<g class="dg"${dt.key ? ` data-key="${dt.key}" data-x="${x}" data-y="${y}"` : ''}>`;
+    if (dt.anim === 'shake') d += `<rect class="flash" x="${cellX(dt.f)}" y="${y - gap / 2}" width="${cellW(dt.f)}" height="${gap}" rx="6"/>`;
+    if (dt.cls === 'target' || dt.cls === 'reveal') d += `<circle class="ring${dt.cls === 'reveal' ? ' soft' : ''}" cx="${x}" cy="${y}" r="${r}"/>`;
+    if (dt.cls === 'ok' && dt.anim === 'pop') d += `<circle class="burst" cx="${x}" cy="${y}" r="${r}"/>`;
+    const glow = dt.cls === 'target' || dt.cls === 'reveal' ? ` filter="url(#${glowId})"` : '';
+    d += `<circle class="dot ${dt.cls || ''} ${dt.anim || ''}" cx="${x}" cy="${y}" r="${r}"${glow}${dt.fill ? ` style="fill:${dt.fill}"` : ''}/>`;
+    if (dt.label) {
+      const fs = dt.label.length >= 4 ? 10 : dt.label.length === 3 ? 11.5 : 13;
+      d += `<text class="dot-label" x="${x}" y="${y}" font-size="${fs}">${dt.label}</text>`;
     }
+    d += '</g>';
+    dt.anim = null; // l'animació només es fa quan el punt apareix, no en redibuixar
   }
-  svg += '</svg>';
-  host.innerHTML = svg;
+  dyn.innerHTML = d;
+  // El punt de la pregunta llisca des de la posició anterior (com un dit que es mou pel màstil)
+  if (!reduceMotion()) for (const g of dyn.querySelectorAll('[data-key]')) {
+    const o = old.get(g.dataset.key);
+    if (!o) continue;
+    const dx = o.x - g.dataset.x, dy = o.y - g.dataset.y;
+    if (!dx && !dy) continue;
+    g.style.transform = `translate(${dx}px, ${dy}px)`;
+    g.getBoundingClientRect();
+    g.style.transition = 'transform .34s cubic-bezier(.3,.7,.2,1)';
+    g.style.transform = '';
+  }
 
-  if (onTap) {
-    host.firstElementChild.addEventListener('click', e => {
-      const h = e.target.closest('.hit'); if (h) onTap(h.dataset.s, +h.dataset.f);
-    });
-  }
   // Si el màstil no hi cap, centra la zona que interessa
   if (totalW > W) {
-    const fx = focus != null ? cx(focus) : cx(Math.max(from, rMin)) + W / 2 - fw;
-    host.scrollLeft = Math.max(0, fx - W / 2);
+    if (focus != null) host.scrollTo({ left: Math.max(0, cx(focus) - W / 2), behavior: fresh || reduceMotion() ? 'auto' : 'smooth' });
+    else if (fresh) host.scrollLeft = Math.max(0, cx(Math.max(from, rMin)) + W / 2 - fw - W / 2);
   }
   if (!host._fadeBound) { host.addEventListener('scroll', () => updateFade(host), { passive: true }); host._fadeBound = true; }
   updateFade(host);
+}
+
+// La corda tocada vibra: ona estacionària des del trast fins al pont, que s'apaga amb el so.
+// Les cordes greus vibren més amples i més lentes.
+const VIB = { B: [5.5, 5.5], E: [6.5, 5], A: [8, 4.2], D: [9.5, 3.6], G: [11, 3] }; // [Hz visuals, amplitud px]
+function vibrate(host, s, f) {
+  const g = host && host._geo;
+  if (!g || reduceMotion() || f < g.from || f > g.to) return;
+  const i = g.strs.indexOf(s);
+  const line = host.querySelector(`.string[data-s="${s}"]`), layer = host.querySelector('.vib');
+  if (i < 0 || !line || !layer) return;
+  if (host._vib[s]) host._vib[s]();
+  const y = g.rowY(i), xL = +line.getAttribute('x1'), xR = g.boardX + g.boardW;
+  const x0 = f === 0 ? g.boardX : Math.min(xR - 10, g.boardX + (f - g.firstFret + 1) * g.fw); // on la corda queda lliure
+  const [hz, a0] = VIB[s];
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('stroke-width', line.getAttribute('stroke-width'));
+  layer.appendChild(path);
+  line.style.opacity = '0';
+  const t0 = performance.now();
+  let raf = 0;
+  const stop = () => { cancelAnimationFrame(raf); path.remove(); line.style.opacity = ''; if (host._vib[s] === stop) host._vib[s] = null; };
+  const frame = now => {
+    const t = (now - t0) / 1000, amp = a0 * Math.exp(-t / 0.45);
+    if (amp < 0.25 || !path.isConnected) { stop(); return; }
+    const c = Math.cos(2 * Math.PI * hz * t) * amp, N = 36;
+    let dd = `M${xL},${y} L${x0},${y}`;
+    for (let k = 1; k <= N; k++) {
+      const u = k / N;
+      dd += ` L${(x0 + (xR - x0) * u).toFixed(1)},${(y + Math.sin(Math.PI * u) * c).toFixed(2)}`;
+    }
+    path.setAttribute('d', dd);
+    raf = requestAnimationFrame(frame);
+  };
+  host._vib[s] = stop;
+  raf = requestAnimationFrame(frame);
 }
 // Difumina les vores quan hi ha més màstil fora de la vista
 function updateFade(host) {
@@ -1210,10 +1314,11 @@ const MODULES = {
     render(q) {
       const { s, f, midi } = q.item, pc = pcOf(midi);
       promptEl.innerHTML = `<h2>Quina nota és?</h2><div class="sub">${posText(s, f)}</div>`;
-      renderFretboard(boardEl, { dots: [{ s, f, cls: 'target' }], focus: f });
+      renderFretboard(boardEl, { dots: [{ s, f, cls: 'target', key: 'q' }], focus: f });
       pcButtons(q, pc, ok => {
         recordPos(s, f, ok);
-        renderFretboard(boardEl, { dots: [{ s, f, cls: ok ? 'ok' : 'reveal', anim: ok ? 'pop' : 'shake', label: pcShort(pc, q.notation) }], focus: f });
+        renderFretboard(boardEl, { dots: [{ s, f, key: 'q', cls: ok ? 'ok' : 'reveal', anim: ok ? 'pop' : 'shake', label: pcShort(pc, q.notation) }], focus: f });
+        vibrate(boardEl, s, f);
         const name = pcLabel(pc, q.notation);
         resolve(ok, midi, ok ? `Correcte: ${name}` : `És ${name} (${posText(s, f, true)})`);
       });
@@ -1262,6 +1367,7 @@ const MODULES = {
           dots.push({ s, f, cls: 'ok', anim: 'pop', label: name });
           if (all) $('#foundCnt').textContent = found.size;
           keepScroll(draw);
+          vibrate(boardEl, s, f);
           if (all && found.size < targets.length) { playMidi(m); return; }
           resolve(true, m, all ? `Correcte: has trobat totes les posicions de ${name}` : `Correcte: ${name} (${posText(s, f, true)})`);
         } else {
@@ -1270,6 +1376,7 @@ const MODULES = {
           for (const t of targets) if (!found.has(t.s + t.f)) { recordPos(t.s, t.f, false); dots.push({ s: t.s, f: t.f, cls: 'reveal', label: label(t) }); }
           keepScroll(draw);
           const near = nearest(targets, s, f);
+          vibrate(boardEl, near.s, near.f);
           resolve(false, near.midi, `Has tocat ${wrongName}. ${name} és a les posicions marcades.`);
         }
       }
@@ -1333,6 +1440,7 @@ const MODULES = {
           recordPos(s, f, true);
           dots.push({ s, f, cls: 'ok', anim: 'pop', label: name });
           draw();
+          vibrate(boardEl, s, f);
           renderStaff(staffEl, { midi, spelling, cls: 'ok', label: name, anim: 'pop' });
           resolve(true, m, `Correcte: ${name} (${posText(s, f, true)})`);
           return;
@@ -1342,6 +1450,7 @@ const MODULES = {
         for (const t of targets) { recordPos(t.s, t.f, false); dots.push({ s: t.s, f: t.f, cls: 'reveal', label: name }); }
         draw();
         renderStaff(staffEl, { midi, spelling, cls: 'err', label: name });
+        if (targets[0]) vibrate(boardEl, targets[0].s, targets[0].f);
         const msg = pcOf(m) === pc
           ? `Nota correcta, però una octava massa ${m > midi ? 'aguda' : 'greu'}. Mira les posicions marcades.`
           : `Has tocat ${tapped}. La nota és ${name}, a les posicions marcades.`;
@@ -1394,7 +1503,7 @@ const MODULES = {
       const { s, f, midi } = q.item, pc = pcOf(midi);
       const name = pcShort(pc, q.notation, q.spelling);
       const targets = positionsInRange().filter(p => Math.abs(p.midi - midi) === 12);
-      const dots = [{ s, f, cls: 'target', label: name }], links = [];
+      const dots = [{ s, f, cls: 'target', label: name, key: 'q' }], links = [];
       promptEl.innerHTML = `<h2>Troba l'octava</h2><div class="sub">La mateixa nota una octava amunt o avall, en una altra zona</div>`;
       answersEl.className = 'answers'; answersEl.innerHTML = ''; answersEl.onclick = null;
       const draw = (focus = null) => {
@@ -1412,6 +1521,7 @@ const MODULES = {
           links.push({ a: { s, f }, b: { s: ts, f: tf }, cls: 'ok' });
           recordPos(s, f, true);
           draw();
+          vibrate(boardEl, ts, tf);
           resolve(true, m, `Correcte: una octava ${m > midi ? 'amunt' : 'avall'} (${posText(ts, tf, true)})`);
           return;
         }
@@ -1423,7 +1533,9 @@ const MODULES = {
         const why = m === midi ? 'És la mateixa altura, no una octava.'
           : pcOf(m) === pc ? 'És la mateixa nota, però a més d\'una octava.'
           : `Has tocat ${tapped}.`;
-        resolve(false, nearest(targets, ts, tf).midi, `${why} Les octaves són a les posicions marcades.`);
+        const near = nearest(targets, ts, tf);
+        vibrate(boardEl, near.s, near.f);
+        resolve(false, near.midi, `${why} Les octaves són a les posicions marcades.`);
       }
       draw(f);
     },
@@ -1449,12 +1561,24 @@ function startSession(mid) {
     return;
   }
   sess = { mid, size: cfg.sessionSize, count: 0, ok: 0, ko: 0, ms: 0, lastKey: null, fails: {}, q: null, timer: null };
-  show('quiz');
-  nextQuestion();
+  show('quiz', nextQuestion);
+}
+
+// Passa a la pregunta següent amb una sortida curta (la pregunta nova entra des de baix)
+function goNext() {
+  if (!sess) return;
+  clearTimeout(sess.timer);
+  if (reduceMotion()) { nextQuestion(); return; }
+  [promptEl, answersEl, $('#staffCard')].forEach(e => e.classList.add('leaving'));
+  sess.timer = setTimeout(nextQuestion, 170);
 }
 
 function nextQuestion() {
   clearTimeout(sess.timer);
+  [promptEl, answersEl, $('#staffCard')].forEach(e => {
+    e.classList.remove('leaving', 'entering');
+    if (!reduceMotion()) { void e.offsetWidth; e.classList.add('entering'); }
+  });
   if (sess.size && sess.count >= sess.size) { endSession(); return; }
   const M = MODULES[sess.mid];
   const item = pickWeighted(M.candidates(), sess.lastKey);
@@ -1479,7 +1603,7 @@ function resolve(correct, midi, text) {
   playMidi(midi);
   setFeedback(correct ? 'ok' : 'err', text);
   updateQuizBar();
-  if (correct) sess.timer = setTimeout(nextQuestion, 850);
+  if (correct) sess.timer = setTimeout(goNext, 700);
   else { $('#btnNext').hidden = false; $('#btnNext').focus({ preventScroll: true }); }
 }
 
@@ -1500,11 +1624,12 @@ function endSession() {
     const [name, where] = M.failLabel(k);
     return `<li><b>${name}</b>${where ? ' ' + where : ''}${n > 1 ? ` (${n} cops)` : ''}</li>`;
   }).join('');
-  show('summary');
   const seen = new Set(), dots = [];
   for (const [k] of fails) for (const d of M.failDots(k)) if (!seen.has(d.s + d.f)) { seen.add(d.s + d.f); dots.push(d); }
-  $('#sumBoard').parentElement.hidden = !dots.length;
-  if (dots.length) renderFretboard($('#sumBoard'), { dots });
+  show('summary', () => {
+    $('#sumBoard').parentElement.hidden = !dots.length;
+    if (dots.length) renderFretboard($('#sumBoard'), { dots });
+  });
 }
 
 function updateQuizBar() {
@@ -1512,8 +1637,13 @@ function updateQuizBar() {
   $('#quizModule').textContent = M.title;
   const cur = sess.count + (q && !q.done ? 1 : 0);
   $('#quizProgress').textContent = sess.size ? `${Math.max(1, cur)} de ${sess.size}` : `${Math.max(1, cur)} (sessió lliure)`;
-  $('#scOk').textContent = sess.ok; $('#scKo').textContent = sess.ko;
+  bumpNum($('#scOk'), sess.ok); bumpNum($('#scKo'), sess.ko);
   $('#progFill').style.width = sess.size ? (sess.count / sess.size) * 100 + '%' : '0';
+}
+function bumpNum(el, v) {
+  if (el.textContent === String(v)) return;
+  el.textContent = v;
+  el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
 }
 function setFeedback(cls, text) {
   $('#feedback').className = 'feedback ' + cls;
@@ -1525,15 +1655,21 @@ function setFeedback(cls, text) {
    ===================================================================== */
 const fmtSec = ms => (ms / 1000).toFixed(1).replace('.', ',') + ' s';
 
-function show(view) {
-  for (const v of ['home', 'config', 'explore', 'stats', 'play', 'quiz', 'summary']) $('#view-' + v).hidden = v !== view;
-  document.body.classList.toggle('in-quiz', view === 'quiz');
-  if (view === 'home') renderHome();
-  if (view === 'config') syncConfig();
-  if (view === 'explore') renderExplore();
-  if (view === 'stats') renderStats();
-  if (view === 'play') renderPlay();
-  window.scrollTo(0, 0);
+// Canvia de pantalla. `then` s'executa amb la pantalla nova ja visible (dins la transició).
+function show(view, then) {
+  const update = () => {
+    for (const v of ['home', 'config', 'explore', 'stats', 'play', 'quiz', 'summary']) $('#view-' + v).hidden = v !== view;
+    document.body.classList.toggle('in-quiz', view === 'quiz');
+    if (view === 'home') renderHome();
+    if (view === 'config') syncConfig();
+    if (view === 'explore') renderExplore();
+    if (view === 'stats') renderStats();
+    if (view === 'play') renderPlay();
+    window.scrollTo(0, 0);
+    if (then) then();
+  };
+  if (document.startViewTransition && !reduceMotion() && document.visibilityState === 'visible') document.startViewTransition(update);
+  else update();
 }
 
 function rangeChips(presets = RANGE_PRESETS) {
@@ -1593,7 +1729,7 @@ function renderExplore() {
   const dots = pos.map(p => ({ s: p.s, f: p.f, fill: `var(--oct-${octave(p) % 4})`, label: pcShort(explorePc, notation) }));
   const links = [];
   for (const a of pos) for (const b of pos) if (b.midi - a.midi === 12 && isOctaveShape(a, b)) links.push({ a, b, cls: 'shape' });
-  renderFretboard($('#exploreBoard'), { dots, links, onTap: (s, f) => playMidi(midiAt(s, f)) });
+  renderFretboard($('#exploreBoard'), { dots, links, onTap: (s, f) => { playMidi(midiAt(s, f)); vibrate($('#exploreBoard'), s, f); } });
   const en = spell(explorePc, cfg.accidentals === 'flat' ? 'flat' : 'sharp', 'english');
   $('#exploreLegend').innerHTML = octs.map(o => `<span><i style="background:var(--oct-${o % 4})"></i>${en}${o}</span>`).join('');
 }
@@ -1683,6 +1819,7 @@ function playTap(s, f) {
   const hz = freq(midi).toFixed(1).replace('.', ',');
   $('#playInfo').textContent = `${posText(s, f)}. Sona ${sciName(midi, sp)} (${hz} Hz) i s'escriu ${writtenInfo(midi, sp).sci}.`;
   renderPlay();
+  vibrate($('#playBoard'), s, f);
 }
 
 function syncConfig() {
@@ -1758,14 +1895,14 @@ document.addEventListener('click', e => {
 $('#fretMin').addEventListener('change', e => { cfg.fretMin = +e.target.value; if (cfg.fretMin > cfg.fretMax) cfg.fretMax = cfg.fretMin; afterCfg(); });
 $('#fretMax').addEventListener('change', e => { cfg.fretMax = +e.target.value; if (cfg.fretMax < cfg.fretMin) cfg.fretMin = cfg.fretMax; afterCfg(); });
 
-$('#btnNext').addEventListener('click', () => nextQuestion());
+$('#btnNext').addEventListener('click', () => goNext());
 $('#btnReset').addEventListener('click', resetStats);
 $('#quizExit').addEventListener('click', () => endSession());
 $('#sumAgain').addEventListener('click', () => startSession(sess ? sess.mid : 'm1'));
 
 document.addEventListener('keydown', e => {
   if ($('#view-quiz').hidden || !sess) return;
-  if ((e.key === 'Enter' || e.key === ' ') && !$('#btnNext').hidden) { e.preventDefault(); nextQuestion(); }
+  if ((e.key === 'Enter' || e.key === ' ') && !$('#btnNext').hidden) { e.preventDefault(); goNext(); }
   if (e.key === 'Escape') endSession();
 });
 
@@ -1775,6 +1912,7 @@ window.addEventListener('resize', () => {
   resizeTimer = setTimeout(() => ['board', 'previewBoard', 'homeBoard', 'sumBoard', 'exploreBoard', 'heatBoard', 'playBoard'].forEach(id => redraw($('#' + id))), 150);
 });
 
+document.addEventListener('touchstart', () => {}, { passive: true });
 selfTest();
 applyTheme();
 show('home');

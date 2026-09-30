@@ -22,6 +22,7 @@ Idioma de la interfície: **català**.
 - Les captures de referència són a `/design/`. Inspira't en el seu estil visual (paleta, tipografia, espais, sensació general) sense copiar-lo literalment ni fer servir cap logotip, nom o text de la marca original.
 - Estètica neta i visual: el màstil és el protagonista.
 - Màstil en horitzontal, amb la corda greu a baix (com el baixista el veu mirant avall), marcadors als trasts 3, 5, 7, 9 i 12 (doble punt), i números de trast visibles.
+- Moviment només com a resposta a una acció, curt (150–400 ms) i desactivat amb `prefers-reduced-motion`: la corda tocada vibra en sonar, el punt de la pregunta llisca a la nova posició, transicions de pantalla amb el màstil com a element compartit. Sense confeti ni celebracions exagerades.
 - Tema **fosc per defecte**, amb degradats molt subtils que donin profunditat. A la configuració es pot triar clar o automàtic (segons `prefers-color-scheme`).
 
 ## Mòduls d'exercici
