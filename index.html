@@ -1,0 +1,1098 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Bass Lab</title>
+<style>
+/* ===================== Tokens ===================== */
+:root {
+  --bg: #f3f6fa; --bg-glow: rgba(26,111,240,.08);
+  --card: #ffffff; --card-2: #f6f9fc;
+  --line: #dbe4ef; --line-strong: #c3d1e1;
+  --text: #0b1829; --muted: #5a6a7f; --faint: #8a99ac;
+  --accent: #0f74d1; --accent-soft: rgba(15,116,209,.10); --accent-glow: rgba(15,116,209,.35);
+  --primary: #1a6ff0; --primary-2: #0f5fd6; --on-primary: #ffffff;
+  --primary-edge: rgba(10,50,130,.35); --primary-halo: rgba(31,116,242,.25);
+  --ok: #0f9d67; --ok-soft: rgba(15,157,103,.12);
+  --err: #d64545; --err-soft: rgba(214,69,69,.12);
+  --board: #fbfcfe; --board-line: #cfdae7; --nut: #cfc6b4; --string: #7d8fa5;
+  --marker: #e1e8f1; --out: rgba(243,246,250,.78); --dot-text: #ffffff;
+  --open-bg: #e3ecf7; --open-line: #b9cbe0;
+  --r-lg: 18px; --r-md: 12px; --r-sm: 10px;
+  --shadow: 0 1px 2px rgba(10,30,60,.05), 0 8px 24px rgba(10,30,60,.06);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Veu d'instrument: DIN del sistema (Windows: Bahnschrift, Apple: DIN Alternate) */
+  --font-display: Bahnschrift, "DIN Alternate", "DIN 2014", "Barlow", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #060f1c; --bg-glow: rgba(31,116,242,.16);
+    --card: #0c1a2b; --card-2: #0f2136;
+    --line: #1a2f4b; --line-strong: #27446a;
+    --text: #eef4fb; --muted: #8fa3bb; --faint: #5f7590;
+    --accent: #5cc8f5; --accent-soft: rgba(92,200,245,.12); --accent-glow: rgba(92,200,245,.55);
+    --primary: #1f74f2; --primary-2: #1560d8;
+    --primary-edge: rgba(0,20,60,.6); --primary-halo: rgba(31,116,242,.3);
+    --ok: #34d399; --ok-soft: rgba(52,211,153,.14);
+    --err: #f87171; --err-soft: rgba(248,113,113,.14);
+    --board: #08131f; --board-line: #1d324a; --nut: #b9b09e; --string: #5b7190;
+    --marker: #15283f; --out: rgba(6,15,28,.72); --dot-text: #04121f;
+    --open-bg: #16304d; --open-line: #2a4c74;
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+}
+
+/* ===================== Base ===================== */
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; min-height: 100vh; font-family: var(--font); color: var(--text);
+  background: radial-gradient(1200px 500px at 70% -10%, var(--bg-glow), transparent 70%), var(--bg);
+  background-attachment: fixed;
+  line-height: 1.45;
+}
+button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; }
+select { font: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 16px 40px; }
+
+/* ===================== Topbar ===================== */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: 980px; margin: 0 auto; padding: 12px 16px;
+}
+.brand {
+  display: flex; align-items: center; gap: 10px; background: none; border: 0; padding: 4px 0; min-height: 44px;
+  font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: .01em;
+}
+.brand svg { color: var(--accent); }
+.icons { display: flex; gap: 8px; }
+.icon-btn {
+  width: 44px; height: 44px; display: grid; place-items: center; flex: none;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); color: var(--muted);
+}
+.icon-btn:hover { color: var(--text); border-color: var(--line-strong); }
+.icon-btn.off { opacity: .6; }
+
+/* ===================== Typography & common ===================== */
+h1, h2 { font-family: var(--font-display); font-weight: 700; letter-spacing: -.01em; }
+h1 { font-size: clamp(28px, 5.5vw, 40px); line-height: 1.05; margin: 10px 0 16px; }
+h2 { font-size: clamp(24px, 4.2vw, 32px); line-height: 1.1; margin: 4px 0; }
+h3 { font-size: 15px; font-weight: 750; margin: 0; }
+.small { font-size: 13px; color: var(--muted); margin: 0; }
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg);
+  box-shadow: var(--shadow); padding: 16px;
+}
+.link { background: none; border: 0; padding: 0 2px; color: var(--accent); font-weight: 700; min-height: 32px; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 50px; padding: 0 22px; border-radius: var(--r-md); font-weight: 750;
+  background: var(--card-2); border: 1px solid var(--line); color: var(--text);
+}
+.btn:hover { border-color: var(--line-strong); }
+.btn.primary {
+  background: linear-gradient(180deg, var(--primary), var(--primary-2)); color: var(--on-primary);
+  border: 0; box-shadow: 0 4px 0 var(--primary-edge), 0 10px 24px var(--primary-halo);
+}
+.btn.primary:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--primary-edge); }
+
+/* Segmented controls */
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button {
+  min-height: 44px; padding: 0 15px; border-radius: 999px; font-weight: 700; font-size: 14px;
+  background: var(--card-2); border: 1px solid var(--line); color: var(--muted);
+}
+.seg button:hover { color: var(--text); border-color: var(--line-strong); }
+.seg button.on { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }
+.seg.num button { font-family: var(--font-display); font-size: 16px; font-weight: 600; min-width: 52px; }
+
+/* ===================== Home ===================== */
+.home-head { padding: 8px 0 0; }
+.practice { display: grid; gap: 14px; }
+.practice .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.practice .row > span { min-width: 58px; font-size: 14px; font-weight: 700; color: var(--muted); }
+.setup-line { font-size: 14px; color: var(--muted); margin: 0; }
+
+.modules { display: grid; gap: 10px; margin-top: 18px; }
+.mod {
+  width: 100%; text-align: left; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 16px;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg);
+  padding: 18px 20px; box-shadow: var(--shadow);
+}
+.mod:hover { border-color: var(--accent); }
+.mod:active { transform: scale(.99); }
+.mod .t { font-family: var(--font-display); font-weight: 700; font-size: 22px; }
+.mod .d { grid-column: 1; color: var(--muted); font-size: 14px; }
+.mod .s { grid-row: 1 / span 2; grid-column: 2; text-align: right; }
+.mod .s b { display: block; font-family: var(--font-display); font-weight: 600; font-size: 26px; color: var(--accent); font-variant-numeric: tabular-nums; }
+.mod .s small { font-size: 12px; color: var(--muted); }
+.mod .s .new { font-size: 14px; font-weight: 700; color: var(--accent); }
+.soon { font-size: 13px; color: var(--faint); margin: 14px 4px 0; }
+
+/* ===================== Config ===================== */
+.page-head { display: flex; align-items: center; gap: 12px; padding: 16px 0 14px; }
+.page-head h2 { margin: 0; }
+.cfg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-top: 12px; }
+.cfg-grid .card { display: grid; gap: 10px; align-content: start; }
+.range-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 14px; }
+.range-row select {
+  min-height: 44px; padding: 0 10px; border-radius: var(--r-sm); background: var(--card-2);
+  border: 1px solid var(--line); color: var(--text); font-family: var(--font-display); font-size: 16px;
+}
+
+/* ===================== Board ===================== */
+.board-card { padding: 12px 8px 4px; }
+.board-wrap {
+  overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: thin;
+  --fade-l: 0px; --fade-r: 0px;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent 100%);
+}
+.board-wrap.fade-l { --fade-l: 28px; }
+.board-wrap.fade-r { --fade-r: 28px; }
+.board-wrap svg { display: block; }
+.board-hint { font-size: 12px; color: var(--faint); text-align: right; margin: 2px 6px 0; }
+
+/* Fretboard SVG */
+.fb .board { fill: var(--board); stroke: var(--line); }
+.fb .open-bg { fill: var(--open-bg); stroke: var(--open-line); }
+.fb .fret { stroke: var(--board-line); stroke-width: 2; }
+.fb .nut { stroke: var(--nut); stroke-width: 6; stroke-linecap: round; }
+.fb .string { stroke: var(--string); stroke-linecap: round; }
+.fb .string.off { opacity: .25; stroke-dasharray: 3 6; }
+.fb .marker { fill: var(--marker); }
+.fb .out { fill: var(--out); pointer-events: none; }
+.fb text { font-family: var(--font-display); }
+.fb .slabel { fill: var(--muted); font-size: 13px; font-weight: 600; text-anchor: middle; dominant-baseline: central; }
+.fb .slabel.off { opacity: .35; }
+.fb .fnum { fill: var(--faint); font-size: 12px; text-anchor: middle; }
+.fb .fnum.mk { fill: var(--muted); font-weight: 700; }
+.fb .fnum.dim { opacity: .4; }
+.fb .hit { fill: transparent; cursor: pointer; }
+@media (hover: hover) { .fb .hit:hover { fill: var(--accent-soft); } }
+.fb .dot { fill: var(--accent); pointer-events: none; transform-box: fill-box; transform-origin: center; }
+.fb .dot.ok { fill: var(--ok); }
+.fb .dot.err { fill: var(--err); }
+.fb .dot.pop { animation: pop .32s cubic-bezier(.3,1.6,.5,1); }
+.fb .dot.shake { animation: shake .36s ease-in-out; }
+.fb .dot-label { fill: var(--dot-text); font-weight: 700; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.fb .ring {
+  fill: none; stroke: var(--accent); stroke-width: 2; pointer-events: none;
+  transform-box: fill-box; transform-origin: center; animation: pulse 1.6s ease-out infinite;
+}
+@keyframes pulse { from { transform: scale(1); opacity: .8; } to { transform: scale(1.9); opacity: 0; } }
+@keyframes pop { 0% { transform: scale(.6); } 100% { transform: scale(1); } }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+/* ===================== Quiz ===================== */
+.quiz-bar { display: flex; align-items: center; gap: 12px; padding: 12px 0 10px; }
+.quiz-title { flex: 1; min-width: 0; display: grid; }
+.quiz-title span { font-size: 13px; color: var(--muted); font-weight: 650; }
+.quiz-title b { font-family: var(--font-display); font-weight: 600; font-size: 17px; font-variant-numeric: tabular-nums; }
+.score { display: flex; gap: 12px; font-family: var(--font-display); font-weight: 700; font-size: 17px; font-variant-numeric: tabular-nums; }
+.score .ok { color: var(--ok); } .score .err { color: var(--err); }
+.progress { height: 4px; background: var(--line); border-radius: 4px; overflow: hidden; margin-bottom: 16px; }
+.progress i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; box-shadow: 0 0 10px var(--accent-glow); }
+
+.prompt { text-align: center; min-height: 104px; margin-bottom: 12px; display: grid; align-content: center; }
+.prompt .ask { font-size: 15px; font-weight: 650; color: var(--muted); }
+.prompt .big { font-family: var(--font-display); font-weight: 700; font-size: clamp(52px, 12vw, 76px); line-height: 1; color: var(--accent); }
+.prompt h2 { margin: 0 0 4px; }
+.prompt .sub { color: var(--muted); font-size: 14px; font-weight: 600; }
+.prompt .sub b { font-family: var(--font-display); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+
+.dock { margin-top: 16px; }
+.answers { display: grid; gap: 8px; grid-template-columns: repeat(7, 1fr); }
+.answers.n12 { grid-template-columns: repeat(6, 1fr); }
+.answers:empty { display: none; }
+.ans {
+  min-height: 58px; border-radius: var(--r-md); padding: 4px;
+  font-family: var(--font-display); font-weight: 600; font-size: 21px;
+  background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow);
+}
+.ans.acc { font-size: 16px; background: var(--card-2); }
+.ans:hover:not(:disabled) { border-color: var(--accent); }
+.ans:disabled { cursor: default; }
+.ans.ok { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+.ans.err { background: var(--err-soft); border-color: var(--err); color: var(--err); animation: shake .36s ease-in-out; }
+.ans.reveal { border-color: var(--ok); color: var(--ok); border-style: dashed; border-width: 2px; }
+
+.feedback {
+  min-height: 60px; margin-top: 12px; display: flex; align-items: center; justify-content: center;
+  gap: 14px; flex-wrap: wrap; text-align: center; font-weight: 700;
+}
+.feedback.ok #fbText { color: var(--ok); }
+.feedback.err #fbText { color: var(--err); }
+
+/* ===================== Summary ===================== */
+.summary { max-width: 720px; margin: 20px auto 0; display: grid; gap: 18px; padding: 24px 18px; }
+.summary h2 { font-size: clamp(34px, 7vw, 48px); }
+.summary h2 small { display: block; font-family: var(--font); font-size: 15px; font-weight: 650; color: var(--muted); letter-spacing: 0; margin-bottom: 6px; }
+.figures { display: flex; gap: 28px; flex-wrap: wrap; }
+.figures div { display: grid; }
+.figures b { font-family: var(--font-display); font-weight: 600; font-size: 28px; color: var(--accent); font-variant-numeric: tabular-nums; }
+.figures span { font-size: 13px; color: var(--muted); }
+.fails { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.fails li { padding: 8px 12px; border-radius: var(--r-sm); background: var(--err-soft); font-size: 14px; font-weight: 650; }
+.fails li b { color: var(--err); font-family: var(--font-display); font-weight: 700; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* Toast */
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 10;
+  background: var(--text); color: var(--bg); padding: 12px 18px; border-radius: var(--r-md);
+  font-weight: 650; font-size: 14px; max-width: calc(100% - 32px); box-shadow: var(--shadow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fb .ring { animation: none; opacity: 0; }
+  .fb .dot.pop, .fb .dot.shake, .ans.err { animation: none; }
+}
+
+/* ===================== Mobile ===================== */
+body.in-quiz .topbar { display: none; }
+@media (max-width: 640px) {
+  .card { padding: 14px; }
+  .cfg-grid { grid-template-columns: 1fr; }
+  .mod { padding: 16px; }
+  .mod .t { font-size: 20px; }
+  .answers, .answers.n12 { grid-template-columns: repeat(4, 1fr); }
+  .ans { min-height: 56px; font-size: 19px; }
+  .ans.acc { font-size: 14px; }
+  /* Respostes a la zona del polze */
+  #view-quiz:not([hidden]) { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+  .dock { margin-top: auto; padding: 16px 0 max(8px, env(safe-area-inset-bottom)); }
+  .feedback { min-height: 0; margin-top: 10px; }
+  .feedback:has(#fbText:empty) { margin-top: 0; }
+  #btnNext { width: 100%; }
+  .actions .btn { flex: 1; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <button class="brand" data-go="home" aria-label="Bass Lab, inici">
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <path d="M3 7h20M3 12h20M3 17h20" opacity=".55"/><path d="M9 4v16M16 4v16" opacity=".3"/>
+      <circle cx="12.5" cy="12" r="3" fill="currentColor" stroke="none"/>
+    </svg>
+    Bass Lab
+  </button>
+  <div class="icons">
+    <button class="icon-btn js-sound" aria-label="So"></button>
+    <button class="icon-btn" data-go="config" aria-label="Configuració">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ============ INICI ============ -->
+  <section id="view-home">
+    <div class="home-head">
+      <h1>Què practiquem avui?</h1>
+    </div>
+
+    <div class="card practice">
+      <div class="board-wrap" id="homeBoard"></div>
+      <div class="row">
+        <span>Trasts</span>
+        <div class="seg num" id="homeRange"></div>
+      </div>
+      <div class="row">
+        <span>Sessió</span>
+        <div class="seg num" data-key="sessionSize" data-type="num">
+          <button data-val="10">10</button><button data-val="20">20</button><button data-val="50">50</button><button data-val="0">Lliure</button>
+        </div>
+      </div>
+      <p class="setup-line" id="homeSummary"></p>
+    </div>
+
+    <div class="modules" id="modules"></div>
+    <p class="soon">Properament: lectura en clau de fa, notació i connexions del màstil.</p>
+  </section>
+
+  <!-- ============ CONFIGURACIÓ ============ -->
+  <section id="view-config" hidden>
+    <div class="page-head">
+      <button class="icon-btn" data-go="home" aria-label="Tornar a l'inici">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <h2>Configuració</h2>
+    </div>
+
+    <div class="card board-card">
+      <div class="board-wrap" id="previewBoard"></div>
+    </div>
+
+    <div class="cfg-grid">
+      <div class="card">
+        <h3>Baix</h3>
+        <div class="seg" data-key="strings" data-type="num">
+          <button data-val="4">4 cordes (E A D G)</button><button data-val="5">5 cordes (B E A D G)</button>
+        </div>
+        <p class="small">Toca una corda per activar-la o desactivar-la.</p>
+        <div class="seg" id="stringChips"></div>
+      </div>
+
+      <div class="card">
+        <h3>Rang de trasts</h3>
+        <div class="range-row">
+          <label>Del <select id="fretMin" aria-label="Primer trast"></select></label>
+          <label>al <select id="fretMax" aria-label="Últim trast"></select></label>
+        </div>
+        <div class="seg num" id="cfgRange"></div>
+      </div>
+
+      <div class="card">
+        <h3>Alteracions</h3>
+        <div class="seg" data-key="accidentals">
+          <button data-val="natural">Només naturals</button><button data-val="sharp">Sostinguts ♯</button>
+          <button data-val="flat">Bemolls ♭</button><button data-val="both">Tots dos</button>
+        </div>
+        <p class="small">Amb «tots dos» s'accepten les dues grafies (Do♯ = Re♭).</p>
+      </div>
+
+      <div class="card">
+        <h3>Notació</h3>
+        <div class="seg" data-key="notation">
+          <button data-val="mixed">Barrejada</button><button data-val="latin">Llatina (Do Re Mi)</button><button data-val="english">Anglesa (C D E)</button>
+        </div>
+        <p class="small">Barrejada: cada pregunta surt en una notació a l'atzar.</p>
+      </div>
+
+      <div class="card">
+        <h3>Nota → màstil</h3>
+        <div class="seg" data-key="allPositions" data-type="bool">
+          <button data-val="0">Una posició</button><button data-val="1">Totes les posicions</button>
+        </div>
+        <p class="small">Amb «totes les posicions» has de trobar la nota a tot el rang triat.</p>
+      </div>
+
+      <div class="card">
+        <h3>So i sessió</h3>
+        <div class="seg" data-key="sound" data-type="bool">
+          <button data-val="1">So activat</button><button data-val="0">So desactivat</button>
+        </div>
+        <div class="seg" data-key="sessionSize" data-type="num">
+          <button data-val="10">10 preguntes</button><button data-val="20">20</button><button data-val="50">50</button><button data-val="0">Lliure</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EXERCICI ============ -->
+  <section id="view-quiz" hidden>
+    <div class="quiz-bar">
+      <button class="icon-btn" id="quizExit" aria-label="Acabar la sessió">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <div class="quiz-title"><span id="quizModule"></span><b id="quizProgress"></b></div>
+      <div class="score" aria-label="Encerts i errors"><span class="ok">✓ <span id="scOk">0</span></span><span class="err">✗ <span id="scKo">0</span></span></div>
+      <button class="icon-btn js-sound" aria-label="So"></button>
+    </div>
+    <div class="progress"><i id="progFill"></i></div>
+
+    <div class="prompt" id="prompt" aria-live="polite"></div>
+    <div class="card board-card">
+      <div class="board-wrap" id="board"></div>
+      <p class="board-hint" id="boardHint" hidden>Llisca per veure més trasts</p>
+    </div>
+    <div class="dock">
+      <div class="answers" id="answers"></div>
+      <div class="feedback" id="feedback" aria-live="polite">
+        <span id="fbText"></span>
+        <button class="btn primary" id="btnNext" hidden>Següent</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RESUM ============ -->
+  <section id="view-summary" hidden>
+    <div class="card summary">
+      <h2 id="sumTitle"></h2>
+      <div class="figures">
+        <div><b id="sumPct"></b><span>d'encerts</span></div>
+        <div><b id="sumTime"></b><span>de mitjana per resposta</span></div>
+      </div>
+      <div id="sumFailsBox">
+        <h3>On has fallat</h3>
+        <div class="board-card" style="padding:10px 0 0"><div class="board-wrap" id="sumBoard"></div></div>
+        <ul class="fails" id="sumFails"></ul>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="sumAgain">Una altra sessió</button>
+        <button class="btn" data-go="home">Tornar a l'inici</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+'use strict';
+
+/* =====================================================================
+   1. TEORIA MUSICAL  (secció pura, sense DOM: es pot provar amb node)
+   ===================================================================== */
+// ==THEORY==
+const PC_SHARP = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+const PC_FLAT  = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B'];
+const LATIN = { C: 'Do', D: 'Re', E: 'Mi', F: 'Fa', G: 'Sol', A: 'La', B: 'Si' };
+const NATURAL_PCS = [0, 2, 4, 5, 7, 9, 11];
+const ALL_PCS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+// Cordes de greu a agut, altura real (MIDI)
+const STRINGS = [
+  { id: 'B', midi: 23 }, // B0
+  { id: 'E', midi: 28 }, // E1
+  { id: 'A', midi: 33 }, // A1
+  { id: 'D', midi: 38 }, // D2
+  { id: 'G', midi: 43 }, // G2
+];
+const MAX_FRET = 24;
+
+const openMidi = id => STRINGS.find(s => s.id === id).midi;
+const midiAt = (id, fret) => openMidi(id) + fret;
+const pcOf = m => ((m % 12) + 12) % 12;
+const isNatural = pc => NATURAL_PCS.includes(pc);
+const freq = m => 440 * Math.pow(2, (m - 69) / 12);
+const instrumentStrings = n => (n === 5 ? STRINGS.slice() : STRINGS.slice(1));
+
+// spelling: 'sharp' | 'flat'; notation: 'latin' | 'english'
+function spell(pc, spelling, notation) {
+  const en = (spelling === 'flat' ? PC_FLAT : PC_SHARP)[pc];
+  return notation === 'latin' ? LATIN[en[0]] + en.slice(1) : en;
+}
+// Notació científica en anglès (E1, C4…)
+const sciName = (m, spelling = 'sharp') => spell(pcOf(m), spelling, 'english') + (Math.floor(m / 12) - 1);
+// ==END THEORY==
+
+function selfTest() {
+  const errors = [];
+  const pos = [
+    ['B', 0, 23, 'B0'], ['E', 0, 28, 'E1'], ['A', 0, 33, 'A1'], ['D', 0, 38, 'D2'], ['G', 0, 43, 'G2'],
+    ['B', 5, 28, 'E1'], ['E', 5, 33, 'A1'], ['A', 5, 38, 'D2'], ['D', 5, 43, 'G2'], ['G', 5, 48, 'C3'],
+    ['B', 12, 35, 'B1'], ['E', 12, 40, 'E2'], ['A', 12, 45, 'A2'], ['D', 12, 50, 'D3'], ['G', 12, 55, 'G3'],
+  ];
+  for (const [s, f, m, n] of pos) {
+    const mm = midiAt(s, f), nn = sciName(mm);
+    if (mm !== m || nn !== n) errors.push(`${s}${f}: ${mm}/${nn}, esperat ${m}/${n}`);
+  }
+  for (const [m, hz] of [[23, 30.87], [28, 41.20], [33, 55.00], [38, 73.42], [43, 98.00]]) {
+    if (Math.abs(freq(m) - hz) > 0.01) errors.push(`freq(${m}) = ${freq(m).toFixed(2)}, esperat ${hz}`);
+  }
+  const names = [[1, 'sharp', 'latin', 'Do♯'], [1, 'flat', 'english', 'D♭'], [7, 'sharp', 'latin', 'Sol'],
+                 [11, 'sharp', 'latin', 'Si'], [10, 'flat', 'latin', 'Si♭'], [9, 'sharp', 'english', 'A']];
+  for (const [pc, sp, no, exp] of names) {
+    if (spell(pc, sp, no) !== exp) errors.push(`spell(${pc},${sp},${no}) = ${spell(pc, sp, no)}, esperat ${exp}`);
+  }
+  if (errors.length) console.error('[Bass Lab] Autotest amb errors:\n' + errors.join('\n'));
+  else console.info('[Bass Lab] Autotest OK: cordes a l\'aire, trast 5, trast 12, freqüències i noms.');
+  return errors;
+}
+
+/* =====================================================================
+   2. EMMAGATZEMATGE
+   ===================================================================== */
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sense persistència */ } },
+};
+const K_CFG = 'basslab.config', K_STATS = 'basslab.stats';
+
+/* =====================================================================
+   3. CONFIGURACIÓ
+   ===================================================================== */
+const DEFAULT_CFG = {
+  v: 2, strings: 4, active: { B: true, E: true, A: true, D: true, G: true },
+  fretMin: 0, fretMax: 12, accidentals: 'natural', notation: 'mixed',
+  sound: true, sessionSize: 20, allPositions: false,
+};
+const RANGE_PRESETS = [[0, 5], [0, 12], [0, 20]];
+const ACC_LABEL = { natural: 'només notes naturals', sharp: 'amb sostinguts', flat: 'amb bemolls', both: 'amb sostinguts i bemolls' };
+const NOT_LABEL = { latin: 'notació llatina', english: 'notació anglesa', mixed: 'notació barrejada' };
+
+function sanitize(c) {
+  const int = (v, d) => (Number.isFinite(+v) ? Math.round(+v) : d);
+  c.strings = c.strings === 5 ? 5 : 4;
+  c.fretMin = Math.min(MAX_FRET, Math.max(0, int(c.fretMin, 0)));
+  c.fretMax = Math.min(MAX_FRET, Math.max(0, int(c.fretMax, 12)));
+  if (c.fretMin > c.fretMax) [c.fretMin, c.fretMax] = [c.fretMax, c.fretMin];
+  if (!['natural', 'sharp', 'flat', 'both'].includes(c.accidentals)) c.accidentals = 'natural';
+  if (!['latin', 'english', 'mixed'].includes(c.notation)) c.notation = 'latin';
+  if (![0, 10, 20, 50].includes(c.sessionSize)) c.sessionSize = 20;
+  c.sound = !!c.sound; c.allPositions = !!c.allPositions;
+  if (!instrumentStrings(c.strings).some(s => c.active[s.id])) STRINGS.forEach(s => (c.active[s.id] = true));
+  return c;
+}
+function loadCfg() {
+  const saved = LS.get(K_CFG, {});
+  const c = Object.assign({}, DEFAULT_CFG, saved);
+  c.active = Object.assign({}, DEFAULT_CFG.active, saved.active);
+  // v2: la notació per defecte passa a ser barrejada des del primer dia
+  if ((saved.v || 1) < 2) c.notation = 'mixed';
+  c.v = DEFAULT_CFG.v;
+  return sanitize(c);
+}
+let cfg = loadCfg();
+const saveCfg = () => LS.set(K_CFG, cfg);
+
+const activeStringIds = () => instrumentStrings(cfg.strings).filter(s => cfg.active[s.id]).map(s => s.id);
+const allowedPc = pc => cfg.accidentals !== 'natural' || isNatural(pc);
+const stringLabel = id => (cfg.notation === 'latin' ? LATIN[id] : id);
+const posText = (s, f, lower = false) => `${lower ? "corda" : "Corda"} ${stringLabel(s)}, ${f === 0 ? "a l'aire" : "trast " + f}`;
+
+function positionsInRange() {
+  const out = [];
+  for (const s of activeStringIds())
+    for (let f = cfg.fretMin; f <= cfg.fretMax; f++) out.push({ s, f, midi: midiAt(s, f) });
+  return out;
+}
+const questionNotation = () => (cfg.notation === 'mixed' ? (Math.random() < 0.5 ? 'latin' : 'english') : cfg.notation);
+const questionSpelling = () =>
+  cfg.accidentals === 'flat' ? 'flat' : cfg.accidentals === 'both' ? (Math.random() < 0.5 ? 'sharp' : 'flat') : 'sharp';
+
+// Nom complet d'una classe de nota segons les alteracions configurades
+function pcLabel(pc, notation) {
+  if (isNatural(pc) || cfg.accidentals === 'sharp' || cfg.accidentals === 'natural') return spell(pc, 'sharp', notation);
+  if (cfg.accidentals === 'flat') return spell(pc, 'flat', notation);
+  return spell(pc, 'sharp', notation) + '/' + spell(pc, 'flat', notation);
+}
+// Nom curt per dibuixar dins d'un punt del màstil
+const pcShort = (pc, notation, spelling) =>
+  spell(pc, isNatural(pc) ? 'sharp' : spelling || (cfg.accidentals === 'flat' ? 'flat' : 'sharp'), notation);
+
+/* =====================================================================
+   4. ESTADÍSTIQUES I PESOS
+   ===================================================================== */
+function loadStats() {
+  const s = LS.get(K_STATS, null);
+  if (!s || s.v !== 1) return { v: 1, modules: {}, items: {}, sessions: [] };
+  s.modules = s.modules || {}; s.items = s.items || {}; s.sessions = s.sessions || [];
+  return s;
+}
+let stats = loadStats();
+const saveStats = () => LS.set(K_STATS, stats);
+
+const W_MIN = 0.25, W_MAX = 8, FAST_MS = 2000, SLOW_MS = 4000;
+
+function recordAnswer(mid, key, correct, ms) {
+  ms = Math.min(ms, 30000); // una pausa llarga no ha d'enfonsar la mitjana
+  const it = stats.items[key] || (stats.items[key] = { w: 1, n: 0, ok: 0, ms: 0 });
+  it.n++; it.ms += ms;
+  if (correct) {
+    it.ok++;
+    if (ms < FAST_MS) it.w = Math.max(W_MIN, it.w * 0.7);
+    else if (ms > SLOW_MS) it.w = Math.min(W_MAX, it.w * 1.2);
+  } else {
+    it.w = Math.min(W_MAX, it.w * 2);
+  }
+  const m = stats.modules[mid] || (stats.modules[mid] = { n: 0, ok: 0, ms: 0 });
+  m.n++; m.ms += ms; if (correct) m.ok++;
+  saveStats();
+}
+
+function pickWeighted(cands, lastKey) {
+  const pool = cands.length > 1 ? cands.filter(c => c.key !== lastKey) : cands;
+  const ws = pool.map(c => (stats.items[c.key] ? stats.items[c.key].w : 1));
+  let r = Math.random() * ws.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < pool.length; i++) { r -= ws[i]; if (r <= 0) return pool[i]; }
+  return pool[pool.length - 1];
+}
+
+/* =====================================================================
+   5. ÀUDIO (síntesi, altura real)
+   ===================================================================== */
+let actx = null, master = null;
+function ensureAudio() {
+  if (!actx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    actx = new AC();
+    const comp = actx.createDynamicsCompressor();
+    master = actx.createGain(); master.gain.value = 0.9;
+    master.connect(comp); comp.connect(actx.destination);
+  }
+  if (actx.state === 'suspended') actx.resume();
+  return actx;
+}
+// Els navegadors només deixen iniciar l'àudio després d'un gest de l'usuari
+document.addEventListener('pointerdown', () => { if (cfg.sound) ensureAudio(); }, { passive: true });
+
+function playMidi(midi) {
+  if (!cfg.sound || midi == null) return;
+  const c = ensureAudio(); if (!c) return;
+  const f = freq(midi), t = c.currentTime;
+  const saw = c.createOscillator(); saw.type = 'sawtooth'; saw.frequency.value = f;
+  const tri = c.createOscillator(); tri.type = 'triangle'; tri.frequency.value = f;
+  const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 2;
+  lp.frequency.setValueAtTime(Math.min(f * 14, 3000), t);
+  lp.frequency.exponentialRampToValueAtTime(Math.max(f * 2.5, 180), t + 0.5);
+  const sawGain = c.createGain(); sawGain.gain.value = 0.5;
+  const env = c.createGain();
+  env.gain.setValueAtTime(0.0001, t);
+  env.gain.exponentialRampToValueAtTime(0.5, t + 0.008);
+  env.gain.exponentialRampToValueAtTime(0.18, t + 0.25);
+  env.gain.exponentialRampToValueAtTime(0.0001, t + 1.6);
+  saw.connect(sawGain); sawGain.connect(lp); tri.connect(lp); lp.connect(env); env.connect(master);
+  saw.start(t); tri.start(t); saw.stop(t + 1.7); tri.stop(t + 1.7);
+}
+
+/* =====================================================================
+   6. MÀSTIL (SVG)
+   ===================================================================== */
+const SINGLE_MARKERS = [3, 5, 7, 9, 15, 17, 19, 21];
+const DOUBLE_MARKERS = [12, 24];
+
+// opts: { dots:[{s,f,cls,label}], onTap(s,f), focus:fret }
+function renderFretboard(host, opts = {}) {
+  const { dots = [], onTap = null, focus = null } = opts;
+  host._fb = opts;
+  const strs = instrumentStrings(cfg.strings).slice().reverse(); // aguda a dalt, greu a baix
+  const active = new Set(activeStringIds());
+  const W = host.clientWidth || 600;
+  const narrow = W < 700;
+
+  // Trasts visibles: en pantalla estreta, només el rang actiu ± 1
+  const from = narrow ? Math.max(0, cfg.fretMin - 1) : 0;
+  const to = narrow ? Math.min(MAX_FRET, cfg.fretMax + 1) : Math.min(MAX_FRET, Math.max(12, cfg.fretMax + 1));
+  const hasOpen = from === 0;
+  const firstFret = Math.max(from, 1);
+  const nFrets = to - firstFret + 1;
+
+  const padL = narrow ? 30 : 36, padR = 8, padT = 8, padB = 26;
+  const gap = 44; // alçada de cel·la: objectiu tàctil mínim
+  const openUnits = hasOpen ? 0.8 : 0;
+  let fw = (W - padL - padR) / (nFrets + openUnits);
+  fw = Math.max(narrow ? 40 : 38, Math.min(fw, 110));
+  const openW = hasOpen ? fw * openUnits : 0;
+  const boardX = padL + openW;
+  const boardW = nFrets * fw;
+  const boardH = strs.length * gap;
+  const totalW = Math.ceil(boardX + boardW + padR);
+  const H = padT + boardH + padB;
+
+  const cx = f => (f === 0 ? padL + openW / 2 : boardX + (f - firstFret + 0.5) * fw);
+  const cellX = f => (f === 0 ? padL : boardX + (f - firstFret) * fw);
+  const cellW = f => (f === 0 ? openW : fw);
+  const rowY = i => padT + gap / 2 + i * gap;
+  const yOf = id => rowY(strs.findIndex(s => s.id === id));
+  const inRange = f => f >= cfg.fretMin && f <= cfg.fretMax;
+  const thick = { B: 3.4, E: 3, A: 2.4, D: 1.9, G: 1.4 };
+  const glowId = 'glow-' + host.id;
+
+  let svg = `<svg class="fb" width="${totalW}" height="${H}" viewBox="0 0 ${totalW} ${H}" role="img" aria-label="Màstil">
+    <defs><filter id="${glowId}" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter></defs>
+    <rect class="board" x="${boardX}" y="${padT}" width="${boardW}" height="${boardH}" rx="6"/>`;
+  // Columna de les cordes a l'aire, amb fons propi perquè no es confongui amb el màstil
+  if (hasOpen) svg += `<rect class="open-bg" x="${padL}" y="${padT}" width="${openW}" height="${boardH}" rx="6"/>`;
+
+  // Marcadors
+  for (let f = firstFret; f <= to; f++) {
+    if (SINGLE_MARKERS.includes(f)) svg += `<circle class="marker" cx="${cx(f)}" cy="${padT + boardH / 2}" r="6"/>`;
+    if (DOUBLE_MARKERS.includes(f)) {
+      svg += `<circle class="marker" cx="${cx(f)}" cy="${padT + boardH * 0.25}" r="6"/>`;
+      svg += `<circle class="marker" cx="${cx(f)}" cy="${padT + boardH * 0.75}" r="6"/>`;
+    }
+  }
+  // Trasts (el primer és la celleta si es veu el trast 0)
+  for (let f = firstFret - 1; f <= to; f++) {
+    const x = boardX + (f - firstFret + 1) * fw;
+    svg += `<line class="${f === 0 ? 'nut' : 'fret'}" x1="${x}" y1="${padT}" x2="${x}" y2="${padT + boardH}"/>`;
+  }
+  // Cordes i etiquetes
+  strs.forEach((s, i) => {
+    const y = rowY(i), off = active.has(s.id) ? '' : ' off';
+    svg += `<line class="string${off}" x1="${hasOpen ? padL : boardX}" y1="${y}" x2="${boardX + boardW}" y2="${y}" stroke-width="${thick[s.id]}"/>`;
+    svg += `<text class="slabel${off}" x="${padL / 2 - 2}" y="${y}">${stringLabel(s.id)}</text>`;
+  });
+  // Zones fora de rang
+  for (let f = from; f <= to; f++) {
+    if (!inRange(f)) svg += `<rect class="out" x="${cellX(f)}" y="${padT - 2}" width="${cellW(f)}" height="${boardH + 4}"/>`;
+  }
+  // Números de trast
+  for (let f = from; f <= to; f++) {
+    const mk = SINGLE_MARKERS.includes(f) || DOUBLE_MARKERS.includes(f) ? ' mk' : '';
+    svg += `<text class="fnum${mk}${inRange(f) ? '' : ' dim'}" x="${cx(f)}" y="${H - 8}">${f}</text>`;
+  }
+  // Zones tàctils
+  if (onTap) {
+    strs.forEach((s, i) => {
+      if (!active.has(s.id)) return;
+      for (let f = from; f <= to; f++) {
+        if (!inRange(f)) continue;
+        svg += `<rect class="hit" data-s="${s.id}" data-f="${f}" x="${cellX(f)}" y="${rowY(i) - gap / 2}" width="${cellW(f)}" height="${gap}" rx="6"/>`;
+      }
+    });
+  }
+  // Punts
+  const r = Math.min(fw, gap) * 0.36;
+  for (const d of dots) {
+    const x = cx(d.f), y = yOf(d.s);
+    if (y == null || isNaN(y) || d.f < from || d.f > to) continue;
+    if (d.cls === 'target') svg += `<circle class="ring" cx="${x}" cy="${y}" r="${r}"/>`;
+    const glow = d.cls === 'target' || d.cls === 'reveal' ? ` filter="url(#${glowId})"` : '';
+    svg += `<circle class="dot ${d.cls || ''} ${d.anim || ''}" cx="${x}" cy="${y}" r="${r}"${glow}/>`;
+    d.anim = null; // l'animació només es fa quan el punt apareix, no en redibuixar
+    if (d.label) {
+      const fs = d.label.length >= 4 ? 10 : d.label.length === 3 ? 11.5 : 13;
+      svg += `<text class="dot-label" x="${x}" y="${y}" font-size="${fs}">${d.label}</text>`;
+    }
+  }
+  svg += '</svg>';
+  host.innerHTML = svg;
+
+  if (onTap) {
+    host.firstElementChild.addEventListener('click', e => {
+      const h = e.target.closest('.hit'); if (h) onTap(h.dataset.s, +h.dataset.f);
+    });
+  }
+  // Si el màstil no hi cap, centra la zona que interessa
+  if (totalW > W) {
+    const fx = focus != null ? cx(focus) : cx(Math.max(from, cfg.fretMin)) + W / 2 - fw;
+    host.scrollLeft = Math.max(0, fx - W / 2);
+  }
+  if (!host._fadeBound) { host.addEventListener('scroll', () => updateFade(host), { passive: true }); host._fadeBound = true; }
+  updateFade(host);
+}
+// Difumina les vores quan hi ha més màstil fora de la vista
+function updateFade(host) {
+  const max = host.scrollWidth - host.clientWidth;
+  host.classList.toggle('fade-l', max > 2 && host.scrollLeft > 2);
+  host.classList.toggle('fade-r', max > 2 && host.scrollLeft < max - 2);
+  const hint = host.parentElement.querySelector('.board-hint');
+  if (hint) hint.hidden = max <= 2;
+}
+const redraw = host => { if (host._fb && host.offsetParent) renderFretboard(host, host._fb); };
+
+/* =====================================================================
+   7. MÒDULS
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const boardEl = $('#board'), answersEl = $('#answers'), promptEl = $('#prompt');
+
+const failNotation = () => (cfg.notation === 'english' ? 'english' : 'latin');
+
+const MODULES = {
+  m1: {
+    title: 'Màstil → nota', desc: 'Veus un punt al màstil i dius quina nota és.',
+    candidates() {
+      return positionsInRange().filter(p => allowedPc(pcOf(p.midi))).map(p => ({ ...p, key: `m1|${p.s}${p.f}` }));
+    },
+    render(q) {
+      const { s, f, midi } = q.item, pc = pcOf(midi);
+      promptEl.innerHTML = `<h2>Quina nota és?</h2><div class="sub">${posText(s, f)}</div>`;
+      renderFretboard(boardEl, { dots: [{ s, f, cls: 'target' }], focus: f });
+      const pcs = cfg.accidentals === 'natural' ? NATURAL_PCS : ALL_PCS;
+      answersEl.className = 'answers' + (pcs.length === 12 ? ' n12' : '');
+      answersEl.innerHTML = pcs.map(p =>
+        `<button class="ans${isNatural(p) ? '' : ' acc'}" data-pc="${p}">${pcLabel(p, q.notation)}</button>`).join('');
+      answersEl.onclick = e => {
+        const b = e.target.closest('button[data-pc]');
+        if (!b || q.done) return;
+        const ok = +b.dataset.pc === pc;
+        answersEl.querySelectorAll('button').forEach(x => (x.disabled = true));
+        b.classList.add(ok ? 'ok' : 'err');
+        if (!ok) answersEl.querySelector(`[data-pc="${pc}"]`).classList.add('reveal');
+        renderFretboard(boardEl, { dots: [{ s, f, cls: ok ? 'ok' : 'reveal', anim: ok ? 'pop' : 'shake', label: pcShort(pc, q.notation) }], focus: f });
+        const name = pcLabel(pc, q.notation);
+        resolve(ok, midi, ok ? `Correcte: ${name}` : `És ${name} (${posText(s, f, true)})`);
+      };
+    },
+    failLabel(key) {
+      const pos = key.split('|')[1], s = pos[0], f = +pos.slice(1);
+      return [pcLabel(pcOf(midiAt(s, f)), failNotation()), posText(s, f, true)];
+    },
+    failDots(key) {
+      const pos = key.split('|')[1], s = pos[0], f = +pos.slice(1);
+      return [{ s, f, cls: 'err', label: pcShort(pcOf(midiAt(s, f)), failNotation()) }];
+    },
+  },
+
+  m2: {
+    title: 'Nota → màstil', desc: 'Veus el nom d\'una nota i la toques al màstil.',
+    candidates() {
+      const pcs = new Set(positionsInRange().map(p => pcOf(p.midi)).filter(allowedPc));
+      return [...pcs].sort((a, b) => a - b).map(pc => ({ pc, key: `m2|${pc}` }));
+    },
+    render(q) {
+      const pc = q.item.pc;
+      const spelling = isNatural(pc) ? 'sharp' : q.spelling;
+      const name = spell(pc, spelling, q.notation);
+      const targets = positionsInRange().filter(p => pcOf(p.midi) === pc);
+      const all = cfg.allPositions && targets.length > 1;
+      const found = new Set();
+      const dots = [];
+      q.units = all ? targets.length : 1;
+
+      promptEl.innerHTML = `<div class="ask">Troba</div><div class="big">${name}</div><div class="sub">${
+        all ? `Totes les posicions: <b id="foundCnt">0</b> de <b>${targets.length}</b>` : 'Toca-la al màstil'}</div>`;
+      answersEl.className = 'answers'; answersEl.innerHTML = ''; answersEl.onclick = null;
+
+      const draw = () => renderFretboard(boardEl, { dots, onTap, focus: null });
+      const keepScroll = fn => { const x = boardEl.scrollLeft; fn(); boardEl.scrollLeft = x; updateFade(boardEl); };
+      const label = p => pcShort(pcOf(p.midi), q.notation, spelling);
+
+      function onTap(s, f) {
+        if (q.done) return;
+        const m = midiAt(s, f), hit = pcOf(m) === pc, k = s + f;
+        if (hit) {
+          if (found.has(k)) return;
+          found.add(k);
+          dots.push({ s, f, cls: 'ok', anim: 'pop', label: name });
+          if (all) $('#foundCnt').textContent = found.size;
+          keepScroll(draw);
+          if (all && found.size < targets.length) { playMidi(m); return; }
+          resolve(true, m, all ? `Correcte: has trobat totes les posicions de ${name}` : `Correcte: ${name} (${posText(s, f, true)})`);
+        } else {
+          const wrongName = pcShort(pcOf(m), q.notation, spelling);
+          dots.push({ s, f, cls: 'err', anim: 'shake', label: wrongName });
+          for (const t of targets) if (!found.has(t.s + t.f)) dots.push({ s: t.s, f: t.f, cls: 'reveal', label: label(t) });
+          keepScroll(draw);
+          const near = nearest(targets, s, f);
+          resolve(false, near.midi, `Has tocat ${wrongName}. ${name} és a les posicions marcades.`);
+        }
+      }
+      draw();
+    },
+    failLabel(key) {
+      return [pcLabel(+key.split('|')[1], failNotation()), ''];
+    },
+    failDots(key) {
+      const pc = +key.split('|')[1];
+      return positionsInRange().filter(p => pcOf(p.midi) === pc)
+        .map(p => ({ s: p.s, f: p.f, cls: 'err', label: pcShort(pc, failNotation()) }));
+    },
+  },
+};
+
+function nearest(targets, s, f) {
+  const si = id => STRINGS.findIndex(x => x.id === id);
+  return targets.slice().sort((a, b) =>
+    (Math.abs(a.f - f) + 3 * Math.abs(si(a.s) - si(s))) - (Math.abs(b.f - f) + 3 * Math.abs(si(b.s) - si(s))))[0];
+}
+
+/* =====================================================================
+   8. SESSIÓ
+   ===================================================================== */
+let sess = null;
+
+function startSession(mid) {
+  if (!MODULES[mid].candidates().length) {
+    toast('No hi ha cap nota amb aquesta configuració. Revisa el rang, les cordes o les alteracions.');
+    return;
+  }
+  sess = { mid, size: cfg.sessionSize, count: 0, ok: 0, ko: 0, ms: 0, lastKey: null, fails: {}, q: null, timer: null };
+  show('quiz');
+  nextQuestion();
+}
+
+function nextQuestion() {
+  clearTimeout(sess.timer);
+  if (sess.size && sess.count >= sess.size) { endSession(); return; }
+  const M = MODULES[sess.mid];
+  const item = pickWeighted(M.candidates(), sess.lastKey);
+  sess.lastKey = item.key;
+  sess.q = { item, notation: questionNotation(), spelling: questionSpelling(), t0: performance.now(), done: false, units: 1 };
+  setFeedback('', '');
+  $('#btnNext').hidden = true;
+  M.render(sess.q);
+  updateQuizBar();
+}
+
+function resolve(correct, midi, text) {
+  const q = sess.q;
+  if (q.done) return;
+  q.done = true;
+  const ms = (performance.now() - q.t0) / (q.units || 1);
+  recordAnswer(sess.mid, q.item.key, correct, ms);
+  sess.count++; sess.ms += Math.min(ms, 30000);
+  if (correct) sess.ok++; else { sess.ko++; sess.fails[q.item.key] = (sess.fails[q.item.key] || 0) + 1; }
+  playMidi(midi);
+  setFeedback(correct ? 'ok' : 'err', text);
+  updateQuizBar();
+  if (correct) sess.timer = setTimeout(nextQuestion, 850);
+  else { $('#btnNext').hidden = false; $('#btnNext').focus({ preventScroll: true }); }
+}
+
+function endSession() {
+  clearTimeout(sess.timer);
+  if (!sess.count) { sess = null; show('home'); return; }
+  stats.sessions.push({ d: Date.now(), m: sess.mid, n: sess.count, ok: sess.ok, ms: Math.round(sess.ms / sess.count) });
+  if (stats.sessions.length > 500) stats.sessions.splice(0, stats.sessions.length - 500);
+  saveStats();
+
+  const M = MODULES[sess.mid];
+  $('#sumTitle').innerHTML = `<small>${M.title}</small>${sess.ok} de ${sess.count} correctes`;
+  $('#sumPct').textContent = Math.round((sess.ok / sess.count) * 100) + '%';
+  $('#sumTime').textContent = fmtSec(sess.ms / sess.count);
+  const fails = Object.entries(sess.fails).sort((a, b) => b[1] - a[1]);
+  $('#sumFailsBox').hidden = !fails.length;
+  $('#sumFails').innerHTML = fails.slice(0, 8).map(([k, n]) => {
+    const [name, where] = M.failLabel(k);
+    return `<li><b>${name}</b>${where ? ' ' + where : ''}${n > 1 ? ` (${n} cops)` : ''}</li>`;
+  }).join('');
+  show('summary');
+  if (fails.length) {
+    const seen = new Set(), dots = [];
+    for (const [k] of fails) for (const d of M.failDots(k)) if (!seen.has(d.s + d.f)) { seen.add(d.s + d.f); dots.push(d); }
+    renderFretboard($('#sumBoard'), { dots });
+  }
+}
+
+function updateQuizBar() {
+  const q = sess.q, M = MODULES[sess.mid];
+  $('#quizModule').textContent = M.title;
+  const cur = sess.count + (q && !q.done ? 1 : 0);
+  $('#quizProgress').textContent = sess.size ? `${Math.max(1, cur)} de ${sess.size}` : `${Math.max(1, cur)} (sessió lliure)`;
+  $('#scOk').textContent = sess.ok; $('#scKo').textContent = sess.ko;
+  $('#progFill').style.width = sess.size ? (sess.count / sess.size) * 100 + '%' : '0';
+}
+function setFeedback(cls, text) {
+  $('#feedback').className = 'feedback ' + cls;
+  $('#fbText').textContent = text;
+}
+
+/* =====================================================================
+   9. INTERFÍCIE
+   ===================================================================== */
+const fmtSec = ms => (ms / 1000).toFixed(1).replace('.', ',') + ' s';
+
+function show(view) {
+  for (const v of ['home', 'config', 'quiz', 'summary']) $('#view-' + v).hidden = v !== view;
+  document.body.classList.toggle('in-quiz', view === 'quiz');
+  if (view === 'home') renderHome();
+  if (view === 'config') syncConfig();
+  window.scrollTo(0, 0);
+}
+
+function rangeChips() {
+  return RANGE_PRESETS.map(([a, b]) =>
+    `<button data-range="${a}-${b}" class="${cfg.fretMin === a && cfg.fretMax === b ? 'on' : ''}">${a}–${b}</button>`).join('');
+}
+
+function syncSegs() {
+  document.querySelectorAll('.seg[data-key]').forEach(seg => {
+    const v = cfg[seg.dataset.key];
+    seg.querySelectorAll('button').forEach(b => {
+      const bv = seg.dataset.type === 'num' ? +b.dataset.val : seg.dataset.type === 'bool' ? b.dataset.val === '1' : b.dataset.val;
+      b.classList.toggle('on', bv === v);
+    });
+  });
+  const on = cfg.sound;
+  document.querySelectorAll('.js-sound').forEach(b => {
+    b.classList.toggle('off', !on);
+    b.setAttribute('aria-label', on ? 'Silenciar' : 'Activar el so');
+    b.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/>${
+      on ? '<path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>' : '<path d="M17 9l5 6M22 9l-5 6"/>'}</svg>`;
+  });
+}
+
+function renderHome() {
+  syncSegs();
+  const isPreset = RANGE_PRESETS.some(([a, b]) => cfg.fretMin === a && cfg.fretMax === b);
+  $('#homeRange').innerHTML = rangeChips() + (isPreset ? '' : `<button class="on" data-go="config">${cfg.fretMin}–${cfg.fretMax}</button>`);
+  $('#homeSummary').innerHTML = `Baix de ${cfg.strings} cordes (${activeStringIds().map(stringLabel).join(' ')}), ${ACC_LABEL[cfg.accidentals]}, ${
+    NOT_LABEL[cfg.notation]}${cfg.allPositions ? ', totes les posicions' : ''}. <button class="link" data-go="config">Canvia</button>`;
+  renderFretboard($('#homeBoard'), {});
+
+  $('#modules').innerHTML = Object.entries(MODULES).map(([id, M]) => {
+    const st = stats.modules[id];
+    const stat = st && st.n
+      ? `<b>${Math.round((st.ok / st.n) * 100)}%</b><small>${fmtSec(st.ms / st.n)} de mitjana</small>`
+      : '<span class="new">Comença</span>';
+    return `<button class="mod" data-start="${id}"><span class="t">${M.title}</span><span class="d">${M.desc}</span><span class="s">${stat}</span></button>`;
+  }).join('');
+}
+
+function syncConfig() {
+  syncSegs();
+  $('#stringChips').innerHTML = instrumentStrings(cfg.strings).map(s =>
+    `<button data-string="${s.id}" class="${cfg.active[s.id] ? 'on' : ''}">${stringLabel(s.id)}</button>`).join('');
+  const opts = sel => Array.from({ length: MAX_FRET + 1 }, (_, i) => `<option value="${i}"${i === sel ? ' selected' : ''}>${i}</option>`).join('');
+  $('#fretMin').innerHTML = opts(cfg.fretMin);
+  $('#fretMax').innerHTML = opts(cfg.fretMax);
+  $('#cfgRange').innerHTML = rangeChips();
+  renderFretboard($('#previewBoard'), {});
+}
+
+function afterCfg() {
+  cfg = sanitize(cfg);
+  saveCfg();
+  if (!$('#view-config').hidden) syncConfig();
+  if (!$('#view-home').hidden) renderHome();
+  syncSegs();
+}
+
+let toastTimer = null;
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 3500);
+}
+
+// Clics delegats
+document.addEventListener('click', e => {
+  const go = e.target.closest('[data-go]');
+  if (go) { show(go.dataset.go); return; }
+
+  const start = e.target.closest('[data-start]');
+  if (start) { startSession(start.dataset.start); return; }
+
+  const segBtn = e.target.closest('.seg[data-key] button');
+  if (segBtn) {
+    const seg = segBtn.parentElement, t = seg.dataset.type, v = segBtn.dataset.val;
+    cfg[seg.dataset.key] = t === 'num' ? +v : t === 'bool' ? v === '1' : v;
+    afterCfg(); return;
+  }
+
+  const rng = e.target.closest('[data-range]');
+  if (rng) { [cfg.fretMin, cfg.fretMax] = rng.dataset.range.split('-').map(Number); afterCfg(); return; }
+
+  const str = e.target.closest('[data-string]');
+  if (str) {
+    const id = str.dataset.string;
+    if (cfg.active[id] && activeStringIds().length === 1) { toast('Cal deixar almenys una corda activa.'); return; }
+    cfg.active[id] = !cfg.active[id];
+    afterCfg(); return;
+  }
+
+  if (e.target.closest('.js-sound')) {
+    cfg.sound = !cfg.sound; afterCfg();
+    if (cfg.sound) playMidi(33);
+  }
+});
+
+$('#fretMin').addEventListener('change', e => { cfg.fretMin = +e.target.value; if (cfg.fretMin > cfg.fretMax) cfg.fretMax = cfg.fretMin; afterCfg(); });
+$('#fretMax').addEventListener('change', e => { cfg.fretMax = +e.target.value; if (cfg.fretMax < cfg.fretMin) cfg.fretMin = cfg.fretMax; afterCfg(); });
+
+$('#btnNext').addEventListener('click', () => nextQuestion());
+$('#quizExit').addEventListener('click', () => endSession());
+$('#sumAgain').addEventListener('click', () => startSession(sess ? sess.mid : 'm1'));
+
+document.addEventListener('keydown', e => {
+  if ($('#view-quiz').hidden || !sess) return;
+  if ((e.key === 'Enter' || e.key === ' ') && !$('#btnNext').hidden) { e.preventDefault(); nextQuestion(); }
+  if (e.key === 'Escape') endSession();
+});
+
+let resizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => ['board', 'previewBoard', 'homeBoard', 'sumBoard'].forEach(id => redraw($('#' + id))), 150);
+});
+
+selfTest();
+show('home');
+</script>
+</body>
+</html>
