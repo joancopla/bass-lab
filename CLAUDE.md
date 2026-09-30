@@ -100,7 +100,8 @@ Alteracions: ♯ = sostingut, ♭ = bemoll (Do♯ = C♯, Re♭ = D♭). En mode
 - Opció per reiniciar les estadístiques, amb confirmació.
 
 ## So
-- Síntesi simple d'un so de baix: oscil·lador (triangle o serra filtrada amb pas baix) i envolupant curta d'atac i caiguda.
+- So de baix per **model físic de corda pinçada (Karplus-Strong)**, calculat en JavaScript: excitació de dit, línia de retard amb pèrdues, retard fraccionari (allpass) per a l'afinació exacta i filtre de pinta de pastilla. Sense samples externs.
+- L'afinació s'ha de mantenir dins de ±2 cèntims (verificable per autocorrelació).
 - Ha de sonar a l'**altura real** (no a l'escrita).
 - L'àudio s'ha d'activar amb la primera interacció de l'usuari (restricció dels navegadors).
 
