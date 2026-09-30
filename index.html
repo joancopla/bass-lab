@@ -30,6 +30,7 @@
   --err: #d64545; --err-soft: rgba(214,69,69,.12);
   --board: #fbfcfe; --board-edge: #f0f4f9; --board-line: #cfdae7;
   --staff-line: #7d8ea3; --staff-ink: #0b1829;
+  --oct-0: #0f74d1; --oct-1: #7c3aed; --oct-2: #b7791f; --oct-3: #db2777;
   --fret-edge: #8e99a7; --fret-mid: #b9c2cd; --fret-hi: #ffffff; --fret-shadow: rgba(40,60,90,.14); --nut: #cfc6b4; --string: #7d8fa5;
   --marker: #e1e8f1; --pearl-op: 1; --pearl-stroke: rgba(40,60,90,.18); --out: rgba(243,246,250,.78); --dot-text: #ffffff;
   --open-bg: #e3ecf7; --open-line: #b9cbe0;
@@ -53,6 +54,7 @@
   --err: #f87171; --err-soft: rgba(248,113,113,.14);
   --board: #07111e; --board-edge: #0c1b30; --board-line: #1b3049;
   --staff-line: #5f7593; --staff-ink: #e6eef8;
+  --oct-0: #5cc8f5; --oct-1: #a78bfa; --oct-2: #fbbf24; --oct-3: #f472b6;
   --fret-edge: #3b4757; --fret-mid: #7f8b9a; --fret-hi: #d3dbe5; --fret-shadow: rgba(0,0,0,.55); --nut: #b9b09e; --string: #5b7190;
   --marker: #14263c; --pearl-op: .82; --pearl-stroke: rgba(0,0,0,.4); --out: rgba(4,10,20,.72); --dot-text: #04121f;
   --open-bg: #13294a; --open-line: #28497a;
@@ -152,6 +154,12 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 .mod .s .new { font-size: 14px; font-weight: 700; color: var(--accent); }
 .soon { font-size: 13px; color: var(--faint); margin: 14px 4px 0; }
 
+.mod.alt { background: transparent; box-shadow: none; border-style: dashed; }
+.explore { display: grid; gap: 14px; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 14px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+
 /* ===================== Config ===================== */
 .page-head { display: flex; align-items: center; gap: 12px; padding: 16px 0 14px; }
 .page-head h2 { margin: 0; }
@@ -195,6 +203,9 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 @media (hover: hover) { .fb .hit:hover { fill: var(--accent-soft); } }
 .fb .dot { fill: var(--accent); pointer-events: none; transform-box: fill-box; transform-origin: center; }
 .fb .dot.ok { fill: var(--ok); }
+.fb .link { stroke: var(--accent); stroke-width: 2.5; stroke-dasharray: 5 5; stroke-linecap: round; opacity: .75; pointer-events: none; }
+.fb .link.ok { stroke: var(--ok); stroke-dasharray: none; }
+.fb .link.shape { stroke: var(--muted); stroke-dasharray: none; opacity: .55; }
 .fb .dot.err { fill: var(--err); }
 .fb .dot.pop { animation: pop .32s cubic-bezier(.3,1.6,.5,1); }
 .fb .dot.shake { animation: shake .36s ease-in-out; }
@@ -341,6 +352,10 @@ body.in-quiz .topbar { display: none; }
         <div class="seg num" id="homeRange"></div>
       </div>
       <div class="row">
+        <span>Zona</span>
+        <div class="seg num" id="homeZones"></div>
+      </div>
+      <div class="row">
         <span>Sessió</span>
         <div class="seg num" data-key="sessionSize" data-type="num">
           <button data-val="10">10</button><button data-val="20">20</button><button data-val="50">50</button><button data-val="0">Lliure</button>
@@ -350,7 +365,6 @@ body.in-quiz .topbar { display: none; }
     </div>
 
     <div class="modules" id="modules"></div>
-    <p class="soon">Properament: notació i connexions del màstil.</p>
   </section>
 
   <!-- ============ CONFIGURACIÓ ============ -->
@@ -383,6 +397,8 @@ body.in-quiz .topbar { display: none; }
           <label>al <select id="fretMax" aria-label="Últim trast"></select></label>
         </div>
         <div class="seg num" id="cfgRange"></div>
+        <p class="small">Zones, per conquerir el màstil per blocs:</p>
+        <div class="seg num" id="cfgZones"></div>
       </div>
 
       <div class="card">
@@ -427,6 +443,26 @@ body.in-quiz .topbar { display: none; }
           <button data-val="10">10 preguntes</button><button data-val="20">20</button><button data-val="50">50</button><button data-val="0">Lliure</button>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ MAPA DE CONNEXIONS ============ -->
+  <section id="view-explore" hidden>
+    <div class="page-head">
+      <button class="icon-btn" data-go="home" aria-label="Tornar a l'inici">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <h2>Mapa de connexions</h2>
+    </div>
+    <div class="card explore">
+      <div class="seg num" id="explorePcs"></div>
+      <div class="board-wrap" id="exploreBoard"></div>
+      <p class="board-hint" hidden>Llisca per veure més trasts</p>
+      <div class="legend" id="exploreLegend"></div>
+      <p class="small">Cada color és una octava. Les línies marquen les formes d'octava: 2 cordes amunt i 2 trasts, 3 cordes amunt i 3 trasts enrere, o 12 trasts a la mateixa corda. Toca un punt per escoltar-lo.</p>
+    </div>
+    <div class="actions" style="margin-top:14px">
+      <button class="btn primary" data-start="m6">Practica les octaves</button>
     </div>
   </section>
 
@@ -537,6 +573,13 @@ function ledgerSteps(step) {
   for (let s = STAFF_TOP + 2; s <= step; s += 2) out.push(s);
   return out;
 }
+// Formes d'octava entre dues posicions (a → b una octava amunt):
+// 2 cordes amunt + 2 trasts, 3 cordes amunt − 3 trasts, o mateixa corda + 12 trasts
+function isOctaveShape(a, b) {
+  const si = id => STRINGS.findIndex(x => x.id === id);
+  const ds = si(b.s) - si(a.s), df = b.f - a.f;
+  return (ds === 2 && df === 2) || (ds === 3 && df === -3) || (ds === 0 && df === 12);
+}
 // ==END THEORY==
 
 function selfTest() {
@@ -576,6 +619,13 @@ function selfTest() {
     if (w.sci !== sci || w.step !== step || l.join() !== led.join())
       errors.push(`pentagrama ${m}/${sp}: ${w.sci} step ${w.step} [${l}], esperat ${sci} step ${step} [${led}]`);
   }
+  // Formes d'octava (exemples del CLAUDE.md) i una que no ho és
+  const shapes = [[{ s: 'E', f: 0 }, { s: 'D', f: 2 }, true], [{ s: 'E', f: 5 }, { s: 'G', f: 2 }, true],
+                  [{ s: 'A', f: 3 }, { s: 'A', f: 15 }, true], [{ s: 'E', f: 5 }, { s: 'A', f: 12 }, false]];
+  for (const [a, b, exp] of shapes) {
+    const octave = midiAt(b.s, b.f) - midiAt(a.s, a.f) === 12;
+    if (isOctaveShape(a, b) !== exp || (exp && !octave)) errors.push(`forma d'octava ${a.s}${a.f}→${b.s}${b.f}`);
+  }
   if (errors.length) console.error('[Bass Lab] Autotest amb errors:\n' + errors.join('\n'));
   else console.info('[Bass Lab] Autotest OK: cordes a l\'aire, trast 5, trast 12, freqüències, noms i pentagrama.');
   return errors;
@@ -599,6 +649,7 @@ const DEFAULT_CFG = {
   sound: true, sessionSize: 20, allPositions: false, theme: 'dark',
 };
 const RANGE_PRESETS = [[0, 5], [0, 12], [0, 20]];
+const ZONE_PRESETS = [[0, 4], [5, 9], [10, 15], [12, 20]]; // mòdul 7
 const ACC_LABEL = { natural: 'només notes naturals', sharp: 'amb sostinguts', flat: 'amb bemolls', both: 'amb sostinguts i bemolls' };
 const NOT_LABEL = { latin: 'notació llatina', english: 'notació anglesa', mixed: 'notació barrejada' };
 
@@ -737,7 +788,7 @@ const DOUBLE_MARKERS = [12, 24];
 
 // opts: { dots:[{s,f,cls,label}], onTap(s,f), focus:fret }
 function renderFretboard(host, opts = {}) {
-  const { dots = [], onTap = null, focus = null } = opts;
+  const { dots = [], links = [], onTap = null, focus = null } = opts;
   host._fb = opts;
   const strs = instrumentStrings(cfg.strings).slice().reverse(); // aguda a dalt, greu a baix
   const active = new Set(activeStringIds());
@@ -834,6 +885,15 @@ function renderFretboard(host, opts = {}) {
       }
     });
   }
+  // Connexions entre posicions (formes d'octava)
+  for (const l of links) {
+    const ya = yOf(l.a.s), yb = yOf(l.b.s);
+    if ([ya, yb].some(v => v == null || isNaN(v)) || [l.a.f, l.b.f].some(f => f < from || f > to)) continue;
+    // A la mateixa corda, un arc per sobre perquè la línia no quedi amagada sota la corda
+    svg += l.a.s === l.b.s
+      ? `<path class="link ${l.cls || ''}" fill="none" d="M${cx(l.a.f)},${ya} Q${(cx(l.a.f) + cx(l.b.f)) / 2},${ya - gap * 0.9} ${cx(l.b.f)},${yb}"/>`
+      : `<line class="link ${l.cls || ''}" x1="${cx(l.a.f)}" y1="${ya}" x2="${cx(l.b.f)}" y2="${yb}"/>`;
+  }
   // Punts
   const r = Math.min(fw, gap) * 0.36;
   for (const d of dots) {
@@ -841,7 +901,7 @@ function renderFretboard(host, opts = {}) {
     if (y == null || isNaN(y) || d.f < from || d.f > to) continue;
     if (d.cls === 'target') svg += `<circle class="ring" cx="${x}" cy="${y}" r="${r}"/>`;
     const glow = d.cls === 'target' || d.cls === 'reveal' ? ` filter="url(#${glowId})"` : '';
-    svg += `<circle class="dot ${d.cls || ''} ${d.anim || ''}" cx="${x}" cy="${y}" r="${r}"${glow}/>`;
+    svg += `<circle class="dot ${d.cls || ''} ${d.anim || ''}" cx="${x}" cy="${y}" r="${r}"${glow}${d.fill ? ` style="fill:${d.fill}"` : ''}/>`;
     d.anim = null; // l'animació només es fa quan el punt apareix, no en redibuixar
     if (d.label) {
       const fs = d.label.length >= 4 ? 10 : d.label.length === 3 ? 11.5 : 13;
@@ -1100,6 +1160,82 @@ const MODULES = {
     failLabel(key) { return MODULES.m3.failLabel(key); },
     failDots(key) { return MODULES.m3.failDots(key); },
   },
+
+  m5: {
+    title: 'Notació', desc: 'Tradueixes noms de nota entre la notació llatina i l\'anglesa.',
+    board: false,
+    candidates() {
+      const sps = cfg.accidentals === 'flat' ? ['flat'] : cfg.accidentals === 'both' ? ['sharp', 'flat'] : ['sharp'];
+      const out = [];
+      for (const pc of ALL_PCS) {
+        if (!allowedPc(pc)) continue;
+        for (const sp of isNatural(pc) ? ['sharp'] : sps)
+          for (const dir of ['la2en', 'en2la']) out.push({ pc, sp, dir, key: `m5|${dir}|${spell(pc, sp, 'english')}` });
+      }
+      return out;
+    },
+    render(q) {
+      const { pc, sp, dir } = q.item;
+      const from = dir === 'la2en' ? 'latin' : 'english', to = dir === 'la2en' ? 'english' : 'latin';
+      const name = spell(pc, sp, from), answer = spell(pc, sp, to);
+      promptEl.innerHTML = `<div class="ask">${to === 'english' ? 'En notació anglesa' : 'En notació llatina'}</div><div class="big">${name}</div>`;
+      q.notation = to; // els botons surten en la notació de destí
+      pcButtons(q, pc, ok => resolve(ok, 28 + ((pc - 4 + 12) % 12), ok ? `Correcte: ${name} = ${answer}` : `${name} = ${answer}`));
+    },
+    failLabel(key) {
+      const [, dir, en] = key.split('|');
+      const pc = PC_SHARP.includes(en) ? PC_SHARP.indexOf(en) : PC_FLAT.indexOf(en);
+      const sp = PC_SHARP.includes(en) ? 'sharp' : 'flat';
+      return dir === 'la2en' ? [spell(pc, sp, 'latin'), `= ${en}`] : [en, `= ${spell(pc, sp, 'latin')}`];
+    },
+    failDots() { return []; },
+  },
+
+  m6: {
+    title: 'Connexions', desc: 'Veus una nota al màstil i la trobes una octava amunt o avall en una altra zona.',
+    candidates() {
+      const pos = positionsInRange();
+      return pos.filter(p => allowedPc(pcOf(p.midi)) && pos.some(o => Math.abs(o.midi - p.midi) === 12))
+        .map(p => ({ ...p, key: `m6|${p.s}${p.f}` }));
+    },
+    render(q) {
+      const { s, f, midi } = q.item, pc = pcOf(midi);
+      const name = pcShort(pc, q.notation, q.spelling);
+      const targets = positionsInRange().filter(p => Math.abs(p.midi - midi) === 12);
+      const dots = [{ s, f, cls: 'target', label: name }], links = [];
+      promptEl.innerHTML = `<h2>Troba l'octava</h2><div class="sub">La mateixa nota una octava amunt o avall, en una altra zona</div>`;
+      answersEl.className = 'answers'; answersEl.innerHTML = ''; answersEl.onclick = null;
+      const draw = (focus = null) => {
+        const x = boardEl.scrollLeft;
+        renderFretboard(boardEl, { dots, links, onTap, focus });
+        if (focus == null) boardEl.scrollLeft = x;
+        updateFade(boardEl);
+      };
+      function onTap(ts, tf) {
+        if (q.done || (ts === s && tf === f)) return;
+        const m = midiAt(ts, tf);
+        dots[0].cls = 'reveal';
+        if (Math.abs(m - midi) === 12) {
+          dots.push({ s: ts, f: tf, cls: 'ok', anim: 'pop', label: name });
+          links.push({ a: { s, f }, b: { s: ts, f: tf }, cls: 'ok' });
+          draw();
+          resolve(true, m, `Correcte: una octava ${m > midi ? 'amunt' : 'avall'} (${posText(ts, tf, true)})`);
+          return;
+        }
+        const tapped = pcShort(pcOf(m), q.notation, q.spelling);
+        dots.push({ s: ts, f: tf, cls: 'err', anim: 'shake', label: tapped });
+        for (const t of targets) { dots.push({ s: t.s, f: t.f, cls: 'reveal', label: name }); links.push({ a: { s, f }, b: t }); }
+        draw();
+        const why = m === midi ? 'És la mateixa altura, no una octava.'
+          : pcOf(m) === pc ? 'És la mateixa nota, però a més d\'una octava.'
+          : `Has tocat ${tapped}.`;
+        resolve(false, nearest(targets, ts, tf).midi, `${why} Les octaves són a les posicions marcades.`);
+      }
+      draw(f);
+    },
+    failLabel(key) { return MODULES.m1.failLabel(key.replace('m6', 'm1')); },
+    failDots(key) { return MODULES.m1.failDots(key.replace('m6', 'm1')); },
+  },
 };
 
 function nearest(targets, s, f) {
@@ -1171,11 +1307,10 @@ function endSession() {
     return `<li><b>${name}</b>${where ? ' ' + where : ''}${n > 1 ? ` (${n} cops)` : ''}</li>`;
   }).join('');
   show('summary');
-  if (fails.length) {
-    const seen = new Set(), dots = [];
-    for (const [k] of fails) for (const d of M.failDots(k)) if (!seen.has(d.s + d.f)) { seen.add(d.s + d.f); dots.push(d); }
-    renderFretboard($('#sumBoard'), { dots });
-  }
+  const seen = new Set(), dots = [];
+  for (const [k] of fails) for (const d of M.failDots(k)) if (!seen.has(d.s + d.f)) { seen.add(d.s + d.f); dots.push(d); }
+  $('#sumBoard').parentElement.hidden = !dots.length;
+  if (dots.length) renderFretboard($('#sumBoard'), { dots });
 }
 
 function updateQuizBar() {
@@ -1197,15 +1332,16 @@ function setFeedback(cls, text) {
 const fmtSec = ms => (ms / 1000).toFixed(1).replace('.', ',') + ' s';
 
 function show(view) {
-  for (const v of ['home', 'config', 'quiz', 'summary']) $('#view-' + v).hidden = v !== view;
+  for (const v of ['home', 'config', 'explore', 'quiz', 'summary']) $('#view-' + v).hidden = v !== view;
   document.body.classList.toggle('in-quiz', view === 'quiz');
   if (view === 'home') renderHome();
   if (view === 'config') syncConfig();
+  if (view === 'explore') renderExplore();
   window.scrollTo(0, 0);
 }
 
-function rangeChips() {
-  return RANGE_PRESETS.map(([a, b]) =>
+function rangeChips(presets = RANGE_PRESETS) {
+  return presets.map(([a, b]) =>
     `<button data-range="${a}-${b}" class="${cfg.fretMin === a && cfg.fretMax === b ? 'on' : ''}">${a}–${b}</button>`).join('');
 }
 
@@ -1228,8 +1364,9 @@ function syncSegs() {
 
 function renderHome() {
   syncSegs();
-  const isPreset = RANGE_PRESETS.some(([a, b]) => cfg.fretMin === a && cfg.fretMax === b);
+  const isPreset = RANGE_PRESETS.concat(ZONE_PRESETS).some(([a, b]) => cfg.fretMin === a && cfg.fretMax === b);
   $('#homeRange').innerHTML = rangeChips() + (isPreset ? '' : `<button class="on" data-go="config">${cfg.fretMin}–${cfg.fretMax}</button>`);
+  $('#homeZones').innerHTML = rangeChips(ZONE_PRESETS);
   $('#homeSummary').innerHTML = `Baix de ${cfg.strings} cordes (${activeStringIds().map(stringLabel).join(' ')}), ${ACC_LABEL[cfg.accidentals]}, ${
     NOT_LABEL[cfg.notation]}${cfg.allPositions ? ', totes les posicions' : ''}. <button class="link" data-go="config">Canvia</button>`;
   renderFretboard($('#homeBoard'), {});
@@ -1240,7 +1377,28 @@ function renderHome() {
       ? `<b>${Math.round((st.ok / st.n) * 100)}%</b><small>${fmtSec(st.ms / st.n)} de mitjana</small>`
       : '<span class="new">Comença</span>';
     return `<button class="mod" data-start="${id}"><span class="t">${M.title}</span><span class="d">${M.desc}</span><span class="s">${stat}</span></button>`;
-  }).join('');
+  }).join('') + `<button class="mod alt" data-go="explore"><span class="t">Mapa de connexions</span><span class="d">Tria una nota i mira totes les seves posicions i formes d'octava.</span><span class="s"><span class="new">Obre</span></span></button>`;
+}
+
+let explorePc = 4; // Mi / E
+// Posició més greu de la nota dins el rang (per fer-la sonar en triar-la)
+const lowestMidi = pc => { const p = positionsInRange().filter(x => pcOf(x.midi) === pc).sort((a, b) => a.midi - b.midi)[0]; return p ? p.midi : null; };
+
+function renderExplore() {
+  const notation = cfg.notation === 'english' ? 'english' : 'latin';
+  const pcs = cfg.accidentals === 'natural' ? NATURAL_PCS : ALL_PCS;
+  if (!pcs.includes(explorePc)) explorePc = 4;
+  $('#explorePcs').innerHTML = pcs.map(p =>
+    `<button data-explore="${p}" class="${p === explorePc ? 'on' : ''}">${pcLabel(p, notation)}</button>`).join('');
+  const pos = positionsInRange().filter(p => pcOf(p.midi) === explorePc);
+  const octave = p => Math.floor(p.midi / 12) - 1;
+  const octs = [...new Set(pos.map(octave))].sort((a, b) => a - b);
+  const dots = pos.map(p => ({ s: p.s, f: p.f, fill: `var(--oct-${octave(p) % 4})`, label: pcShort(explorePc, notation) }));
+  const links = [];
+  for (const a of pos) for (const b of pos) if (b.midi - a.midi === 12 && isOctaveShape(a, b)) links.push({ a, b, cls: 'shape' });
+  renderFretboard($('#exploreBoard'), { dots, links, onTap: (s, f) => playMidi(midiAt(s, f)) });
+  const en = spell(explorePc, cfg.accidentals === 'flat' ? 'flat' : 'sharp', 'english');
+  $('#exploreLegend').innerHTML = octs.map(o => `<span><i style="background:var(--oct-${o % 4})"></i>${en}${o}</span>`).join('');
 }
 
 function syncConfig() {
@@ -1251,6 +1409,7 @@ function syncConfig() {
   $('#fretMin').innerHTML = opts(cfg.fretMin);
   $('#fretMax').innerHTML = opts(cfg.fretMax);
   $('#cfgRange').innerHTML = rangeChips();
+  $('#cfgZones').innerHTML = rangeChips(ZONE_PRESETS);
   renderFretboard($('#previewBoard'), {});
 }
 
@@ -1267,6 +1426,7 @@ function afterCfg() {
   applyTheme();
   if (!$('#view-config').hidden) syncConfig();
   if (!$('#view-home').hidden) renderHome();
+  if (!$('#view-explore').hidden) renderExplore();
   syncSegs();
 }
 
@@ -1290,6 +1450,9 @@ document.addEventListener('click', e => {
     cfg[seg.dataset.key] = t === 'num' ? +v : t === 'bool' ? v === '1' : v;
     afterCfg(); return;
   }
+
+  const ex = e.target.closest('[data-explore]');
+  if (ex) { explorePc = +ex.dataset.explore; renderExplore(); playMidi(lowestMidi(explorePc)); return; }
 
   const rng = e.target.closest('[data-range]');
   if (rng) { [cfg.fretMin, cfg.fretMax] = rng.dataset.range.split('-').map(Number); afterCfg(); return; }
@@ -1324,7 +1487,7 @@ document.addEventListener('keydown', e => {
 let resizeTimer = null;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => ['board', 'previewBoard', 'homeBoard', 'sumBoard'].forEach(id => redraw($('#' + id))), 150);
+  resizeTimer = setTimeout(() => ['board', 'previewBoard', 'homeBoard', 'sumBoard', 'exploreBoard'].forEach(id => redraw($('#' + id))), 150);
 });
 
 selfTest();
