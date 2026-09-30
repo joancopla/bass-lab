@@ -33,6 +33,10 @@ Idioma de la interfície: **català**.
 6. **Connexions del màstil**: en triar una nota, es mostren totes les seves posicions alhora i es remarquen les formes d'octava. Exercici: es marca una posició i l'usuari ha de trobar la mateixa nota una octava amunt o avall en una altra zona.
 7. **Zones**: qualsevol exercici es pot limitar a una zona concreta (trasts 0–4, 5–9, 10–15, 12–20) per conquerir el màstil per blocs.
 
+### Eines sense preguntes
+- **Mapa de connexions**: tria una nota i mostra totes les seves posicions, amb colors per octava i les formes d'octava.
+- **Toca lliure**: tot el mànec (fins al trast 20 o més); en tocar una posició sona la nota i es mostra el nom en les dues notacions, l'altura real, la freqüència i la nota escrita al pentagrama.
+
 ## Configuració
 - Baix de **4 cordes** (E A D G) o **5 cordes** (B E A D G), en afinació estàndard.
 - Rang de trasts personalitzable (per exemple 0–5, 0–12, 0–20) i presets de zona (mòdul 7).

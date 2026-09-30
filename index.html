@@ -182,6 +182,15 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
   .history li { grid-template-columns: 92px 1fr auto; }
 }
 
+/* ===================== Toca lliure ===================== */
+.play-top { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.play-now { display: grid; align-content: center; gap: 6px; min-height: 150px; }
+.play-name { display: flex; align-items: baseline; gap: 14px; }
+.play-name .big { font-family: var(--font-display); font-weight: 700; font-size: clamp(48px, 10vw, 68px); line-height: 1; color: var(--accent); }
+.play-name .alt { font-family: var(--font-display); font-weight: 600; font-size: 28px; color: var(--muted); }
+.play-staff { margin-bottom: 0; }
+@media (max-width: 640px) { .play-top { grid-template-columns: 1fr; } .play-now { min-height: 0; } }
+
 /* ===================== Config ===================== */
 .page-head { display: flex; align-items: center; gap: 12px; padding: 16px 0 14px; }
 .page-head h2 { margin: 0; }
@@ -500,6 +509,27 @@ body.in-quiz .topbar { display: none; }
     </div>
     <div class="actions" style="margin-top:14px">
       <button class="btn danger" id="btnReset">Reinicia les estadístiques</button>
+    </div>
+  </section>
+
+  <!-- ============ TOCA LLIURE ============ -->
+  <section id="view-play" hidden>
+    <div class="page-head">
+      <button class="icon-btn" data-go="home" aria-label="Tornar a l'inici">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <h2>Toca lliure</h2>
+    </div>
+    <div class="play-top">
+      <div class="card play-now" aria-live="polite">
+        <div class="play-name"><span class="big" id="playName">—</span><span class="alt" id="playAlt"></span></div>
+        <p class="small" id="playInfo">Toca qualsevol posició del màstil per escoltar-la.</p>
+      </div>
+      <div class="card staff-card play-staff"><div id="playStaff"></div></div>
+    </div>
+    <div class="card board-card">
+      <div class="board-wrap" id="playBoard"></div>
+      <p class="board-hint" hidden>Llisca per veure més trasts</p>
     </div>
   </section>
 
@@ -830,8 +860,8 @@ document.addEventListener('pointerdown', () => { if (cfg.sound) ensureAudio(); }
 // Una línia de retard fa de corda: cada volta perd una mica d'energia i d'aguts.
 // La longitud total del bucle (enter + 0,5 del filtre de mitjana + retard fraccionari
 // de l'allpass) és exactament sr/f, de manera que la nota surt afinada.
-const PLUCK_POS = 0.22;   // on pincem la corda (fracció des del pont)
-const PICKUP_POS = 0.16;  // on és la pastilla: dona el color de baix elèctric
+const PLUCK_POS = 0.38;   // on pincem la corda (fracció des del pont): a prop del mànec, so rodó
+const PICKUP_POS = 0.27;  // on és la pastilla: posició de mànec, més greus i menys nasal
 const ksCache = new Map();
 
 function pluckedString(sr, f, dur) {
@@ -849,11 +879,11 @@ function pluckedString(sr, f, dur) {
   const apex = Math.max(1, Math.round(PLUCK_POS * N));
   let mean = 0;
   for (let i = 0; i < N; i++) {
-    e[i] = (i < apex ? i / apex : (N - i) / (N - apex)) + 0.18 * (Math.random() * 2 - 1);
+    e[i] = (i < apex ? i / apex : (N - i) / (N - apex)) + 0.06 * (Math.random() * 2 - 1);
     mean += e[i];
   }
   mean /= N;
-  const soft = Math.exp(-2 * Math.PI * 1800 / sr);
+  const soft = Math.exp(-2 * Math.PI * 950 / sr); // dit tou: menys aguts a l'atac
   let lp = 0;
   for (let i = 0; i < N; i++) { lp = (1 - soft) * (e[i] - mean) + soft * lp; e[i] = lp; }
 
@@ -910,9 +940,9 @@ function bassVoice(c, dest, f, t) {
   const src = c.createBufferSource(); src.buffer = buf;
   // To: brillant a l'atac i més rodó després, amb una mica de cos als greus
   const tone = c.createBiquadFilter(); tone.type = 'lowpass'; tone.Q.value = 0.7;
-  tone.frequency.setValueAtTime(3200, t);
-  tone.frequency.exponentialRampToValueAtTime(900, t + 0.6);
-  const body = c.createBiquadFilter(); body.type = 'peaking'; body.frequency.value = 180; body.Q.value = 0.9; body.gain.value = 3;
+  tone.frequency.setValueAtTime(1900, t);
+  tone.frequency.exponentialRampToValueAtTime(620, t + 0.5);
+  const body = c.createBiquadFilter(); body.type = 'peaking'; body.frequency.value = 140; body.Q.value = 0.8; body.gain.value = 4;
   const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 28; hp.Q.value = 0.7;
   const out = c.createGain(); out.gain.value = 0.75;
   src.connect(hp).connect(body).connect(tone).connect(out).connect(dest);
@@ -1108,9 +1138,9 @@ function staffStepRange() {
 const CLEF_PATH = 'M0.1,0 C0,-1.45 2.55,-1.75 2.65,-0.1 C2.72,1.4 1.5,2.5 0,2.95 L-0.06,2.72 C1.1,2.25 1.98,1.3 1.95,-0.1 C1.9,-1.25 0.6,-1.25 0.5,-0.4 Z';
 
 // opts: { midi (altura real), spelling, cls: ''|'ok'|'err', label, anim }
-function renderStaff(host, { midi, spelling, cls = '', label = '', anim = '' }) {
+function renderStaff(host, { midi, spelling, cls = '', label = '', anim = '', range = null }) {
   const sp = 10, half = sp / 2;
-  const [lo, hi] = staffStepRange();
+  const [lo, hi] = range || staffStepRange();
   const top = Math.max(hi + 3, STAFF_TOP + 4), bot = Math.min(lo - 3, STAFF_BOTTOM - 4);
   const W = 200, H = (top - bot) * half;
   const y = st => (top - st) * half;
@@ -1496,12 +1526,13 @@ function setFeedback(cls, text) {
 const fmtSec = ms => (ms / 1000).toFixed(1).replace('.', ',') + ' s';
 
 function show(view) {
-  for (const v of ['home', 'config', 'explore', 'stats', 'quiz', 'summary']) $('#view-' + v).hidden = v !== view;
+  for (const v of ['home', 'config', 'explore', 'stats', 'play', 'quiz', 'summary']) $('#view-' + v).hidden = v !== view;
   document.body.classList.toggle('in-quiz', view === 'quiz');
   if (view === 'home') renderHome();
   if (view === 'config') syncConfig();
   if (view === 'explore') renderExplore();
   if (view === 'stats') renderStats();
+  if (view === 'play') renderPlay();
   window.scrollTo(0, 0);
 }
 
@@ -1542,7 +1573,8 @@ function renderHome() {
       ? `<b>${Math.round((st.ok / st.n) * 100)}%</b><small>${fmtSec(st.ms / st.n)} de mitjana</small>`
       : '<span class="new">Comença</span>';
     return `<button class="mod" data-start="${id}"><span class="t">${M.title}</span><span class="d">${M.desc}</span><span class="s">${stat}</span></button>`;
-  }).join('') + `<button class="mod alt" data-go="explore"><span class="t">Mapa de connexions</span><span class="d">Tria una nota i mira totes les seves posicions i formes d'octava.</span><span class="s"><span class="new">Obre</span></span></button>`;
+  }).join('') + `<button class="mod alt" data-go="explore"><span class="t">Mapa de connexions</span><span class="d">Tria una nota i mira totes les seves posicions i formes d'octava.</span><span class="s"><span class="new">Obre</span></span></button>`
+    + `<button class="mod alt" data-go="play"><span class="t">Toca lliure</span><span class="d">Toca qualsevol posició i escolta com sona, amb el nom i la partitura.</span><span class="s"><span class="new">Obre</span></span></button>`;
 }
 
 let explorePc = 4; // Mi / E
@@ -1619,6 +1651,38 @@ function resetStats() {
   stats = emptyStats(); saveStats();
   renderStats();
   toast('Estadístiques reiniciades.');
+}
+
+// Toca lliure: tot el màstil i totes les cordes, sense preguntes
+let playLast = null;
+function renderPlay() {
+  const maxF = Math.min(MAX_FRET, Math.max(20, cfg.fretMax)); // tot el mànec, no només el rang d'exercici
+  const dots = playLast ? [{ ...playLast, cls: 'reveal', anim: playLast.anim, label: playLast.label }] : [];
+  const x = $('#playBoard').scrollLeft;
+  renderFretboard($('#playBoard'), { dots, range: [0, maxF], onTap: playTap });
+  if (playLast) { $('#playBoard').scrollLeft = x; updateFade($('#playBoard')); }
+  if (playLast) playLast.anim = null;
+  // Pentagrama amb el rang de tot el màstil visible
+  let lo = STAFF_BOTTOM, hi = STAFF_TOP;
+  for (const st of instrumentStrings(cfg.strings)) for (const f of [0, maxF]) {
+    const w = writtenInfo(midiAt(st.id, f), 'sharp').step; lo = Math.min(lo, w); hi = Math.max(hi, w);
+  }
+  const midi = playLast ? midiAt(playLast.s, playLast.f) : null;
+  if (midi == null) { $('#playStaff').innerHTML = ''; return; }
+  const pc = pcOf(midi), sp = isNatural(pc) ? 'sharp' : cfg.accidentals === 'flat' ? 'flat' : 'sharp';
+  renderStaff($('#playStaff'), { midi, spelling: sp, range: [lo, hi] });
+}
+function playTap(s, f) {
+  const midi = midiAt(s, f), pc = pcOf(midi);
+  const sp = isNatural(pc) ? 'sharp' : cfg.accidentals === 'flat' ? 'flat' : 'sharp';
+  playMidi(midi);
+  playLast = { s, f, anim: 'pop', label: spell(pc, sp, cfg.notation === 'english' ? 'english' : 'latin') };
+  const both = cfg.accidentals === 'both' && !isNatural(pc);
+  $('#playName').textContent = both ? `${spell(pc, 'sharp', 'latin')}/${spell(pc, 'flat', 'latin')}` : spell(pc, sp, 'latin');
+  $('#playAlt').textContent = both ? `${spell(pc, 'sharp', 'english')}/${spell(pc, 'flat', 'english')}` : spell(pc, sp, 'english');
+  const hz = freq(midi).toFixed(1).replace('.', ',');
+  $('#playInfo').textContent = `${posText(s, f)}. Sona ${sciName(midi, sp)} (${hz} Hz) i s'escriu ${writtenInfo(midi, sp).sci}.`;
+  renderPlay();
 }
 
 function syncConfig() {
@@ -1708,7 +1772,7 @@ document.addEventListener('keydown', e => {
 let resizeTimer = null;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => ['board', 'previewBoard', 'homeBoard', 'sumBoard', 'exploreBoard', 'heatBoard'].forEach(id => redraw($('#' + id))), 150);
+  resizeTimer = setTimeout(() => ['board', 'previewBoard', 'homeBoard', 'sumBoard', 'exploreBoard', 'heatBoard', 'playBoard'].forEach(id => redraw($('#' + id))), 150);
 });
 
 selfTest();
