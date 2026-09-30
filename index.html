@@ -19,23 +19,24 @@
 /* Tema clar (opcional) */
 :root {
   color-scheme: light;
-  --bg: #eef3f9; --bg-top: #f7f9fc; --bg-glow: rgba(26,111,240,.08); --bg-glow-2: rgba(26,111,240,.04);
+  --bg: #e8eef6; --bg-top: #f8fafd; --bg-glow: rgba(26,111,240,.13); --bg-glow-2: rgba(92,200,245,.12);
   --card: #fbfcfe; --card-top: #ffffff; --card-2: #f4f7fb; --edge-hi: rgba(255,255,255,.9);
   --line: #dbe4ef; --line-strong: #c3d1e1;
   --text: #0b1829; --muted: #5a6a7f; --faint: #8a99ac;
-  --accent: #0f74d1; --accent-soft: rgba(15,116,209,.10); --accent-glow: rgba(15,116,209,.35);
+  --accent: #0f74d1; --accent-soft: rgba(15,116,209,.10); --accent-glow: rgba(43,143,232,.55);
   --primary: #1a6ff0; --primary-2: #0f5fd6; --on-primary: #ffffff;
   --primary-edge: rgba(10,50,130,.35); --primary-halo: rgba(31,116,242,.25);
   --ok: #0f9d67; --ok-soft: rgba(15,157,103,.12);
   --err: #d64545; --err-soft: rgba(214,69,69,.12);
-  --board: #fbfcfe; --board-edge: #f0f4f9; --board-line: #cfdae7;
+  /* El màstil és de banús també en el tema clar: hi destaquen els trasts i el nacre */
+  --board: #1b1d24; --board-edge: #0f1015; --board-line: #2a2e38;
   --staff-line: #7d8ea3; --staff-ink: #0b1829;
   --oct-0: #0f74d1; --oct-1: #7c3aed; --oct-2: #b7791f; --oct-3: #db2777;
-  --fret-edge: #8e99a7; --fret-mid: #b9c2cd; --fret-hi: #ffffff; --fret-shadow: rgba(40,60,90,.14); --nut: #cfc6b4; --string: #7d8fa5;
-  --marker: #e1e8f1; --pearl-op: 1; --pearl-stroke: rgba(40,60,90,.18); --out: rgba(243,246,250,.78); --dot-text: #ffffff;
-  --open-bg: #e3ecf7; --open-line: #b9cbe0;
+  --fret-edge: #4d5868; --fret-mid: #909cab; --fret-hi: #e8edf3; --fret-shadow: rgba(0,0,0,.55); --nut: #e2d9c6; --string: #b3bfcd;
+  --marker: #2a2e38; --pearl-op: .9; --pearl-stroke: rgba(0,0,0,.4); --out: rgba(6,9,16,.62); --dot-text: #ffffff;
+  --open-bg: #243249; --open-line: #3a4d6b;
   --r-lg: 18px; --r-md: 12px; --r-sm: 10px;
-  --shadow: 0 1px 2px rgba(10,30,60,.05), 0 8px 24px rgba(10,30,60,.06);
+  --shadow: 0 1px 2px rgba(10,30,60,.06), 0 16px 32px -16px rgba(10,30,60,.28);
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   /* Veu d'instrument: DIN del sistema (Windows: Bahnschrift, Apple: DIN Alternate) */
   --font-display: Bahnschrift, "DIN Alternate", "DIN 2014", "Barlow", system-ui, sans-serif;
@@ -213,6 +214,9 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 .play-name .alt { font-family: var(--font-display); font-weight: 600; font-size: 28px; color: var(--muted); }
 .play-staff { margin-bottom: 0; }
 @media (max-width: 640px) { .play-top { grid-template-columns: 1fr; } .play-now { min-height: 0; } }
+
+.mod[disabled] { opacity: .5; cursor: default; }
+.mod[disabled]:active { transform: none; }
 
 /* ===================== Config ===================== */
 .page-head { display: flex; align-items: center; gap: 12px; padding: 16px 0 14px; }
@@ -1590,7 +1594,68 @@ const MODULES = {
     failLabel(key) { return MODULES.m1.failLabel(key.replace('m6', 'm1')); },
     failDots(key) { return MODULES.m1.failDots(key.replace('m6', 'm1')); },
   },
+
+  // Oïda relativa: sona la nota marcada i després una altra a prop (fins a una quinta)
+  ear: {
+    title: 'Oïda', desc: 'Sona la nota marcada i una altra a prop: troba la segona al màstil.',
+    needsSound: true,
+    candidates() {
+      const pos = positionsInRange().filter(p => allowedPc(pcOf(p.midi)));
+      const mids = new Set(pos.map(p => p.midi));
+      const out = [];
+      for (let iv = -7; iv <= 7; iv++) if (iv && pos.some(p => mids.has(p.midi + iv))) out.push({ iv, key: `ear|${iv > 0 ? '+' : ''}${iv}` });
+      return out;
+    },
+    render(q) {
+      const iv = q.item.iv;
+      const pos = positionsInRange().filter(p => allowedPc(pcOf(p.midi)));
+      const mids = new Set(pos.map(p => p.midi));
+      const refs = pos.filter(p => mids.has(p.midi + iv));
+      const ref = refs[Math.floor(Math.random() * refs.length)];
+      const target = ref.midi + iv;
+      const targets = pos.filter(p => p.midi === target);
+      const nameOf = m => pcShort(pcOf(m), q.notation, q.spelling);
+      const dots = [{ s: ref.s, f: ref.f, cls: 'target', key: 'q', label: nameOf(ref.midi) }];
+      promptEl.innerHTML = `<h2>Escolta i troba-la</h2><div class="sub">Sona la nota marcada i després una altra a prop. <button class="link" id="earReplay">Torna-les a escoltar</button></div>`;
+      answersEl.className = 'answers'; answersEl.innerHTML = ''; answersEl.onclick = null;
+      const draw = () => renderFretboard(boardEl, { dots, onTap, focus: ref.f });
+      const listen = () => {
+        clearTimeout(q.play2);
+        playMidi(ref.midi); vibrate(boardEl, ref.s, ref.f);
+        q.play2 = setTimeout(() => { if (!q.done) playMidi(target); }, 900);
+      };
+      $('#earReplay').onclick = () => { if (!q.done) listen(); };
+      function onTap(s, f) {
+        if (q.done) return;
+        // Tocar la nota de referència la torna a fer sonar
+        if (s === ref.s && f === ref.f) { playMidi(ref.midi); vibrate(boardEl, s, f); return; }
+        clearTimeout(q.play2);
+        const m = midiAt(s, f), tName = nameOf(target);
+        dots[0].cls = 'reveal';
+        if (m === target) {
+          dots.push({ s, f, cls: 'ok', anim: 'pop', label: tName });
+          draw(); vibrate(boardEl, s, f);
+          resolve(true, m, `Correcte: ${tName}, ${intervalName(iv)}`);
+          return;
+        }
+        dots.push({ s, f, cls: 'err', anim: 'shake', label: nameOf(m) });
+        for (const t of targets) dots.push({ s: t.s, f: t.f, cls: 'reveal', label: tName });
+        draw();
+        const near = nearest(targets, s, f);
+        vibrate(boardEl, near.s, near.f);
+        resolve(false, target, `Era ${tName}: ${intervalName(iv)}.`);
+      }
+      draw();
+      q.t0 = performance.now() + 900; // el temps compta des que sona la segona nota
+      listen();
+    },
+    failLabel(key) { return [intervalName(+key.split('|')[1]), '']; },
+    failDots() { return []; },
+  },
 };
+
+const INTERVALS = ['', 'segona menor', 'segona major', 'tercera menor', 'tercera major', 'quarta justa', 'tritò', 'quinta justa'];
+const intervalName = iv => `${INTERVALS[Math.abs(iv)]} ${iv > 0 ? 'amunt' : 'avall'}`;
 
 function nearest(targets, s, f) {
   const si = id => STRINGS.findIndex(x => x.id === id);
@@ -1603,9 +1668,31 @@ function nearest(targets, s, f) {
    ===================================================================== */
 let sess = null;
 
+// Repàs d'errors: ítems amb pes alt (errors no compensats) que encaixen amb la configuració
+const REVIEW_W = 1.5;
+function reviewCandidates() {
+  const out = [];
+  for (const [mid, M] of Object.entries(MODULES)) {
+    if (M.needsSound && !cfg.sound) continue;
+    for (const c of M.candidates()) {
+      const it = stats.items[c.key];
+      if (it && it.w >= REVIEW_W) out.push({ ...c, mid });
+    }
+  }
+  return out;
+}
+const sessTitle = id => (id === 'rev' ? "Repàs d'errors" : MODULES[id] ? MODULES[id].title : id);
+const moduleOfKey = key => MODULES[key.split('|')[0]];
+
 function startSession(mid) {
-  if (!MODULES[mid].candidates().length) {
-    toast('No hi ha cap nota amb aquesta configuració. Revisa el rang, les cordes o les alteracions.');
+  if (mid !== 'rev' && MODULES[mid].needsSound && !cfg.sound) {
+    toast("Aquest exercici necessita el so. Activa'l amb la icona de l'altaveu.");
+    return;
+  }
+  const cands = mid === 'rev' ? reviewCandidates() : MODULES[mid].candidates();
+  if (!cands.length) {
+    toast(mid === 'rev' ? 'Ara mateix no tens errors per repassar amb aquesta configuració.'
+      : 'No hi ha cap nota amb aquesta configuració. Revisa el rang, les cordes o les alteracions.');
     return;
   }
   disarmExit();
@@ -1628,11 +1715,15 @@ function nextQuestion() {
     e.classList.remove('leaving', 'entering');
     if (!reduceMotion()) { void e.offsetWidth; e.classList.add('entering'); }
   });
+  if (sess.q) clearTimeout(sess.q.play2);
   if (sess.size && sess.count >= sess.size) { endSession(); return; }
-  const M = MODULES[sess.mid];
-  const item = pickWeighted(M.candidates(), sess.lastKey);
+  // Al repàs, la llista s'escurça a mesura que els errors es corregeixen
+  const cands = sess.mid === 'rev' ? reviewCandidates() : MODULES[sess.mid].candidates();
+  if (!cands.length) { endSession(); return; }
+  const item = pickWeighted(cands, sess.lastKey);
+  const qmid = item.mid || sess.mid, M = MODULES[qmid];
   sess.lastKey = item.key;
-  sess.q = { item, notation: questionNotation(), spelling: questionSpelling(), t0: performance.now(), done: false, units: 1 };
+  sess.q = { item, mid: qmid, notation: questionNotation(), spelling: questionSpelling(), t0: performance.now(), done: false, units: 1 };
   setFeedback('', '');
   $('#btnNext').hidden = true;
   $('#staffCard').hidden = !M.staff;
@@ -1646,7 +1737,7 @@ function resolve(correct, midi, text) {
   if (q.done) return;
   q.done = true;
   const ms = (performance.now() - q.t0) / (q.units || 1);
-  recordAnswer(sess.mid, q.item.key, correct, ms);
+  recordAnswer(q.mid, q.item.key, correct, ms);
   sess.count++; sess.ms += Math.min(ms, 30000);
   if (correct) sess.ok++; else { sess.ko++; sess.fails[q.item.key] = (sess.fails[q.item.key] || 0) + 1; }
   playMidi(midi);
@@ -1660,23 +1751,23 @@ function resolve(correct, midi, text) {
 
 function endSession() {
   clearTimeout(sess.timer);
+  if (sess.q) clearTimeout(sess.q.play2);
   if (!sess.count) { sess = null; show('home'); return; }
   stats.sessions.push({ d: Date.now(), m: sess.mid, n: sess.count, ok: sess.ok, ms: Math.round(sess.ms / sess.count) });
   if (stats.sessions.length > 500) stats.sessions.splice(0, stats.sessions.length - 500);
   saveStats();
 
-  const M = MODULES[sess.mid];
-  $('#sumTitle').innerHTML = `<small>${M.title}</small>${sess.ok} de ${sess.count} correctes`;
+  $('#sumTitle').innerHTML = `<small>${sessTitle(sess.mid)}</small>${sess.ok} de ${sess.count} correctes`;
   const pctFinal = Math.round((sess.ok / sess.count) * 100), msFinal = sess.ms / sess.count;
   $('#sumPct').textContent = '0%'; $('#sumTime').textContent = fmtSec(0);
   const fails = Object.entries(sess.fails).sort((a, b) => b[1] - a[1]);
   $('#sumFailsBox').hidden = !fails.length;
   $('#sumFails').innerHTML = fails.slice(0, 8).map(([k, n]) => {
-    const [name, where] = M.failLabel(k);
+    const [name, where] = moduleOfKey(k).failLabel(k);
     return `<li><b>${name}</b>${where ? ' ' + where : ''}${n > 1 ? ` (${n} cops)` : ''}</li>`;
   }).join('');
   const seen = new Set(), dots = [];
-  for (const [k] of fails) for (const d of M.failDots(k)) if (!seen.has(d.s + d.f)) { seen.add(d.s + d.f); dots.push(d); }
+  for (const [k] of fails) for (const d of moduleOfKey(k).failDots(k)) if (!seen.has(d.s + d.f)) { seen.add(d.s + d.f); dots.push(d); }
   show('summary', () => {
     $('#sumBoard').parentElement.hidden = !dots.length;
     countUp($('#sumPct'), pctFinal, v => Math.round(v) + '%');
@@ -1717,8 +1808,8 @@ function revealFails(dots) {
 }
 
 function updateQuizBar() {
-  const q = sess.q, M = MODULES[sess.mid];
-  $('#quizModule').textContent = M.title;
+  const q = sess.q;
+  $('#quizModule').textContent = sess.mid === 'rev' && q ? `Repàs d'errors: ${MODULES[q.mid].title}` : sessTitle(sess.mid);
   const cur = sess.count + (q && !q.done ? 1 : 0);
   $('#quizProgress').textContent = sess.size ? `${Math.max(1, cur)} de ${sess.size}` : `${Math.max(1, cur)} (sessió lliure)`;
   bumpNum($('#scOk'), sess.ok); bumpNum($('#scKo'), sess.ko);
@@ -1840,6 +1931,13 @@ function playDayNote() {
   host._seqs = heroPos.map((p, i) => setTimeout(() => { playMidi(p.midi); vibrate(host, p.s, p.f); }, i * 340));
 }
 
+function reviewRow() {
+  const n = reviewCandidates().length;
+  return `<button class="mod alt" data-start="rev"${n ? '' : ' disabled'}><span class="t">Repàs d'errors</span>`
+    + `<span class="d">Una sessió només amb el que més falles, de tots els mòduls.</span>`
+    + `<span class="s">${n ? `<b>${n}</b><small>per repassar</small>` : '<small>Cap error pendent</small>'}</span></button>`;
+}
+
 function renderHome() {
   syncSegs();
   const isPreset = RANGE_PRESETS.concat(ZONE_PRESETS).some(([a, b]) => cfg.fretMin === a && cfg.fretMax === b);
@@ -1857,7 +1955,7 @@ function renderHome() {
       : '<span class="new">Comença</span>';
     const bar = pct != null ? `<span class="bar"><i style="--p:${pct}%"></i></span>` : '';
     return `<button class="mod" data-start="${id}"><span class="t">${M.title}</span><span class="d">${M.desc}</span><span class="s">${stat}</span>${bar}</button>`;
-  }).join('') + `<button class="mod alt" data-go="explore"><span class="t">Mapa de connexions</span><span class="d">Tria una nota i mira totes les seves posicions i formes d'octava.</span><span class="s"><span class="new">Obre</span></span></button>`
+  }).join('') + reviewRow() + `<button class="mod alt" data-go="explore"><span class="t">Mapa de connexions</span><span class="d">Tria una nota i mira totes les seves posicions i formes d'octava.</span><span class="s"><span class="new">Obre</span></span></button>`
     + `<button class="mod alt" data-go="play"><span class="t">Toca lliure</span><span class="d">Toca qualsevol posició i escolta com sona, amb el nom i la partitura.</span><span class="s"><span class="new">Obre</span></span></button>`;
 }
 
@@ -1917,7 +2015,7 @@ function renderStats() {
   const fmtDate = d => new Date(d).toLocaleString('ca-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
   const hist = stats.sessions.slice().reverse().slice(0, 50);
   $('#statsHistory').innerHTML = hist.length
-    ? hist.map(h => `<li><span>${fmtDate(h.d)}</span><span>${MODULES[h.m] ? MODULES[h.m].title : h.m}</span><b>${h.ok}/${h.n}</b></li>`).join('')
+    ? hist.map(h => `<li><span>${fmtDate(h.d)}</span><span>${sessTitle(h.m)}</span><b>${h.ok}/${h.n}</b></li>`).join('')
     : '<li class="empty">Encara no hi ha sessions.</li>';
 }
 

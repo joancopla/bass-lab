@@ -23,7 +23,7 @@ Idioma de la interfície: **català**.
 - Estètica neta i visual: el màstil és el protagonista.
 - Màstil en horitzontal, amb la corda greu a baix (com el baixista el veu mirant avall), marcadors als trasts 3, 5, 7, 9 i 12 (doble punt), i números de trast visibles.
 - Moviment només com a resposta a una acció, curt (150–400 ms) i desactivat amb `prefers-reduced-motion`: la corda tocada vibra en sonar, el punt de la pregunta llisca a la nova posició, transicions de pantalla amb el màstil com a element compartit. Sense confeti ni celebracions exagerades.
-- Tema **fosc per defecte**, amb degradats molt subtils que donin profunditat. A la configuració es pot triar clar o automàtic (segons `prefers-color-scheme`).
+- Tema **fosc per defecte**, amb degradats molt subtils que donin profunditat. A la configuració es pot triar clar o automàtic (segons `prefers-color-scheme`). El màstil és de banús en tots dos temes.
 
 ## Mòduls d'exercici
 1. **Màstil → nota**: es marca una posició al màstil i l'usuari tria el nom de la nota.
@@ -33,6 +33,10 @@ Idioma de la interfície: **català**.
 5. **Notació**: traducció entre notació llatina i anglesa, en els dos sentits.
 6. **Connexions del màstil**: en triar una nota, es mostren totes les seves posicions alhora i es remarquen les formes d'octava. Exercici: es marca una posició i l'usuari ha de trobar la mateixa nota una octava amunt o avall en una altra zona.
 7. **Zones**: qualsevol exercici es pot limitar a una zona concreta (trasts 0–4, 5–9, 10–15, 12–20) per conquerir el màstil per blocs.
+
+### Mòduls afegits després
+- **Oïda (relativa)**: sona una nota marcada al màstil i després una altra a prop (fins a una quinta amunt o avall); l'usuari la troba al màstil. Cal el so activat.
+- **Repàs d'errors**: sessió que barreja mòduls amb els ítems de pes alt (errors no compensats) que encaixen amb la configuració; s'acaba sola quan ja no en queden.
 
 ### Eines sense preguntes
 - **Mapa de connexions**: tria una nota i mostra totes les seves posicions, amb colors per octava i les formes d'octava.
