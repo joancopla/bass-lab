@@ -130,6 +130,15 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 }
 .seg button:hover { color: var(--text); border-color: var(--line-strong); }
 .seg button.on { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }
+/* Indicador que llisca fins a l'opció activa */
+.seg { position: relative; }
+.seg button { position: relative; z-index: 1; }
+.seg-ind {
+  position: absolute; left: 0; top: 0; z-index: 0; pointer-events: none; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--accent);
+  transition: transform .28s cubic-bezier(.3,.7,.2,1), width .28s cubic-bezier(.3,.7,.2,1), height .28s, opacity .2s;
+}
+.seg.has-ind button.on { background: transparent; border-color: transparent; }
 .seg.num button { font-family: var(--font-display); font-size: 16px; font-weight: 600; min-width: 52px; }
 
 /* ===================== Home ===================== */
@@ -338,6 +347,18 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
   .fb .burst, .fb .flash, .entering, .bump { animation: none; }
   .ans:active:not(:disabled), .btn:active, .mod:active, .seg button:active, .icon-btn:active { transform: none; }
 }
+
+/* Barra de percentatge dels mòduls a l'inici */
+.mod .bar { grid-column: 1 / -1; height: 4px; border-radius: 4px; background: var(--line); overflow: hidden; margin-top: 8px; }
+.mod .bar i { display: block; height: 100%; width: var(--p); background: var(--accent); border-radius: 4px; animation: fill .8s cubic-bezier(.3,.7,.2,1); }
+@keyframes fill { from { width: 0; } }
+/* Sortida armada: cal tocar la creu dues vegades */
+.icon-btn.armed { color: var(--err); border-color: var(--err); background: var(--err-soft); }
+/* Tecla premuda */
+.ans.kbd { transform: scale(.96); }
+.kbd-hint { display: none; margin: 10px 0 0; font-size: 13px; color: var(--faint); text-align: center; }
+@media (hover: hover) and (pointer: fine) { .answers:not(:empty) + .kbd-hint { display: block; } }
+@media (prefers-reduced-motion: reduce) { .seg-ind { transition: none; } .mod .bar i { animation: none; } }
 
 /* ===================== Summary ===================== */
 .summary { max-width: 720px; margin: 20px auto 0; display: grid; gap: 18px; padding: 24px 18px; }
@@ -607,6 +628,7 @@ body.in-quiz .topbar { display: none; }
     </div>
     <div class="dock">
       <div class="answers" id="answers"></div>
+      <p class="kbd-hint">Teclat: lletres C–B per a les notes, Majúscules per a ♯, Alt per a ♭ i Espai per continuar.</p>
       <div class="feedback" id="feedback" aria-live="polite">
         <span id="fbText"></span>
         <button class="btn primary" id="btnNext" hidden>Següent</button>
@@ -1560,6 +1582,7 @@ function startSession(mid) {
     toast('No hi ha cap nota amb aquesta configuració. Revisa el rang, les cordes o les alteracions.');
     return;
   }
+  disarmExit();
   sess = { mid, size: cfg.sessionSize, count: 0, ok: 0, ko: 0, ms: 0, lastKey: null, fails: {}, q: null, timer: null };
   show('quiz', nextQuestion);
 }
@@ -1601,6 +1624,8 @@ function resolve(correct, midi, text) {
   sess.count++; sess.ms += Math.min(ms, 30000);
   if (correct) sess.ok++; else { sess.ko++; sess.fails[q.item.key] = (sess.fails[q.item.key] || 0) + 1; }
   playMidi(midi);
+  const PRAISE = ['Correcte', 'Exacte', 'Molt bé', 'Perfecte'];
+  if (correct) text = text.replace(/^Correcte/, PRAISE[Math.floor(Math.random() * PRAISE.length)]);
   setFeedback(correct ? 'ok' : 'err', text);
   updateQuizBar();
   if (correct) sess.timer = setTimeout(goNext, 700);
@@ -1616,8 +1641,8 @@ function endSession() {
 
   const M = MODULES[sess.mid];
   $('#sumTitle').innerHTML = `<small>${M.title}</small>${sess.ok} de ${sess.count} correctes`;
-  $('#sumPct').textContent = Math.round((sess.ok / sess.count) * 100) + '%';
-  $('#sumTime').textContent = fmtSec(sess.ms / sess.count);
+  const pctFinal = Math.round((sess.ok / sess.count) * 100), msFinal = sess.ms / sess.count;
+  $('#sumPct').textContent = '0%'; $('#sumTime').textContent = fmtSec(0);
   const fails = Object.entries(sess.fails).sort((a, b) => b[1] - a[1]);
   $('#sumFailsBox').hidden = !fails.length;
   $('#sumFails').innerHTML = fails.slice(0, 8).map(([k, n]) => {
@@ -1628,8 +1653,41 @@ function endSession() {
   for (const [k] of fails) for (const d of M.failDots(k)) if (!seen.has(d.s + d.f)) { seen.add(d.s + d.f); dots.push(d); }
   show('summary', () => {
     $('#sumBoard').parentElement.hidden = !dots.length;
-    if (dots.length) renderFretboard($('#sumBoard'), { dots });
+    countUp($('#sumPct'), pctFinal, v => Math.round(v) + '%');
+    countUp($('#sumTime'), msFinal, fmtSec);
+    if (dots.length) revealFails(dots);
   });
+}
+
+// Els números del resum compten amunt
+function countUp(el, to, fmt, dur = 650) {
+  if (reduceMotion()) { el.textContent = fmt(to); return; }
+  const t0 = performance.now();
+  const step = now => {
+    const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+    el.textContent = fmt(to * e);
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+// Els errors apareixen al màstil un darrere l'altre; les primeres notes diferents sonen
+function revealFails(dots) {
+  const host = $('#sumBoard');
+  clearTimeout(host._seq);
+  if (reduceMotion()) { renderFretboard(host, { dots }); return; }
+  const shown = [], played = new Set();
+  let k = 0;
+  const step = () => {
+    if ($('#view-summary').hidden) return;
+    const d = { ...dots[k], anim: 'pop' };
+    shown.push(d);
+    renderFretboard(host, { dots: shown });
+    const m = midiAt(d.s, d.f);
+    if (!played.has(m) && played.size < 5) { played.add(m); playMidi(m); vibrate(host, d.s, d.f); }
+    k++;
+    if (k < dots.length) host._seq = setTimeout(step, played.size < 5 ? 280 : 70);
+  };
+  host._seq = setTimeout(step, 250);
 }
 
 function updateQuizBar() {
@@ -1667,6 +1725,7 @@ function show(view, then) {
     if (view === 'play') renderPlay();
     window.scrollTo(0, 0);
     if (then) then();
+    syncIndicators();
   };
   if (document.startViewTransition && !reduceMotion() && document.visibilityState === 'visible') document.startViewTransition(update);
   else update();
@@ -1675,6 +1734,33 @@ function show(view, then) {
 function rangeChips(presets = RANGE_PRESETS) {
   return presets.map(([a, b]) =>
     `<button data-range="${a}-${b}" class="${cfg.fretMin === a && cfg.fretMax === b ? 'on' : ''}">${a}–${b}</button>`).join('');
+}
+
+// Col·loca l'indicador de cada selector sobre l'opció activa (i el fa lliscar si canvia).
+// El selector de cordes és de selecció múltiple i no en porta.
+function syncIndicators() {
+  document.querySelectorAll('.seg').forEach(seg => {
+    if (seg.id === 'stringChips' || !seg.offsetParent) return;
+    const on = seg.querySelector('button.on');
+    let ind = seg.querySelector(':scope > .seg-ind');
+    const created = !ind;
+    if (!ind) { ind = document.createElement('span'); ind.className = 'seg-ind'; seg.prepend(ind); }
+    seg.classList.add('has-ind');
+    if (!on) { ind.style.opacity = '0'; return; }
+    const box = { x: on.offsetLeft, y: on.offsetTop, w: on.offsetWidth, h: on.offsetHeight };
+    // Si el contingut s'ha redibuixat, parteix de la posició anterior perquè també llisqui
+    const prev = created ? seg._ind : null;
+    const place = b => { ind.style.transform = `translate(${b.x}px, ${b.y}px)`; ind.style.width = b.w + 'px'; ind.style.height = b.h + 'px'; };
+    if (created) {
+      ind.style.transition = 'none';
+      place(prev || box);
+      ind.getBoundingClientRect();
+      ind.style.transition = '';
+    }
+    ind.style.opacity = '1';
+    place(box);
+    seg._ind = box;
+  });
 }
 
 function syncSegs() {
@@ -1705,10 +1791,12 @@ function renderHome() {
 
   $('#modules').innerHTML = Object.entries(MODULES).map(([id, M]) => {
     const st = stats.modules[id];
-    const stat = st && st.n
-      ? `<b>${Math.round((st.ok / st.n) * 100)}%</b><small>${fmtSec(st.ms / st.n)} de mitjana</small>`
+    const pct = st && st.n ? Math.round((st.ok / st.n) * 100) : null;
+    const stat = pct != null
+      ? `<b>${pct}%</b><small>${fmtSec(st.ms / st.n)} de mitjana</small>`
       : '<span class="new">Comença</span>';
-    return `<button class="mod" data-start="${id}"><span class="t">${M.title}</span><span class="d">${M.desc}</span><span class="s">${stat}</span></button>`;
+    const bar = pct != null ? `<span class="bar"><i style="--p:${pct}%"></i></span>` : '';
+    return `<button class="mod" data-start="${id}"><span class="t">${M.title}</span><span class="d">${M.desc}</span><span class="s">${stat}</span>${bar}</button>`;
   }).join('') + `<button class="mod alt" data-go="explore"><span class="t">Mapa de connexions</span><span class="d">Tria una nota i mira totes les seves posicions i formes d'octava.</span><span class="s"><span class="new">Obre</span></span></button>`
     + `<button class="mod alt" data-go="play"><span class="t">Toca lliure</span><span class="d">Toca qualsevol posició i escolta com sona, amb el nom i la partitura.</span><span class="s"><span class="new">Obre</span></span></button>`;
 }
@@ -1849,6 +1937,7 @@ function afterCfg() {
   if (!$('#view-home').hidden) renderHome();
   if (!$('#view-explore').hidden) renderExplore();
   syncSegs();
+  syncIndicators();
 }
 
 let toastTimer = null;
@@ -1873,7 +1962,7 @@ document.addEventListener('click', e => {
   }
 
   const ex = e.target.closest('[data-explore]');
-  if (ex) { explorePc = +ex.dataset.explore; renderExplore(); playMidi(lowestMidi(explorePc)); return; }
+  if (ex) { explorePc = +ex.dataset.explore; renderExplore(); syncIndicators(); playMidi(lowestMidi(explorePc)); return; }
 
   const rng = e.target.closest('[data-range]');
   if (rng) { [cfg.fretMin, cfg.fretMax] = rng.dataset.range.split('-').map(Number); afterCfg(); return; }
@@ -1897,19 +1986,37 @@ $('#fretMax').addEventListener('change', e => { cfg.fretMax = +e.target.value; i
 
 $('#btnNext').addEventListener('click', () => goNext());
 $('#btnReset').addEventListener('click', resetStats);
-$('#quizExit').addEventListener('click', () => endSession());
+// Sortir d'una sessió amb respostes demana tocar la creu (o Esc) dues vegades
+let exitArmed = null;
+function disarmExit() { clearTimeout(exitArmed); exitArmed = null; $('#quizExit').classList.remove('armed'); }
+function requestExit() {
+  if (!sess) return;
+  if (!sess.count || exitArmed) { disarmExit(); $('#toast').hidden = true; endSession(); return; }
+  $('#quizExit').classList.add('armed');
+  toast('Toca la creu de nou per acabar. Les respostes ja estan desades.');
+  exitArmed = setTimeout(disarmExit, 3000);
+}
+$('#quizExit').addEventListener('click', requestExit);
 $('#sumAgain').addEventListener('click', () => startSession(sess ? sess.mid : 'm1'));
 
 document.addEventListener('keydown', e => {
   if ($('#view-quiz').hidden || !sess) return;
   if ((e.key === 'Enter' || e.key === ' ') && !$('#btnNext').hidden) { e.preventDefault(); goNext(); }
-  if (e.key === 'Escape') endSession();
+  if (e.key === 'Escape') { requestExit(); return; }
+  // Lletres C–B (notació anglesa, per la posició a la tecla): natural; Majúscules = ♯; Alt = ♭
+  const m = /^Key([A-G])$/.exec(e.code);
+  if (m && !e.ctrlKey && !e.metaKey && sess.q && !sess.q.done) {
+    let pc = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]];
+    if (e.shiftKey) pc = (pc + 1) % 12; else if (e.altKey) pc = (pc + 11) % 12;
+    const b = answersEl.querySelector(`[data-pc="${pc}"]`);
+    if (b && !b.disabled) { e.preventDefault(); b.classList.add('kbd'); setTimeout(() => b.classList.remove('kbd'), 130); b.click(); }
+  }
 });
 
 let resizeTimer = null;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => ['board', 'previewBoard', 'homeBoard', 'sumBoard', 'exploreBoard', 'heatBoard', 'playBoard'].forEach(id => redraw($('#' + id))), 150);
+  resizeTimer = setTimeout(() => { ['board', 'previewBoard', 'homeBoard', 'sumBoard', 'exploreBoard', 'heatBoard', 'playBoard'].forEach(id => redraw($('#' + id))); syncIndicators(); }, 150);
 });
 
 document.addEventListener('touchstart', () => {}, { passive: true });
