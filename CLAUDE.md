@@ -22,7 +22,7 @@ Idioma de la interfície: **català**.
 - Les captures de referència són a `/design/`. Inspira't en el seu estil visual (paleta, tipografia, espais, sensació general) sense copiar-lo literalment ni fer servir cap logotip, nom o text de la marca original.
 - Estètica neta i visual: el màstil és el protagonista.
 - Màstil en horitzontal, amb la corda greu a baix (com el baixista el veu mirant avall), marcadors als trasts 3, 5, 7, 9 i 12 (doble punt), i números de trast visibles.
-- Tema clar i fosc segons `prefers-color-scheme`.
+- Tema **fosc per defecte**, amb degradats molt subtils que donin profunditat. A la configuració es pot triar clar o automàtic (segons `prefers-color-scheme`).
 
 ## Mòduls d'exercici
 1. **Màstil → nota**: es marca una posició al màstil i l'usuari tria el nom de la nota.
@@ -40,6 +40,7 @@ Idioma de la interfície: **català**.
 - Alteracions: només naturals / sostinguts / bemolls / tots dos.
 - Notació de resposta: llatina, anglesa o barrejada.
 - So activat o desactivat.
+- Tema: fosc (per defecte), clar o automàtic.
 - Mida de sessió: 10, 20 o 50 preguntes, o mode lliure.
 
 ## Referència musical (verificar sempre contra aquesta taula)

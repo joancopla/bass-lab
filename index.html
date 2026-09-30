@@ -3,13 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="light dark">
+<meta name="color-scheme" content="dark light">
+<script>
+  // Aplica el tema abans de pintar, per evitar un parpelleig clar
+  (function () {
+    var t = 'dark';
+    try { t = (JSON.parse(localStorage.getItem('basslab.config')) || {}).theme || 'dark'; } catch (e) {}
+    if (t === 'auto') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  })();
+</script>
 <title>Bass Lab</title>
 <style>
 /* ===================== Tokens ===================== */
+/* Tema clar (opcional) */
 :root {
-  --bg: #f3f6fa; --bg-glow: rgba(26,111,240,.08);
-  --card: #ffffff; --card-2: #f6f9fc;
+  color-scheme: light;
+  --bg: #eef3f9; --bg-top: #f7f9fc; --bg-glow: rgba(26,111,240,.08); --bg-glow-2: rgba(26,111,240,.04);
+  --card: #fbfcfe; --card-top: #ffffff; --card-2: #f4f7fb; --edge-hi: rgba(255,255,255,.9);
   --line: #dbe4ef; --line-strong: #c3d1e1;
   --text: #0b1829; --muted: #5a6a7f; --faint: #8a99ac;
   --accent: #0f74d1; --accent-soft: rgba(15,116,209,.10); --accent-glow: rgba(15,116,209,.35);
@@ -17,7 +28,7 @@
   --primary-edge: rgba(10,50,130,.35); --primary-halo: rgba(31,116,242,.25);
   --ok: #0f9d67; --ok-soft: rgba(15,157,103,.12);
   --err: #d64545; --err-soft: rgba(214,69,69,.12);
-  --board: #fbfcfe; --board-line: #cfdae7; --nut: #cfc6b4; --string: #7d8fa5;
+  --board: #fbfcfe; --board-edge: #f0f4f9; --board-line: #cfdae7; --nut: #cfc6b4; --string: #7d8fa5;
   --marker: #e1e8f1; --out: rgba(243,246,250,.78); --dot-text: #ffffff;
   --open-bg: #e3ecf7; --open-line: #b9cbe0;
   --r-lg: 18px; --r-md: 12px; --r-sm: 10px;
@@ -26,22 +37,22 @@
   /* Veu d'instrument: DIN del sistema (Windows: Bahnschrift, Apple: DIN Alternate) */
   --font-display: Bahnschrift, "DIN Alternate", "DIN 2014", "Barlow", system-ui, sans-serif;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #060f1c; --bg-glow: rgba(31,116,242,.16);
-    --card: #0c1a2b; --card-2: #0f2136;
-    --line: #1a2f4b; --line-strong: #27446a;
-    --text: #eef4fb; --muted: #8fa3bb; --faint: #5f7590;
-    --accent: #5cc8f5; --accent-soft: rgba(92,200,245,.12); --accent-glow: rgba(92,200,245,.55);
-    --primary: #1f74f2; --primary-2: #1560d8;
-    --primary-edge: rgba(0,20,60,.6); --primary-halo: rgba(31,116,242,.3);
-    --ok: #34d399; --ok-soft: rgba(52,211,153,.14);
-    --err: #f87171; --err-soft: rgba(248,113,113,.14);
-    --board: #08131f; --board-line: #1d324a; --nut: #b9b09e; --string: #5b7190;
-    --marker: #15283f; --out: rgba(6,15,28,.72); --dot-text: #04121f;
-    --open-bg: #16304d; --open-line: #2a4c74;
-    --shadow: 0 10px 30px rgba(0,0,0,.35);
-  }
+/* Tema fosc (per defecte): capes de blau nit amb llum que ve de dalt */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #040a14; --bg-top: #081528; --bg-glow: rgba(31,116,242,.20); --bg-glow-2: rgba(92,200,245,.07);
+  --card: #0a1627; --card-top: #10223b; --card-2: #0d1c31; --edge-hi: rgba(255,255,255,.06);
+  --line: #172b46; --line-strong: #25436a;
+  --text: #eef4fb; --muted: #8fa3bb; --faint: #5b718c;
+  --accent: #5cc8f5; --accent-soft: rgba(92,200,245,.12); --accent-glow: rgba(92,200,245,.55);
+  --primary: #1f74f2; --primary-2: #1560d8;
+  --primary-edge: rgba(0,20,60,.7); --primary-halo: rgba(31,116,242,.32);
+  --ok: #34d399; --ok-soft: rgba(52,211,153,.14);
+  --err: #f87171; --err-soft: rgba(248,113,113,.14);
+  --board: #07111e; --board-edge: #0c1b30; --board-line: #1b3049; --nut: #b9b09e; --string: #5b7190;
+  --marker: #14263c; --out: rgba(4,10,20,.72); --dot-text: #04121f;
+  --open-bg: #13294a; --open-line: #28497a;
+  --shadow: 0 1px 0 rgba(0,0,0,.35), 0 18px 40px -14px rgba(0,0,0,.7);
 }
 
 /* ===================== Base ===================== */
@@ -50,7 +61,10 @@
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; min-height: 100vh; font-family: var(--font); color: var(--text);
-  background: radial-gradient(1200px 500px at 70% -10%, var(--bg-glow), transparent 70%), var(--bg);
+  background:
+    radial-gradient(900px 460px at 78% -6%, var(--bg-glow), transparent 70%),
+    radial-gradient(760px 520px at -12% 108%, var(--bg-glow-2), transparent 70%),
+    linear-gradient(180deg, var(--bg-top), var(--bg) 60%);
   background-attachment: fixed;
   line-height: 1.45;
 }
@@ -72,7 +86,7 @@ select { font: inherit; }
 .icons { display: flex; gap: 8px; }
 .icon-btn {
   width: 44px; height: 44px; display: grid; place-items: center; flex: none;
-  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); color: var(--muted);
+  border: 1px solid var(--line); border-radius: var(--r-md); color: var(--muted);
 }
 .icon-btn:hover { color: var(--text); border-color: var(--line-strong); }
 .icon-btn.off { opacity: .6; }
@@ -83,10 +97,11 @@ h1 { font-size: clamp(28px, 5.5vw, 40px); line-height: 1.05; margin: 10px 0 16px
 h2 { font-size: clamp(24px, 4.2vw, 32px); line-height: 1.1; margin: 4px 0; }
 h3 { font-size: 15px; font-weight: 750; margin: 0; }
 .small { font-size: 13px; color: var(--muted); margin: 0; }
-.card {
-  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg);
-  box-shadow: var(--shadow); padding: 16px;
+.card, .mod, .ans, .icon-btn {
+  background: linear-gradient(180deg, var(--card-top), var(--card));
+  box-shadow: inset 0 1px 0 var(--edge-hi), var(--shadow);
 }
+.card { border: 1px solid var(--line); border-radius: var(--r-lg); padding: 16px; }
 .link { background: none; border: 0; padding: 0 2px; color: var(--accent); font-weight: 700; min-height: 32px; }
 
 .btn {
@@ -121,8 +136,7 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 .modules { display: grid; gap: 10px; margin-top: 18px; }
 .mod {
   width: 100%; text-align: left; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 16px;
-  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg);
-  padding: 18px 20px; box-shadow: var(--shadow);
+  border: 1px solid var(--line); border-radius: var(--r-lg); padding: 18px 20px;
 }
 .mod:hover { border-color: var(--accent); }
 .mod:active { transform: scale(.99); }
@@ -159,7 +173,7 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 .board-hint { font-size: 12px; color: var(--faint); text-align: right; margin: 2px 6px 0; }
 
 /* Fretboard SVG */
-.fb .board { fill: var(--board); stroke: var(--line); }
+.fb .board { stroke: var(--line); }
 .fb .open-bg { fill: var(--open-bg); stroke: var(--open-line); }
 .fb .fret { stroke: var(--board-line); stroke-width: 2; }
 .fb .nut { stroke: var(--nut); stroke-width: 6; stroke-linecap: round; }
@@ -213,7 +227,7 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 .ans {
   min-height: 58px; border-radius: var(--r-md); padding: 4px;
   font-family: var(--font-display); font-weight: 600; font-size: 21px;
-  background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow);
+  border: 1px solid var(--line);
 }
 .ans.acc { font-size: 16px; background: var(--card-2); }
 .ans:hover:not(:disabled) { border-color: var(--accent); }
@@ -377,6 +391,14 @@ body.in-quiz .topbar { display: none; }
       </div>
 
       <div class="card">
+        <h3>Tema</h3>
+        <div class="seg" data-key="theme">
+          <button data-val="dark">Fosc</button><button data-val="light">Clar</button><button data-val="auto">Automàtic</button>
+        </div>
+        <p class="small">Automàtic segueix el tema del sistema.</p>
+      </div>
+
+      <div class="card">
         <h3>So i sessió</h3>
         <div class="seg" data-key="sound" data-type="bool">
           <button data-val="1">So activat</button><button data-val="0">So desactivat</button>
@@ -514,7 +536,7 @@ const K_CFG = 'basslab.config', K_STATS = 'basslab.stats';
 const DEFAULT_CFG = {
   v: 2, strings: 4, active: { B: true, E: true, A: true, D: true, G: true },
   fretMin: 0, fretMax: 12, accidentals: 'natural', notation: 'mixed',
-  sound: true, sessionSize: 20, allPositions: false,
+  sound: true, sessionSize: 20, allPositions: false, theme: 'dark',
 };
 const RANGE_PRESETS = [[0, 5], [0, 12], [0, 20]];
 const ACC_LABEL = { natural: 'només notes naturals', sharp: 'amb sostinguts', flat: 'amb bemolls', both: 'amb sostinguts i bemolls' };
@@ -530,6 +552,7 @@ function sanitize(c) {
   if (!['latin', 'english', 'mixed'].includes(c.notation)) c.notation = 'latin';
   if (![0, 10, 20, 50].includes(c.sessionSize)) c.sessionSize = 20;
   c.sound = !!c.sound; c.allPositions = !!c.allPositions;
+  if (!['dark', 'light', 'auto'].includes(c.theme)) c.theme = 'dark';
   if (!instrumentStrings(c.strings).some(s => c.active[s.id])) STRINGS.forEach(s => (c.active[s.id] = true));
   return c;
 }
@@ -671,7 +694,7 @@ function renderFretboard(host, opts = {}) {
   const padL = narrow ? 30 : 36, padR = 8, padT = 8, padB = 26;
   const gap = 44; // alçada de cel·la: objectiu tàctil mínim
   const openUnits = hasOpen ? 0.8 : 0;
-  let fw = (W - padL - padR) / (nFrets + openUnits);
+  let fw = (W - padL - padR - 1) / (nFrets + openUnits); // -1 px: evita scroll per arrodoniment
   fw = Math.max(narrow ? 40 : 38, Math.min(fw, 110));
   const openW = hasOpen ? fw * openUnits : 0;
   const boardX = padL + openW;
@@ -690,10 +713,12 @@ function renderFretboard(host, opts = {}) {
   const glowId = 'glow-' + host.id;
 
   let svg = `<svg class="fb" width="${totalW}" height="${H}" viewBox="0 0 ${totalW} ${H}" role="img" aria-label="Màstil">
-    <defs><filter id="${glowId}" x="-60%" y="-60%" width="220%" height="220%">
+    <defs><linearGradient id="bg-${host.id}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" style="stop-color:var(--board-edge)"/><stop offset=".5" style="stop-color:var(--board)"/><stop offset="1" style="stop-color:var(--board-edge)"/>
+    </linearGradient><filter id="${glowId}" x="-60%" y="-60%" width="220%" height="220%">
       <feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter></defs>
-    <rect class="board" x="${boardX}" y="${padT}" width="${boardW}" height="${boardH}" rx="6"/>`;
+    <rect class="board" fill="url(#bg-${host.id})" x="${boardX}" y="${padT}" width="${boardW}" height="${boardH}" rx="6"/>`;
   // Columna de les cordes a l'aire, amb fons propi perquè no es confongui amb el màstil
   if (hasOpen) svg += `<rect class="open-bg" x="${padL}" y="${padT}" width="${openW}" height="${boardH}" rx="6"/>`;
 
@@ -1026,9 +1051,17 @@ function syncConfig() {
   renderFretboard($('#previewBoard'), {});
 }
 
+const darkMq = matchMedia('(prefers-color-scheme: dark)');
+function applyTheme() {
+  const t = cfg.theme === 'auto' ? (darkMq.matches ? 'dark' : 'light') : cfg.theme;
+  if (document.documentElement.dataset.theme !== t) document.documentElement.dataset.theme = t;
+}
+darkMq.addEventListener('change', applyTheme);
+
 function afterCfg() {
   cfg = sanitize(cfg);
   saveCfg();
+  applyTheme();
   if (!$('#view-config').hidden) syncConfig();
   if (!$('#view-home').hidden) renderHome();
   syncSegs();
@@ -1092,6 +1125,7 @@ window.addEventListener('resize', () => {
 });
 
 selfTest();
+applyTheme();
 show('home');
 </script>
 </body>
