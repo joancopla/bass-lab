@@ -818,6 +818,7 @@ function ensureAudio() {
     const comp = actx.createDynamicsCompressor();
     master = actx.createGain(); master.gain.value = 0.9;
     master.connect(comp); comp.connect(actx.destination);
+    warmVoices();
   }
   if (actx.state === 'suspended') actx.resume();
   return actx;
@@ -825,41 +826,98 @@ function ensureAudio() {
 // Els navegadors només deixen iniciar l'àudio després d'un gest de l'usuari
 document.addEventListener('pointerdown', () => { if (cfg.sound) ensureAudio(); }, { passive: true });
 
-// Veu de baix: serra filtrada (brillantor que s'apaga), triangle (cos), 2n harmònic suau
-// i un clic curt de pua. Als altaveus petits la fonamental (31–100 Hz) gairebé no se sent,
-// però l'oïda la reconstrueix a partir dels harmònics: per això el 2n harmònic hi és reforçat.
-function bassVoice(c, dest, f, t, dur = 1.8) {
-  const out = c.createGain(); out.connect(dest);
-  const osc = (type, fr) => { const o = c.createOscillator(); o.type = type; o.frequency.value = fr; return o; };
-  const gain = v => { const g = c.createGain(); g.gain.value = v; return g; };
+// ---- Model físic de corda pinçada (Karplus-Strong estès) ----
+// Una línia de retard fa de corda: cada volta perd una mica d'energia i d'aguts.
+// La longitud total del bucle (enter + 0,5 del filtre de mitjana + retard fraccionari
+// de l'allpass) és exactament sr/f, de manera que la nota surt afinada.
+const PLUCK_POS = 0.22;   // on pincem la corda (fracció des del pont)
+const PICKUP_POS = 0.16;  // on és la pastilla: dona el color de baix elèctric
+const ksCache = new Map();
 
-  const saw = osc('sawtooth', f), tri = osc('triangle', f), h2 = osc('sine', f * 2);
-  const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 1.4;
-  lp.frequency.setValueAtTime(Math.min(f * 16, 3500), t);
-  lp.frequency.exponentialRampToValueAtTime(Math.max(f * 3, 200), t + 0.35);
-  const env = c.createGain();
-  env.gain.setValueAtTime(0.0001, t);
-  env.gain.exponentialRampToValueAtTime(0.55, t + 0.005);
-  env.gain.exponentialRampToValueAtTime(0.24, t + 0.3);
-  env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  saw.connect(gain(0.45)).connect(lp); tri.connect(lp); h2.connect(gain(0.18)).connect(lp);
-  lp.connect(env).connect(out);
+function pluckedString(sr, f, dur) {
+  const len = Math.floor(sr * dur);
+  const out = new Float32Array(len);
+  const P = sr / f;                       // període en mostres
+  const N = Math.floor(P - 1);            // part entera de la corda
+  const d = P - 0.5 - N;                  // retard fraccionari, entre 0,5 i 1,5
+  const C = (1 - d) / (1 + d);            // coeficient de l'allpass
+  const T60 = 2.4 + 2.2 * Math.max(0, (98 - f) / 67); // les notes greus sonen més estona
+  const rho = Math.pow(10, -3 / (T60 * f));           // pèrdua per volta
 
-  // Pua: 25 ms de soroll filtrat
-  if (!c._noise) {
-    c._noise = c.createBuffer(1, Math.floor(c.sampleRate * 0.03), c.sampleRate);
-    const d = c._noise.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  // Excitació: forma triangular del dit, amb una mica de soroll i suavitzada (dit, no pua)
+  const e = new Float32Array(N);
+  const apex = Math.max(1, Math.round(PLUCK_POS * N));
+  let mean = 0;
+  for (let i = 0; i < N; i++) {
+    e[i] = (i < apex ? i / apex : (N - i) / (N - apex)) + 0.18 * (Math.random() * 2 - 1);
+    mean += e[i];
   }
-  const pick = c.createBufferSource(); pick.buffer = c._noise;
-  const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1400; bp.Q.value = 0.8;
-  const pg = c.createGain();
-  pg.gain.setValueAtTime(0.14, t); pg.gain.exponentialRampToValueAtTime(0.0001, t + 0.025);
-  pick.connect(bp).connect(pg).connect(out);
+  mean /= N;
+  const soft = Math.exp(-2 * Math.PI * 1800 / sr);
+  let lp = 0;
+  for (let i = 0; i < N; i++) { lp = (1 - soft) * (e[i] - mean) + soft * lp; e[i] = lp; }
 
-  for (const o of [saw, tri, h2]) { o.start(t); o.stop(t + dur + 0.05); }
-  pick.start(t);
-  return { stop(at) { out.gain.setTargetAtTime(0, at, 0.012); } };
+  // Bucle de la corda
+  const M = N + 2, h = new Float32Array(M);
+  let w = 0, apx = 0, apy = 0;
+  for (let n = 0; n < len; n++) {
+    const y1 = h[(w - N + M) % M], y2 = h[(w - N - 1 + M) % M];
+    const avg = rho * 0.5 * (y1 + y2);
+    const ap = C * avg + apx - C * apy; apx = avg; apy = ap;
+    const y = ap + (n < N ? e[n] : 0);
+    h[w] = y; w = (w + 1) % M;
+    out[n] = y;
+  }
+
+  // Pastilla: filtre de pinta (resta la mateixa ona retardada)
+  const k = Math.max(1, Math.round(PICKUP_POS * P));
+  let peak = 0;
+  for (let n = len - 1; n >= 0; n--) {
+    out[n] = out[n] - (n >= k ? out[n - k] : 0);
+    peak = Math.max(peak, Math.abs(out[n]));
+  }
+  // Fade final curt perquè no faci clic en acabar
+  const fade = Math.floor(sr * 0.05);
+  for (let i = 0; i < fade; i++) out[len - 1 - i] *= i / fade;
+  const g = peak > 0 ? 0.9 / peak : 1;
+  for (let n = 0; n < len; n++) out[n] *= g;
+  return out;
+}
+
+function stringBuffer(c, f, dur = 2.2) {
+  const key = c.sampleRate + ':' + f.toFixed(3);
+  let buf = ksCache.get(key);
+  if (!buf) {
+    buf = c.createBuffer(1, Math.floor(c.sampleRate * dur), c.sampleRate);
+    buf.copyToChannel(pluckedString(c.sampleRate, f, dur), 0);
+    ksCache.set(key, buf);
+  }
+  return buf;
+}
+// Precalcula en segon pla les notes del rang, perquè la primera pulsació no tingui retard
+function warmVoices() {
+  const midis = [...new Set(positionsInRange().map(p => p.midi))];
+  const step = () => {
+    const m = midis.shift(); if (m == null || !actx) return;
+    stringBuffer(actx, freq(m));
+    setTimeout(step, 15);
+  };
+  setTimeout(step, 50);
+}
+
+function bassVoice(c, dest, f, t) {
+  const buf = stringBuffer(c, f);
+  const src = c.createBufferSource(); src.buffer = buf;
+  // To: brillant a l'atac i més rodó després, amb una mica de cos als greus
+  const tone = c.createBiquadFilter(); tone.type = 'lowpass'; tone.Q.value = 0.7;
+  tone.frequency.setValueAtTime(3200, t);
+  tone.frequency.exponentialRampToValueAtTime(900, t + 0.6);
+  const body = c.createBiquadFilter(); body.type = 'peaking'; body.frequency.value = 180; body.Q.value = 0.9; body.gain.value = 3;
+  const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 28; hp.Q.value = 0.7;
+  const out = c.createGain(); out.gain.value = 0.75;
+  src.connect(hp).connect(body).connect(tone).connect(out).connect(dest);
+  src.start(t);
+  return { stop(at) { out.gain.setTargetAtTime(0, at, 0.012); src.stop(at + 0.1); } };
 }
 
 // Monofònic, com un baix: una nota nova apaga l'anterior
