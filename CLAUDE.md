@@ -46,6 +46,8 @@ Idioma de la interfície: **català**.
   - Noms per grau (una lletra per grau). Si el to té dues grafies, s'agafa la que té menys alteracions (Re♭ menor → Do♯ menor) i, si empaten, la regla `flat_keys_pc`.
   - Si el patró cau per sota del trast 0, la fonamental puja al trast 12.
   - El pla compta des del primer dia que s'obre la pantalla; es pot marcar un altre dia com a avui.
+- **Roda harmònica** (cercle de quintes en SVG propi): fora, les 12 majors en ordre de quintes amb el nombre d'alteracions; dins, les relatives menors. En triar una tonalitat es ressalten el I, el IV i el V i les relatives ii, iii i vi (en una menor: i, iv, v, III, VI, VII), i es mostren els 7 acords diatònics. «Veure al mànec» obre l'escala major (o la menor natural) a la pantalla d'escales. La roda és fixa, amb Do a dalt.
+  - `key_spelling` decideix només la fonamental de la major. La relativa i els acords surten de l'escala, una lletra per grau (Mi → Do♯ m, i no Re♭ m). Fa♯/Sol♭ mostra les dues grafies, però s'escriu amb bemolls.
 
 ## Configuració
 - Baix de **4 cordes** (E A D G) o **5 cordes** (B E A D G), en afinació estàndard.

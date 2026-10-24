@@ -233,6 +233,45 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 .play-staff { margin-bottom: 0; }
 @media (max-width: 640px) { .play-top { grid-template-columns: 1fr; } .play-now { min-height: 0; } }
 
+/* ===================== Roda harmònica ===================== */
+.wh-link { margin-left: auto; min-height: 44px; padding: 0 16px; }
+.wh-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+@media (max-width: 760px) { .wh-layout { grid-template-columns: minmax(0, 1fr); } }
+.wh-card { display: grid; gap: 10px; }
+#wheel svg { display: block; width: 100%; max-width: 460px; height: auto; margin: 0 auto; }
+.wh .sec { cursor: pointer; outline: none; }
+.wh .sec path { fill: var(--card-2); stroke: var(--bg); stroke-width: 2; transition: fill .2s, stroke .2s; }
+.wh .sec.in path { fill: var(--card); }
+.wh .sec text { font-family: var(--font-display); text-anchor: middle; dominant-baseline: central; pointer-events: none; transition: fill .2s; }
+.wh .name { fill: var(--text); font-weight: 700; }
+.wh .in .name { fill: var(--muted); font-weight: 600; }
+.wh .sig { fill: var(--faint); font-size: 12.5px; font-weight: 600; }
+.wh .sec:hover path { fill: var(--card-top); }
+.wh .sec:focus-visible path { stroke: var(--accent); }
+.wh .sec.grp path { fill: var(--accent-soft); }
+.wh .sec.grp .name { fill: var(--accent); }
+.wh .sec.grp .sig { fill: var(--muted); }
+.wh .sec.sel path { fill: var(--primary); }
+.wh .sec.sel .name, .wh .sec.sel .sig { fill: var(--on-primary); }
+.wh .sec.sel .deg { fill: var(--on-primary); }
+.wh .deg { font-family: var(--font-display); font-weight: 700; font-size: 13px; fill: var(--accent); text-anchor: middle; dominant-baseline: central; }
+.wh .hub { fill: var(--card-top); stroke: var(--line); }
+.wh .hub-name { font-family: var(--font-display); font-weight: 700; font-size: 26px; fill: var(--accent); text-anchor: middle; dominant-baseline: central; }
+.wh .hub-sub { font-size: 12px; font-weight: 600; fill: var(--muted); text-anchor: middle; dominant-baseline: central; }
+.wh-info { display: grid; gap: 12px; align-content: start; }
+.wh-info .sc-root { margin: 0; }
+.wh-chords { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.wh-chord {
+  min-height: 64px; padding: 4px 2px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--card-2);
+  display: grid; justify-items: center; align-content: center; gap: 2px;
+}
+.wh-chord small { font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--muted); }
+.wh-chord b { font-family: var(--font-display); font-weight: 600; font-size: 16px; white-space: nowrap; }
+.wh-chord.tonic { border-color: var(--accent); background: var(--accent-soft); }
+.wh-chord.tonic b, .wh-chord.tonic small { color: var(--accent); }
+@media (max-width: 640px) { .wh-chords { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { .wh .sec path, .wh .sec text { transition: none; } }
+
 /* ===================== Escales i arpegis ===================== */
 .sc-kicker { margin: 0; font-size: 13px; font-weight: 700; color: var(--muted); }
 .sc-top { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 12px; margin-bottom: 12px; align-items: start; }
@@ -737,6 +776,23 @@ body.in-quiz .topbar { display: none; }
     </div>
   </section>
 
+  <!-- ============ RODA HARMÒNICA ============ -->
+  <section id="view-wheel" hidden>
+    <div class="page-head">
+      <button class="icon-btn" data-go="home" aria-label="Tornar a l'inici">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <h2>Roda harmònica</h2>
+    </div>
+    <div class="wh-layout">
+      <div class="card wh-card">
+        <div id="wheel"></div>
+        <p class="small">Fora, les tonalitats majors en ordre de quintes i les alteracions de l'armadura. Dins, la relativa menor de cada una, amb la mateixa armadura.</p>
+      </div>
+      <div class="card wh-info" id="whInfo"></div>
+    </div>
+  </section>
+
   <!-- ============ ESCALES I ARPEGIS ============ -->
   <section id="view-scales" hidden>
     <div class="page-head">
@@ -744,6 +800,7 @@ body.in-quiz .topbar { display: none; }
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
       </button>
       <h2>Escales i arpegis</h2>
+      <button class="btn ghost wh-link" data-go="wheel">Roda harmònica</button>
     </div>
     <div class="sc-top">
       <div class="card sc-plan">
@@ -962,7 +1019,57 @@ function planDay(startDay, today, weeks = 52) {
 }
 // El tempo del dia és el de la setmana més l'ajust d'aquell dia (no s'acumula)
 const dayBpm = (week, d) => week.bpm_start + ((week.daily[d - 1] || {}).bpm_delta || 0);
+
+// --- Roda harmònica (cercle de quintes) ---
+const FIFTHS_PCS = [0, 7, 2, 9, 4, 11, 6, 1, 8, 3, 10, 5]; // Do, Sol, Re, La, Mi, Si, Fa♯/Sol♭, Re♭, La♭, Mi♭, Si♭, Fa
+const SHARP_ORDER = 'FCGDAEB', FLAT_ORDER = 'BEADGCF';
+const TRIAD_MAJOR = ['maj', 'min', 'min', 'maj', 'maj', 'min', 'dim']; // acords de l'escala major, grau a grau
+// Tonalitat major: la regla key_spelling (flatKeys) decideix sostinguts o bemolls de la fonamental;
+// la resta de notes (i, per tant, la relativa menor i els acords) surten de l'escala, una lletra per grau.
+function wheelKey(pc, flatKeys, majorScale) {
+  const root = isNatural(pc) ? { letter: PC_SHARP[pc][0], acc: 0 }
+    : flatKeys.includes(pc) ? { letter: PC_FLAT[pc][0], acc: -1 } : { letter: PC_SHARP[pc][0], acc: 1 };
+  const notes = spellWith(majorScale, pc, root).slice(0, 7);
+  const alt = notes.filter(n => n.acc !== 0);
+  const type = alt.length ? (alt[0].acc > 0 ? 'sharp' : 'flat') : null;
+  const order = type === 'sharp' ? SHARP_ORDER : FLAT_ORDER;
+  alt.sort((a, b) => order.indexOf(a.letter) - order.indexOf(b.letter));
+  return { pc, root, notes, sig: { n: alt.length, type, notes: alt }, rel: notes[5], relPc: (pc + 9) % 12 };
+}
+// Els 7 acords diatònics. minor: comença pel vi (menor natural relativa).
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+function diatonicChords(key, minor = false) {
+  const start = minor ? 5 : 0;
+  return Array.from({ length: 7 }, (_, k) => {
+    const i = (start + k) % 7, q = TRIAD_MAJOR[i];
+    return { note: key.notes[i], q, roman: q === 'maj' ? ROMAN[k] : ROMAN[k].toLowerCase() + (q === 'dim' ? '°' : '') };
+  });
+}
+const chordSuffix = q => (q === 'min' ? ' m' : q === 'dim' ? '°' : '');
 // ==END THEORY==
+
+function wheelSelfTest(majorScale, flatKeys) {
+  const errors = [], K = pc => wheelKey(pc, flatKeys, majorScale), L = n => noteName(n, 'latin');
+  const outer = FIFTHS_PCS.map(pc => L(K(pc).root)).join(' ');
+  if (outer !== 'Do Sol Re La Mi Si Sol♭ Re♭ La♭ Mi♭ Si♭ Fa') errors.push('roda: ' + outer);
+  const sigs = FIFTHS_PCS.map(pc => { const s = K(pc).sig; return s.n + (s.type === 'sharp' ? '♯' : s.type ? '♭' : ''); }).join(' ');
+  if (sigs !== '0 1♯ 2♯ 3♯ 4♯ 5♯ 6♭ 5♭ 4♭ 3♭ 2♭ 1♭') errors.push('armadures: ' + sigs);
+  const rels = FIFTHS_PCS.map(pc => L(K(pc).rel)).join(' ');
+  if (rels !== 'La Mi Si Fa♯ Do♯ Sol♯ Mi♭ Si♭ Fa Do Sol Re') errors.push('relatives: ' + rels);
+  const ch = (pc, minor) => diatonicChords(K(pc), minor).map(c => c.roman + ':' + L(c.note) + chordSuffix(c.q)).join(' ');
+  const exp = [
+    [2, false, 'I:Re ii:Mi m iii:Fa♯ m IV:Sol V:La vi:Si m vii°:Do♯°'],
+    [5, false, 'I:Fa ii:Sol m iii:La m IV:Si♭ V:Do vi:Re m vii°:Mi°'],
+    [6, false, 'I:Sol♭ ii:La♭ m iii:Si♭ m IV:Do♭ V:Re♭ vi:Mi♭ m vii°:Fa°'],
+    [0, true, 'i:La m ii°:Si° III:Do iv:Re m v:Mi m VI:Fa VII:Sol'],
+  ];
+  for (const [pc, minor, e] of exp) if (ch(pc, minor) !== e) errors.push(`acords ${pc}${minor ? 'm' : ''}: ${ch(pc, minor)}`);
+  const sig = K(2).sig.notes.map(L).join(' ') + ' | ' + K(3).sig.notes.map(L).join(' ');
+  if (sig !== 'Fa♯ Do♯ | Si♭ Mi♭ La♭') errors.push('alteracions de l\'armadura: ' + sig);
+  if (errors.length) console.error('[Bass Lab] Roda harmònica amb errors:\n' + errors.join('\n'));
+  else console.info('[Bass Lab] Roda harmònica OK: ordre de quintes, armadures, relatives i acords.');
+  return errors;
+}
 
 function scaleSelfTest(data) {
   const errors = [], all = data.scales.concat(data.arpeggios), byId = id => all.find(x => x.id === id);
@@ -2098,7 +2205,7 @@ const fmtSec = ms => (ms / 1000).toFixed(1).replace('.', ',') + ' s';
 function show(view, then) {
   const update = () => {
     if (view !== 'scales') scStopAll();
-    for (const v of ['home', 'config', 'explore', 'stats', 'play', 'scales', 'quiz', 'summary']) $('#view-' + v).hidden = v !== view;
+    for (const v of ['home', 'config', 'explore', 'stats', 'play', 'scales', 'wheel', 'quiz', 'summary']) $('#view-' + v).hidden = v !== view;
     document.body.classList.toggle('in-quiz', view === 'quiz');
     if (view === 'home') renderHome();
     if (view === 'config') syncConfig();
@@ -2106,6 +2213,7 @@ function show(view, then) {
     if (view === 'stats') renderStats();
     if (view === 'play') renderPlay();
     if (view === 'scales') renderScales();
+    if (view === 'wheel') renderWheel();
     window.scrollTo(0, 0);
     if (then) then();
     syncIndicators();
@@ -2227,7 +2335,8 @@ function renderHome() {
     const bar = pct != null ? `<span class="bar"><i style="--p:${pct}%"></i></span>` : '';
     return `<button class="mod" data-start="${id}"><span class="t">${M.title}</span><span class="d">${M.desc}</span><span class="s">${stat}</span>${bar}</button>`;
   }).join('') + reviewRow() + scalesRow() + `<button class="mod alt" data-go="explore"><span class="t">Mapa de connexions</span><span class="d">Tria una nota i mira totes les seves posicions i formes d'octava.</span><span class="s"><span class="new">Obre</span></span></button>`
-    + `<button class="mod alt" data-go="play"><span class="t">Toca lliure</span><span class="d">Toca qualsevol posició i escolta com sona, amb el nom i la partitura.</span><span class="s"><span class="new">Obre</span></span></button>`;
+    + `<button class="mod alt" data-go="play"><span class="t">Toca lliure</span><span class="d">Toca qualsevol posició i escolta com sona, amb el nom i la partitura.</span><span class="s"><span class="new">Obre</span></span></button>`
+    + `<button class="mod alt" data-go="wheel"><span class="t">Roda harmònica</span><span class="d">El cercle de quintes: armadures, relatives menors i els 7 acords de cada tonalitat.</span><span class="s"><span class="new">Obre</span></span></button>`;
 }
 
 let explorePc = 4; // Mi / E
@@ -2676,6 +2785,109 @@ function scalesRow() {
     + `<span class="s"><b>${dayBpm(W, t.d)}</b><small>BPM</small></span></button>`;
 }
 
+/* =====================================================================
+   9c. RODA HARMÒNICA (cercle de quintes)
+   ===================================================================== */
+const SC_MAJOR = scById('major');
+const WH_KEYS = FIFTHS_PCS.map(pc => wheelKey(pc, SC_FLAT, SC_MAJOR));
+const K_WHEEL = 'basslab.wheel';
+const wh = Object.assign({ i: 0, minor: false }, LS.get(K_WHEEL, {}));
+if (!(wh.i >= 0 && wh.i < 12)) wh.i = 0;
+const WH_ENH = 6; // Fa♯/Sol♭: les dues grafies a la roda
+const nm = n => noteName(n, 'latin');
+const whMinorName = k => nm(k.rel) + ' m';
+const pcOfNote = n => pcOf(LETTER_PC[n.letter] + n.acc);
+const lowMidi = pc => 28 + pcOf(pc - 4); // de Mi1 a Re♯2: el registre del baix
+function sigLabel(k, i) {
+  if (i === WH_ENH) return '6♯/6♭';
+  return k.sig.n ? k.sig.n + (k.sig.type === 'sharp' ? '♯' : '♭') : '0';
+}
+
+function buildWheel() {
+  const R1 = 180, R0 = 122, r0 = 70, P = (r, a) => `${(r * Math.cos(a)).toFixed(2)},${(r * Math.sin(a)).toFixed(2)}`;
+  const arc = (ro, ri, a0, a1) => `M${P(ro, a0)} A${ro},${ro} 0 0 1 ${P(ro, a1)} L${P(ri, a1)} A${ri},${ri} 0 0 0 ${P(ri, a0)}Z`;
+  // Text apilat en vertical al centre del sector (al llarg del radi xocaria a les 3 i a les 9)
+  const at = (r, a, dy = 0) => `x="${(r * Math.cos(a)).toFixed(2)}" y="${(r * Math.sin(a) + dy).toFixed(2)}"`;
+  let s = `<svg class="wh" viewBox="-208 -208 416 416" role="group" aria-label="Roda harmònica">`;
+  WH_KEYS.forEach((k, i) => {
+    const a = (-90 + i * 30) * Math.PI / 180, a0 = a - Math.PI / 12, a1 = a + Math.PI / 12;
+    const sig = k.sig.n ? `${k.sig.n} ${k.sig.type === 'sharp' ? 'sostinguts' : 'bemolls'}`.replace(/^1 (\w+)s$/, '1 $1') : 'sense alteracions';
+    const outName = i === WH_ENH
+      ? `<text class="name" ${at(151, a, -15)} font-size="16">Fa♯</text><text class="name" ${at(151, a, 1)} font-size="16">Sol♭</text><text class="sig" ${at(151, a, 17)}>6♯/6♭</text>`
+      : `<text class="name" ${at(151, a, -6)} font-size="20">${nm(k.root)}</text><text class="sig" ${at(151, a, 13)}>${sigLabel(k, i)}</text>`;
+    s += `<g class="sec out" data-wh="o${i}" tabindex="0" role="button" aria-label="${i === WH_ENH ? 'Fa♯ o Sol♭' : nm(k.root)} major, ${i === WH_ENH ? '6 sostinguts o 6 bemolls' : sig}">
+      <path d="${arc(R1, R0, a0, a1)}"/>${outName}</g>`;
+    const inName = i === WH_ENH
+      ? `<text class="name" ${at(96, a, 0)} font-size="12.5">Re♯ m</text><text class="name" ${at(96, a, 12)} font-size="12.5">Mi♭ m</text><text class="deg" ${at(96, a, -13)}></text>`
+      : `<text class="name" ${at(96, a, 6)} font-size="14.5">${whMinorName(k)}</text><text class="deg" ${at(96, a, -10)}></text>`;
+    s += `<g class="sec in" data-wh="i${i}" tabindex="0" role="button" aria-label="${i === WH_ENH ? 'Re♯ o Mi♭' : nm(k.rel)} menor, relativa de ${nm(k.root)} major">
+      <path d="${arc(R0, r0, a0, a1)}"/>${inName}</g>`;
+  });
+  s += `<g class="odeg">${WH_KEYS.map((k, i) => `<text class="deg" ${at(198, (-90 + i * 30) * Math.PI / 180)}></text>`).join('')}</g>`;
+  s += `<circle class="hub" r="64"/><text class="hub-name" y="-8"></text><text class="hub-sub" y="20"></text></svg>`;
+  $('#wheel').innerHTML = s;
+}
+
+function renderWheel() {
+  if (!$('#wheel svg')) buildWheel();
+  const i = wh.i, prev = (i + 11) % 12, next = (i + 1) % 12, k = WH_KEYS[i];
+  // Grau de cada sector ressaltat respecte de la tònica triada
+  const outDeg = wh.minor ? { [i]: 'III', [prev]: 'VI', [next]: 'VII' } : { [i]: 'I', [prev]: 'IV', [next]: 'V' };
+  const inDeg = wh.minor ? { [i]: 'i', [prev]: 'iv', [next]: 'v' } : { [i]: 'vi', [prev]: 'ii', [next]: 'iii' };
+  const grp = j => j === i || j === prev || j === next;
+  document.querySelectorAll('#wheel .sec').forEach(g => {
+    const out = g.dataset.wh[0] === 'o', j = +g.dataset.wh.slice(1);
+    const sel = j === i && out !== wh.minor;
+    g.classList.toggle('sel', sel);
+    g.classList.toggle('grp', !sel && grp(j));
+    g.setAttribute('aria-pressed', sel ? 'true' : 'false');
+    if (!out) g.querySelector('.deg').textContent = inDeg[j] || '';
+  });
+  document.querySelectorAll('#wheel .odeg .deg').forEach((t, j) => (t.textContent = outDeg[j] || ''));
+  $('#wheel .hub-name').textContent = wh.minor ? whMinorName(k) : nm(k.root);
+  $('#wheel .hub-sub').textContent = `${wh.minor ? 'menor' : 'major'} · ${sigLabel(k, i)}`;
+
+  // Panell: armadura, relativa, veïnes i els 7 acords
+  const name = wh.minor ? nm(k.rel) : nm(k.root);
+  const relName = wh.minor ? nm(k.root) + ' major' : nm(k.rel) + ' menor';
+  const sig = k.sig.n
+    ? `${k.sig.n} ${k.sig.type === 'sharp' ? (k.sig.n === 1 ? 'sostingut' : 'sostinguts') : (k.sig.n === 1 ? 'bemoll' : 'bemolls')} (${k.sig.notes.map(nm).join(', ')})`
+    : 'sense alteracions';
+  const enh = i === WH_ENH ? `<p class="small">També s'escriu ${wh.minor ? 'Re♯ menor' : 'Fa♯ major'}, amb 6 sostinguts. La regla del JSON la fa servir amb bemolls.</p>` : '';
+  const chords = diatonicChords(k, wh.minor);
+  const cname = c => nm(c.note) + chordSuffix(c.q);
+  const by = r => cname(chords.find(c => c.roman === r));
+  const near = wh.minor
+    ? `Les veïnes de dins són el iv (${by('iv')}) i el v (${by('v')}); fora, les relatives majors: III (${by('III')}), VI (${by('VI')}) i VII (${by('VII')}).`
+    : `Les veïnes són el IV (${by('IV')}) i el V (${by('V')}); a dins, les seves relatives: ii (${by('ii')}), iii (${by('iii')}) i vi (${by('vi')}).`;
+  $('#whInfo').innerHTML = `
+    <div><p class="sc-kicker">Tonalitat</p><h3 class="sc-root">${name}<small>${wh.minor ? 'menor' : 'major'}</small></h3></div>
+    <p>Armadura: ${sig}. Relativa: ${relName}.</p>${enh}
+    <p class="small">${near}</p>
+    <div class="wh-chords">${chords.map((c, n) => `<button class="wh-chord${n === 0 ? ' tonic' : ''}" data-whchord="${n}" aria-label="${c.roman}: ${cname(c)}"><small>${c.roman}</small><b>${cname(c)}</b></button>`).join('')}</div>
+    <p class="small">Toca un acord per escoltar-ne la fonamental.</p>
+    <div class="actions"><button class="btn primary" data-whgo>Veure ${name} ${wh.minor ? 'menor' : 'major'} al mànec</button></div>`;
+}
+function whSelect(code) {
+  wh.minor = code[0] === 'i'; wh.i = +code.slice(1);
+  LS.set(K_WHEEL, wh);
+  renderWheel();
+  const k = WH_KEYS[wh.i];
+  playMidi(lowMidi(wh.minor ? k.relPc : k.pc));
+}
+function whGo() {
+  const k = WH_KEYS[wh.i];
+  scState.id = wh.minor ? 'natural_minor' : 'major';
+  scState.key = wh.minor ? k.relPc : k.pc;
+  scState.high = false; saveSc();
+  scView = null; // el pla torna a mostrar avui
+  show('scales', () => $('.sc-board').scrollIntoView({ block: 'start' }));
+}
+$('#wheel').addEventListener('keydown', e => {
+  const g = e.target.closest && e.target.closest('[data-wh]');
+  if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); whSelect(g.dataset.wh); }
+});
+
 function syncConfig() {
   syncSegs();
   $('#stringChips').innerHTML = instrumentStrings(cfg.strings).map(s =>
@@ -2727,6 +2939,12 @@ document.addEventListener('click', e => {
     cfg[seg.dataset.key] = t === 'num' ? +v : t === 'bool' ? v === '1' : v;
     afterCfg(); return;
   }
+
+  const whs = e.target.closest('[data-wh]');
+  if (whs) { whSelect(whs.dataset.wh); return; }
+  const whc = e.target.closest('[data-whchord]');
+  if (whc) { const k = WH_KEYS[wh.i], c = diatonicChords(k, wh.minor)[+whc.dataset.whchord]; playMidi(lowMidi(pcOfNote(c.note))); return; }
+  if (e.target.closest('[data-whgo]')) { whGo(); return; }
 
   const scb = e.target.closest('[data-sc]');
   if (scb) { if (!scb.disabled) scAction(scb.dataset.sc, scb.dataset.v); return; }
@@ -2793,6 +3011,7 @@ window.addEventListener('resize', () => {
 document.addEventListener('touchstart', () => {}, { passive: true });
 selfTest();
 scaleSelfTest(SCD);
+wheelSelfTest(SC_MAJOR, SC_FLAT);
 applyTheme();
 show('home');
 </script>
