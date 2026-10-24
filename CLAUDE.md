@@ -41,6 +41,11 @@ Idioma de la interfície: **català**.
 ### Eines sense preguntes
 - **Mapa de connexions**: tria una nota i mostra totes les seves posicions, amb colors per octava i les formes d'octava.
 - **Toca lliure**: tot el mànec (fins al trast 20 o més); en tocar una posició sona la nota i es mostra el nom en les dues notacions, l'altura real, la freqüència i la nota escrita al pentagrama.
+- **Escales i arpegis** (dades a `bass-lab-escales.json`): mànec sempre de 4 cordes i 24 trasts (`instrument`), amb el patró calculat com a fonamental + offsets `[corda, trast]`. Es tria escala o arpegi, to i corda de la fonamental (Mi o La), i es mostren els graus o els noms a cada nota. Inclou el botó «Toca l'escala» (pujant i baixant, una nota per temps), el pla de 52 setmanes amb la tasca del dia i un metrònom amb el BPM del dia (`bpm_start + bpm_delta`, sense acumular).
+  - Les dades van incrustades a l'`index.html` (`<script id="scales-data">`) perquè l'app funcioni obrint el fitxer directament. Si canvia el JSON, cal tornar a enganxar-ne la versió compactada.
+  - Noms per grau (una lletra per grau). Si el to té dues grafies, s'agafa la que té menys alteracions (Re♭ menor → Do♯ menor) i, si empaten, la regla `flat_keys_pc`.
+  - Si el patró cau per sota del trast 0, la fonamental puja al trast 12.
+  - El pla compta des del primer dia que s'obre la pantalla; es pot marcar un altre dia com a avui.
 
 ## Configuració
 - Baix de **4 cordes** (E A D G) o **5 cordes** (B E A D G), en afinació estàndard.
@@ -132,7 +137,7 @@ Alteracions: ♯ = sostingut, ♭ = bemoll (Do♯ = C♯, Re♭ = D♭). En mode
 ## Pendent (anotat el 30/09/2026, per ordre de prioritat)
 1. **Exportar i importar el progrés** (configuració, pesos, estadístiques i historial) com a fitxer JSON des de la configuració. Motiu: Safari esborra el `localStorage` després de 7 dies sense visitar la web; també serveix per passar el progrés entre aparells.
 2. **Afinador pel micròfon** (excepció a "Detecció de notes pel micròfon"): YIN, suposant la corda a l'aire més propera per evitar errors d'octava, mode "harmònic del trast 12", agulla de ±50 cèntims i verd a ±3. Desactivar echoCancellation, noiseSuppression i autoGainControl. Apagar el micròfon en sortir de la pantalla.
-3. **Escales i arpegis al màstil**: escala major i menor, i arpegis d'acords, a qualsevol tonalitat i zona; veure-les i exercitar-s'hi ("toca la tercera de Sol").
+3. **Escales i arpegis al màstil**: veure-les ja està fet (25/10/2026, mòdul «Escales i arpegis»). Falta l'exercici amb preguntes ("toca la tercera de Sol").
 4. **Lectura de frases curtes**: 4–8 notes en clau de fa per llegir i tocar seguides.
 5. **Intervals al màstil**: la forma de cada interval, enllaçada amb l'exercici d'oïda.
 

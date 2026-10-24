@@ -1,0 +1,4278 @@
+{
+  "meta": {
+    "title": "Bass Lab — Escales i arpegis",
+    "language": "ca",
+    "version": 1,
+    "how_to_use": [
+      "Cada patró és una llista [string_offset, fret_offset] relativa a la nota fonamental.",
+      "string_offset 0 = la corda on hi ha la fonamental; 1 = la corda següent (més aguda), etc.",
+      "fret_offset es suma al trast de la fonamental (pot ser negatiu).",
+      "Per a un baix de 4 cordes, si la fonamental és a la corda Mi (0) o La (1), el patró hi cap sencer.",
+      "Validació: 5*string_offset + fret_offset == interval en semitons (afinació per quartes)."
+    ]
+  },
+  "instrument": {
+    "strings": [
+      {
+        "index": 0,
+        "name": "Mi",
+        "en": "E",
+        "midi": 28
+      },
+      {
+        "index": 1,
+        "name": "La",
+        "en": "A",
+        "midi": 33
+      },
+      {
+        "index": 2,
+        "name": "Re",
+        "en": "D",
+        "midi": 38
+      },
+      {
+        "index": 3,
+        "name": "Sol",
+        "en": "G",
+        "midi": 43
+      }
+    ],
+    "semitones_between_strings": 5,
+    "frets": 24,
+    "frets_note": "L'SR300 té 24 trasts; molts baixos tipus Fender en tenen 20 o 21."
+  },
+  "notes": [
+    {
+      "pc": 0,
+      "sharp": "Do",
+      "flat": "Do",
+      "en_sharp": "C",
+      "en_flat": "C"
+    },
+    {
+      "pc": 1,
+      "sharp": "Do#",
+      "flat": "Reb",
+      "en_sharp": "C#",
+      "en_flat": "Db"
+    },
+    {
+      "pc": 2,
+      "sharp": "Re",
+      "flat": "Re",
+      "en_sharp": "D",
+      "en_flat": "D"
+    },
+    {
+      "pc": 3,
+      "sharp": "Re#",
+      "flat": "Mib",
+      "en_sharp": "D#",
+      "en_flat": "Eb"
+    },
+    {
+      "pc": 4,
+      "sharp": "Mi",
+      "flat": "Mi",
+      "en_sharp": "E",
+      "en_flat": "E"
+    },
+    {
+      "pc": 5,
+      "sharp": "Fa",
+      "flat": "Fa",
+      "en_sharp": "F",
+      "en_flat": "F"
+    },
+    {
+      "pc": 6,
+      "sharp": "Fa#",
+      "flat": "Solb",
+      "en_sharp": "F#",
+      "en_flat": "Gb"
+    },
+    {
+      "pc": 7,
+      "sharp": "Sol",
+      "flat": "Sol",
+      "en_sharp": "G",
+      "en_flat": "G"
+    },
+    {
+      "pc": 8,
+      "sharp": "Sol#",
+      "flat": "Lab",
+      "en_sharp": "G#",
+      "en_flat": "Ab"
+    },
+    {
+      "pc": 9,
+      "sharp": "La",
+      "flat": "La",
+      "en_sharp": "A",
+      "en_flat": "A"
+    },
+    {
+      "pc": 10,
+      "sharp": "La#",
+      "flat": "Sib",
+      "en_sharp": "A#",
+      "en_flat": "Bb"
+    },
+    {
+      "pc": 11,
+      "sharp": "Si",
+      "flat": "Si",
+      "en_sharp": "B",
+      "en_flat": "B"
+    }
+  ],
+  "key_spelling": {
+    "flat_keys_pc": [
+      1,
+      3,
+      5,
+      6,
+      8,
+      10
+    ],
+    "rule": "Les tonalitats amb bemolls (Fa, Sib, Mib, Lab, Reb, Solb) s'escriuen amb bemolls; la resta, amb sostinguts."
+  },
+  "circle_of_fourths_pc": [
+    0,
+    5,
+    10,
+    3,
+    8,
+    1,
+    6,
+    11,
+    4,
+    9,
+    2,
+    7
+  ],
+  "intervals": [
+    {
+      "semitones": 0,
+      "degree": "1",
+      "name_ca": "Fonamental (uníson)"
+    },
+    {
+      "semitones": 1,
+      "degree": "b2",
+      "name_ca": "Segona menor"
+    },
+    {
+      "semitones": 2,
+      "degree": "2",
+      "name_ca": "Segona major"
+    },
+    {
+      "semitones": 3,
+      "degree": "b3",
+      "name_ca": "Tercera menor"
+    },
+    {
+      "semitones": 4,
+      "degree": "3",
+      "name_ca": "Tercera major"
+    },
+    {
+      "semitones": 5,
+      "degree": "4",
+      "name_ca": "Quarta justa"
+    },
+    {
+      "semitones": 6,
+      "degree": "#4/b5",
+      "name_ca": "Tríton (quarta augmentada / quinta disminuïda)"
+    },
+    {
+      "semitones": 7,
+      "degree": "5",
+      "name_ca": "Quinta justa"
+    },
+    {
+      "semitones": 8,
+      "degree": "b6",
+      "name_ca": "Sexta menor"
+    },
+    {
+      "semitones": 9,
+      "degree": "6",
+      "name_ca": "Sexta major"
+    },
+    {
+      "semitones": 10,
+      "degree": "b7",
+      "name_ca": "Setena menor"
+    },
+    {
+      "semitones": 11,
+      "degree": "7",
+      "name_ca": "Setena major"
+    },
+    {
+      "semitones": 12,
+      "degree": "8",
+      "name_ca": "Octava"
+    }
+  ],
+  "scales": [
+    {
+      "id": "major",
+      "name_ca": "Escala major (jònica)",
+      "name_en": "Major (Ionian)",
+      "family": "diatònica",
+      "intervals": [
+        0,
+        2,
+        4,
+        5,
+        7,
+        9,
+        11,
+        12
+      ],
+      "pattern": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          -1
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "start_finger": 2,
+      "character": "Alegre, estable i lluminosa. És la referència de tota la teoria musical.",
+      "styles": [
+        "pop",
+        "rock",
+        "country",
+        "música tradicional"
+      ],
+      "progressions": [
+        [
+          "I",
+          "IV",
+          "V",
+          "I"
+        ],
+        [
+          "I",
+          "V",
+          "vi",
+          "IV"
+        ],
+        [
+          "ii",
+          "V",
+          "I"
+        ]
+      ],
+      "bass_tips": [
+        "Comença la nota fonamental amb el dit del mig: així tot el patró cap en 4 trasts.",
+        "La 3a major és la nota que fa que soni 'alegre': escolta-la."
+      ],
+      "degrees": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8"
+      ],
+      "pattern_info": {
+        "span_frets": 4,
+        "min_offset": -1,
+        "max_offset": 2
+      }
+    },
+    {
+      "id": "natural_minor",
+      "name_ca": "Escala menor natural (eòlica)",
+      "name_en": "Natural minor (Aeolian)",
+      "family": "diatònica",
+      "intervals": [
+        0,
+        2,
+        3,
+        5,
+        7,
+        8,
+        10,
+        12
+      ],
+      "pattern": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "start_finger": 1,
+      "character": "Trista, fosca i melancòlica.",
+      "styles": [
+        "rock",
+        "pop",
+        "metal",
+        "balades"
+      ],
+      "progressions": [
+        [
+          "i",
+          "iv",
+          "v",
+          "i"
+        ],
+        [
+          "i",
+          "bVI",
+          "bVII",
+          "i"
+        ],
+        [
+          "i",
+          "bVII",
+          "bVI",
+          "bVII"
+        ]
+      ],
+      "bass_tips": [
+        "Fonamental amb el dit índex (1 dit per trast).",
+        "Cada escala major té una menor relativa que comparteix notes: Do major = La menor."
+      ],
+      "degrees": [
+        "1",
+        "2",
+        "b3",
+        "4",
+        "5",
+        "b6",
+        "b7",
+        "8"
+      ],
+      "pattern_info": {
+        "span_frets": 4,
+        "min_offset": 0,
+        "max_offset": 3
+      }
+    },
+    {
+      "id": "minor_pentatonic",
+      "name_ca": "Pentatònica menor",
+      "name_en": "Minor pentatonic",
+      "family": "pentatònica",
+      "intervals": [
+        0,
+        3,
+        5,
+        7,
+        10,
+        12
+      ],
+      "pattern": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "start_finger": 1,
+      "character": "Directa i 'cantable'. És l'escala més utilitzada en rock i blues.",
+      "styles": [
+        "rock",
+        "blues",
+        "funk",
+        "soul"
+      ],
+      "progressions": [
+        [
+          "i",
+          "iv",
+          "v"
+        ],
+        [
+          "i",
+          "bVII",
+          "IV"
+        ],
+        [
+          "blues de 12 compassos"
+        ]
+      ],
+      "bass_tips": [
+        "Només 5 notes: no hi ha cap nota 'perillosa'.",
+        "Base perfecta per a riffs i línies de funk."
+      ],
+      "degrees": [
+        "1",
+        "b3",
+        "4",
+        "5",
+        "b7",
+        "8"
+      ],
+      "pattern_info": {
+        "span_frets": 4,
+        "min_offset": 0,
+        "max_offset": 3
+      }
+    },
+    {
+      "id": "major_pentatonic",
+      "name_ca": "Pentatònica major",
+      "name_en": "Major pentatonic",
+      "family": "pentatònica",
+      "intervals": [
+        0,
+        2,
+        4,
+        7,
+        9,
+        12
+      ],
+      "pattern": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          -1
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "start_finger": 2,
+      "character": "Oberta i alegre, sense tensions.",
+      "styles": [
+        "country",
+        "pop",
+        "soul",
+        "motown"
+      ],
+      "progressions": [
+        [
+          "I",
+          "IV",
+          "V"
+        ],
+        [
+          "I",
+          "vi",
+          "IV",
+          "V"
+        ]
+      ],
+      "bass_tips": [
+        "Molt típica de les línies de baix de Motown i del country.",
+        "Té les mateixes notes que la pentatònica menor de la seva relativa (Do major = La menor)."
+      ],
+      "degrees": [
+        "1",
+        "2",
+        "3",
+        "5",
+        "6",
+        "8"
+      ],
+      "pattern_info": {
+        "span_frets": 4,
+        "min_offset": -1,
+        "max_offset": 2
+      }
+    },
+    {
+      "id": "blues",
+      "name_ca": "Escala de blues",
+      "name_en": "Blues scale",
+      "family": "pentatònica",
+      "intervals": [
+        0,
+        3,
+        5,
+        6,
+        7,
+        10,
+        12
+      ],
+      "pattern": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "start_finger": 1,
+      "character": "Pentatònica menor amb la 'blue note' (b5), que hi afegeix tensió i color.",
+      "styles": [
+        "blues",
+        "rock",
+        "jazz",
+        "funk"
+      ],
+      "progressions": [
+        [
+          "blues de 12 compassos: I-I-I-I-IV-IV-I-I-V-IV-I-V"
+        ]
+      ],
+      "bass_tips": [
+        "La b5 és una nota de pas: no t'hi quedis gaire estona.",
+        "Fes servir la b5 per anar de la 4a a la 5a cromàticament."
+      ],
+      "degrees": [
+        "1",
+        "b3",
+        "4",
+        "#4/b5",
+        "5",
+        "b7",
+        "8"
+      ],
+      "pattern_info": {
+        "span_frets": 4,
+        "min_offset": 0,
+        "max_offset": 3
+      }
+    },
+    {
+      "id": "dorian",
+      "name_ca": "Mode dòric",
+      "name_en": "Dorian",
+      "family": "mode",
+      "intervals": [
+        0,
+        2,
+        3,
+        5,
+        7,
+        9,
+        10,
+        12
+      ],
+      "pattern": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "start_finger": 1,
+      "character": "Menor però més lluminós que la menor natural, gràcies a la 6a major.",
+      "styles": [
+        "funk",
+        "jazz",
+        "soul",
+        "rock"
+      ],
+      "progressions": [
+        [
+          "i",
+          "IV"
+        ],
+        [
+          "i7",
+          "IV7"
+        ]
+      ],
+      "bass_tips": [
+        "És el 2n mode de l'escala major (Re dòric = notes de Do major).",
+        "Hi ha un estirament: el 6è grau a la corda del mig."
+      ],
+      "degrees": [
+        "1",
+        "2",
+        "b3",
+        "4",
+        "5",
+        "6",
+        "b7",
+        "8"
+      ],
+      "pattern_info": {
+        "span_frets": 5,
+        "min_offset": 0,
+        "max_offset": 4
+      }
+    },
+    {
+      "id": "phrygian",
+      "name_ca": "Mode frigi",
+      "name_en": "Phrygian",
+      "family": "mode",
+      "intervals": [
+        0,
+        1,
+        3,
+        5,
+        7,
+        8,
+        10,
+        12
+      ],
+      "pattern": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "start_finger": 1,
+      "character": "Fosc i exòtic, amb aire flamenc o espanyol per la b2.",
+      "styles": [
+        "flamenc",
+        "metal",
+        "música d'arrel mediterrània"
+      ],
+      "progressions": [
+        [
+          "i",
+          "bII"
+        ],
+        [
+          "i",
+          "bII",
+          "bIII",
+          "bII"
+        ]
+      ],
+      "bass_tips": [
+        "3r mode de l'escala major (Mi frigi = notes de Do major).",
+        "La b2 just al costat de la fonamental és el que li dona el caràcter."
+      ],
+      "degrees": [
+        "1",
+        "b2",
+        "b3",
+        "4",
+        "5",
+        "b6",
+        "b7",
+        "8"
+      ],
+      "pattern_info": {
+        "span_frets": 4,
+        "min_offset": 0,
+        "max_offset": 3
+      }
+    },
+    {
+      "id": "lydian",
+      "name_ca": "Mode lidi",
+      "name_en": "Lydian",
+      "family": "mode",
+      "intervals": [
+        0,
+        2,
+        4,
+        6,
+        7,
+        9,
+        11,
+        12
+      ],
+      "pattern": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          -1
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "start_finger": 2,
+      "character": "Major, somiador i 'flotant', per la #4.",
+      "styles": [
+        "bandes sonores",
+        "jazz",
+        "rock progressiu"
+      ],
+      "progressions": [
+        [
+          "I",
+          "II"
+        ],
+        [
+          "Imaj7",
+          "II7"
+        ]
+      ],
+      "bass_tips": [
+        "4t mode de l'escala major (Fa lidi = notes de Do major).",
+        "Com l'escala major però amb la 4a pujada mig to."
+      ],
+      "degrees": [
+        "1",
+        "2",
+        "3",
+        "#4/b5",
+        "5",
+        "6",
+        "7",
+        "8"
+      ],
+      "pattern_info": {
+        "span_frets": 4,
+        "min_offset": -1,
+        "max_offset": 2
+      }
+    },
+    {
+      "id": "mixolydian",
+      "name_ca": "Mode mixolidi",
+      "name_en": "Mixolydian",
+      "family": "mode",
+      "intervals": [
+        0,
+        2,
+        4,
+        5,
+        7,
+        9,
+        10,
+        12
+      ],
+      "pattern": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          -1
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "start_finger": 2,
+      "character": "Major però amb un punt bluesy per la b7. Molt de rock i funk.",
+      "styles": [
+        "rock",
+        "funk",
+        "blues",
+        "country"
+      ],
+      "progressions": [
+        [
+          "I",
+          "bVII",
+          "IV",
+          "I"
+        ],
+        [
+          "I7"
+        ]
+      ],
+      "bass_tips": [
+        "5è mode de l'escala major (Sol mixolidi = notes de Do major).",
+        "És l'escala natural sobre un acord de 7a dominant."
+      ],
+      "degrees": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "b7",
+        "8"
+      ],
+      "pattern_info": {
+        "span_frets": 4,
+        "min_offset": -1,
+        "max_offset": 2
+      }
+    },
+    {
+      "id": "locrian",
+      "name_ca": "Mode locri",
+      "name_en": "Locrian",
+      "family": "mode",
+      "intervals": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8,
+        10,
+        12
+      ],
+      "pattern": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "start_finger": 1,
+      "character": "Molt inestable i tens, per la b5. És el mode menys utilitzat.",
+      "styles": [
+        "metal",
+        "jazz (sobre acords semidisminuïts)"
+      ],
+      "progressions": [
+        [
+          "iø7",
+          "V7",
+          "i (en tonalitat menor)"
+        ]
+      ],
+      "bass_tips": [
+        "7è mode de l'escala major (Si locri = notes de Do major).",
+        "Es fa servir sobretot sobre l'acord m7b5."
+      ],
+      "degrees": [
+        "1",
+        "b2",
+        "b3",
+        "4",
+        "#4/b5",
+        "b6",
+        "b7",
+        "8"
+      ],
+      "pattern_info": {
+        "span_frets": 4,
+        "min_offset": 0,
+        "max_offset": 3
+      }
+    },
+    {
+      "id": "harmonic_minor",
+      "name_ca": "Menor harmònica",
+      "name_en": "Harmonic minor",
+      "family": "menor",
+      "intervals": [
+        0,
+        2,
+        3,
+        5,
+        7,
+        8,
+        11,
+        12
+      ],
+      "pattern": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "start_finger": 1,
+      "character": "Menor amb la 7a major: dramàtica, d'aire clàssic o oriental.",
+      "styles": [
+        "clàssica",
+        "metal neoclàssic",
+        "música d'Orient Mitjà",
+        "tango"
+      ],
+      "progressions": [
+        [
+          "i",
+          "iv",
+          "V7",
+          "i"
+        ]
+      ],
+      "bass_tips": [
+        "El salt d'un to i mig entre la b6 i la 7 és el seu tret característic.",
+        "Apareix quan una cançó en menor fa servir un acord V major."
+      ],
+      "degrees": [
+        "1",
+        "2",
+        "b3",
+        "4",
+        "5",
+        "b6",
+        "7",
+        "8"
+      ],
+      "pattern_info": {
+        "span_frets": 4,
+        "min_offset": 0,
+        "max_offset": 3
+      }
+    },
+    {
+      "id": "melodic_minor",
+      "name_ca": "Menor melòdica (ascendent)",
+      "name_en": "Melodic minor (ascending)",
+      "family": "menor",
+      "intervals": [
+        0,
+        2,
+        3,
+        5,
+        7,
+        9,
+        11,
+        12
+      ],
+      "pattern": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "start_finger": 1,
+      "character": "Menor a la part baixa i major a la part alta. Molt usada en jazz.",
+      "styles": [
+        "jazz",
+        "fusió",
+        "clàssica"
+      ],
+      "progressions": [
+        [
+          "imMaj7"
+        ],
+        [
+          "i",
+          "IV7"
+        ]
+      ],
+      "bass_tips": [
+        "En clàssica, baixant es toca com la menor natural; en jazz, igual en les dues direccions.",
+        "Hi ha un estirament: el 6è grau a la corda del mig."
+      ],
+      "degrees": [
+        "1",
+        "2",
+        "b3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8"
+      ],
+      "pattern_info": {
+        "span_frets": 5,
+        "min_offset": 0,
+        "max_offset": 4
+      }
+    }
+  ],
+  "arpeggios": [
+    {
+      "id": "major_triad",
+      "name_ca": "Tríada major",
+      "symbol": "",
+      "intervals": [
+        0,
+        4,
+        7,
+        12
+      ],
+      "pattern": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "degrees": [
+        "1",
+        "3",
+        "5",
+        "8"
+      ],
+      "pattern_info": {
+        "span_frets": 4,
+        "min_offset": -1,
+        "max_offset": 2
+      }
+    },
+    {
+      "id": "minor_triad",
+      "name_ca": "Tríada menor",
+      "symbol": "m",
+      "intervals": [
+        0,
+        3,
+        7,
+        12
+      ],
+      "pattern": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "degrees": [
+        "1",
+        "b3",
+        "5",
+        "8"
+      ],
+      "pattern_info": {
+        "span_frets": 4,
+        "min_offset": 0,
+        "max_offset": 3
+      }
+    },
+    {
+      "id": "dominant7",
+      "name_ca": "Setena de dominant",
+      "symbol": "7",
+      "intervals": [
+        0,
+        4,
+        7,
+        10
+      ],
+      "pattern": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          0
+        ]
+      ],
+      "degrees": [
+        "1",
+        "3",
+        "5",
+        "b7"
+      ],
+      "pattern_info": {
+        "span_frets": 4,
+        "min_offset": -1,
+        "max_offset": 2
+      }
+    },
+    {
+      "id": "major7",
+      "name_ca": "Setena major",
+      "symbol": "maj7",
+      "intervals": [
+        0,
+        4,
+        7,
+        11
+      ],
+      "pattern": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "degrees": [
+        "1",
+        "3",
+        "5",
+        "7"
+      ],
+      "pattern_info": {
+        "span_frets": 4,
+        "min_offset": -1,
+        "max_offset": 2
+      }
+    },
+    {
+      "id": "minor7",
+      "name_ca": "Menor setena",
+      "symbol": "m7",
+      "intervals": [
+        0,
+        3,
+        7,
+        10
+      ],
+      "pattern": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          0
+        ]
+      ],
+      "degrees": [
+        "1",
+        "b3",
+        "5",
+        "b7"
+      ],
+      "pattern_info": {
+        "span_frets": 4,
+        "min_offset": 0,
+        "max_offset": 3
+      }
+    }
+  ],
+  "practice_plan": {
+    "weeks": 52,
+    "minutes_per_day": "5-10",
+    "principle": "Millor 10 minuts cada dia que dues hores un sol dia.",
+    "plan": [
+      {
+        "week": 1,
+        "phase": "Fonaments",
+        "focus": "Notes del mànec a les cordes Mi i La (trasts 0-12)",
+        "scale_ids": [],
+        "keys": [],
+        "keys_pc": [],
+        "bpm_start": 60,
+        "notes": [
+          "Digues el nom de cada nota mentre la toques.",
+          "Troba totes les notes Do del mànec."
+        ],
+        "daily": [
+          {
+            "day": 1,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 4,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 5,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 6,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 2,
+        "phase": "Fonaments",
+        "focus": "Notes del mànec a les cordes Re i Sol + octaves",
+        "scale_ids": [],
+        "keys": [],
+        "keys_pc": [],
+        "bpm_start": 60,
+        "notes": [
+          "Patró d'octava: 2 cordes amunt i 2 trasts amunt."
+        ],
+        "daily": [
+          {
+            "day": 1,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 4,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 5,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 6,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 3,
+        "phase": "Fonaments",
+        "focus": "Intervals: identificar-los al mànec",
+        "scale_ids": [],
+        "keys": [],
+        "keys_pc": [],
+        "bpm_start": 60,
+        "notes": [
+          "Toca cada interval des de la fonamental i escolta'l."
+        ],
+        "daily": [
+          {
+            "day": 1,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 4,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 5,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 6,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 4,
+        "phase": "Fonaments",
+        "focus": "Arpegis: tríades i acords de 7a",
+        "scale_ids": [],
+        "keys": [],
+        "keys_pc": [],
+        "bpm_start": 60,
+        "notes": [
+          "Fes servir la llista 'arpeggios' del fitxer."
+        ],
+        "daily": [
+          {
+            "day": 1,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 4,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 5,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 6,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Pràctica de 5-10 minuts del tema de la setmana.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 5,
+        "phase": "Escala major",
+        "focus": "Escala major",
+        "scale_ids": [
+          "major"
+        ],
+        "keys": [
+          "Do"
+        ],
+        "keys_pc": [
+          0
+        ],
+        "bpm_start": 60,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 6,
+        "phase": "Escala major",
+        "focus": "Escala major",
+        "scale_ids": [
+          "major"
+        ],
+        "keys": [
+          "Fa"
+        ],
+        "keys_pc": [
+          5
+        ],
+        "bpm_start": 62,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 7,
+        "phase": "Escala major",
+        "focus": "Escala major",
+        "scale_ids": [
+          "major"
+        ],
+        "keys": [
+          "Sib"
+        ],
+        "keys_pc": [
+          10
+        ],
+        "bpm_start": 64,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 8,
+        "phase": "Escala major",
+        "focus": "Escala major",
+        "scale_ids": [
+          "major"
+        ],
+        "keys": [
+          "Mib"
+        ],
+        "keys_pc": [
+          3
+        ],
+        "bpm_start": 66,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 9,
+        "phase": "Escala major",
+        "focus": "Escala major",
+        "scale_ids": [
+          "major"
+        ],
+        "keys": [
+          "Lab"
+        ],
+        "keys_pc": [
+          8
+        ],
+        "bpm_start": 68,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 10,
+        "phase": "Escala major",
+        "focus": "Escala major",
+        "scale_ids": [
+          "major"
+        ],
+        "keys": [
+          "Reb"
+        ],
+        "keys_pc": [
+          1
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 11,
+        "phase": "Escala major",
+        "focus": "Escala major",
+        "scale_ids": [
+          "major"
+        ],
+        "keys": [
+          "Solb"
+        ],
+        "keys_pc": [
+          6
+        ],
+        "bpm_start": 72,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 12,
+        "phase": "Escala major",
+        "focus": "Escala major",
+        "scale_ids": [
+          "major"
+        ],
+        "keys": [
+          "Si"
+        ],
+        "keys_pc": [
+          11
+        ],
+        "bpm_start": 74,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 13,
+        "phase": "Escala major",
+        "focus": "Escala major",
+        "scale_ids": [
+          "major"
+        ],
+        "keys": [
+          "Mi"
+        ],
+        "keys_pc": [
+          4
+        ],
+        "bpm_start": 76,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 14,
+        "phase": "Escala major",
+        "focus": "Escala major",
+        "scale_ids": [
+          "major"
+        ],
+        "keys": [
+          "La"
+        ],
+        "keys_pc": [
+          9
+        ],
+        "bpm_start": 78,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 15,
+        "phase": "Escala major",
+        "focus": "Escala major",
+        "scale_ids": [
+          "major"
+        ],
+        "keys": [
+          "Re"
+        ],
+        "keys_pc": [
+          2
+        ],
+        "bpm_start": 80,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 16,
+        "phase": "Escala major",
+        "focus": "Escala major",
+        "scale_ids": [
+          "major"
+        ],
+        "keys": [
+          "Sol"
+        ],
+        "keys_pc": [
+          7
+        ],
+        "bpm_start": 82,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 17,
+        "phase": "Escala menor natural",
+        "focus": "Menor natural (relativa)",
+        "scale_ids": [
+          "natural_minor"
+        ],
+        "keys": [
+          "La"
+        ],
+        "keys_pc": [
+          9
+        ],
+        "bpm_start": 60,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "És la relativa menor de Do major: les mateixes notes."
+        ]
+      },
+      {
+        "week": 18,
+        "phase": "Escala menor natural",
+        "focus": "Menor natural (relativa)",
+        "scale_ids": [
+          "natural_minor"
+        ],
+        "keys": [
+          "Re"
+        ],
+        "keys_pc": [
+          2
+        ],
+        "bpm_start": 62,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "És la relativa menor de Fa major: les mateixes notes."
+        ]
+      },
+      {
+        "week": 19,
+        "phase": "Escala menor natural",
+        "focus": "Menor natural (relativa)",
+        "scale_ids": [
+          "natural_minor"
+        ],
+        "keys": [
+          "Sol"
+        ],
+        "keys_pc": [
+          7
+        ],
+        "bpm_start": 64,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "És la relativa menor de Sib major: les mateixes notes."
+        ]
+      },
+      {
+        "week": 20,
+        "phase": "Escala menor natural",
+        "focus": "Menor natural (relativa)",
+        "scale_ids": [
+          "natural_minor"
+        ],
+        "keys": [
+          "Do"
+        ],
+        "keys_pc": [
+          0
+        ],
+        "bpm_start": 66,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "És la relativa menor de Mib major: les mateixes notes."
+        ]
+      },
+      {
+        "week": 21,
+        "phase": "Escala menor natural",
+        "focus": "Menor natural (relativa)",
+        "scale_ids": [
+          "natural_minor"
+        ],
+        "keys": [
+          "Fa"
+        ],
+        "keys_pc": [
+          5
+        ],
+        "bpm_start": 68,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "És la relativa menor de Lab major: les mateixes notes."
+        ]
+      },
+      {
+        "week": 22,
+        "phase": "Escala menor natural",
+        "focus": "Menor natural (relativa)",
+        "scale_ids": [
+          "natural_minor"
+        ],
+        "keys": [
+          "Sib"
+        ],
+        "keys_pc": [
+          10
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "És la relativa menor de Reb major: les mateixes notes."
+        ]
+      },
+      {
+        "week": 23,
+        "phase": "Escala menor natural",
+        "focus": "Menor natural (relativa)",
+        "scale_ids": [
+          "natural_minor"
+        ],
+        "keys": [
+          "Mib"
+        ],
+        "keys_pc": [
+          3
+        ],
+        "bpm_start": 72,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "És la relativa menor de Solb major: les mateixes notes."
+        ]
+      },
+      {
+        "week": 24,
+        "phase": "Escala menor natural",
+        "focus": "Menor natural (relativa)",
+        "scale_ids": [
+          "natural_minor"
+        ],
+        "keys": [
+          "Lab"
+        ],
+        "keys_pc": [
+          8
+        ],
+        "bpm_start": 74,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "És la relativa menor de Si major: les mateixes notes."
+        ]
+      },
+      {
+        "week": 25,
+        "phase": "Escala menor natural",
+        "focus": "Menor natural (relativa)",
+        "scale_ids": [
+          "natural_minor"
+        ],
+        "keys": [
+          "Reb"
+        ],
+        "keys_pc": [
+          1
+        ],
+        "bpm_start": 76,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "És la relativa menor de Mi major: les mateixes notes."
+        ]
+      },
+      {
+        "week": 26,
+        "phase": "Escala menor natural",
+        "focus": "Menor natural (relativa)",
+        "scale_ids": [
+          "natural_minor"
+        ],
+        "keys": [
+          "Solb"
+        ],
+        "keys_pc": [
+          6
+        ],
+        "bpm_start": 78,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "És la relativa menor de La major: les mateixes notes."
+        ]
+      },
+      {
+        "week": 27,
+        "phase": "Escala menor natural",
+        "focus": "Menor natural (relativa)",
+        "scale_ids": [
+          "natural_minor"
+        ],
+        "keys": [
+          "Si"
+        ],
+        "keys_pc": [
+          11
+        ],
+        "bpm_start": 80,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "És la relativa menor de Re major: les mateixes notes."
+        ]
+      },
+      {
+        "week": 28,
+        "phase": "Escala menor natural",
+        "focus": "Menor natural (relativa)",
+        "scale_ids": [
+          "natural_minor"
+        ],
+        "keys": [
+          "Mi"
+        ],
+        "keys_pc": [
+          4
+        ],
+        "bpm_start": 82,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "És la relativa menor de Sol major: les mateixes notes."
+        ]
+      },
+      {
+        "week": 29,
+        "phase": "Pentatònica menor",
+        "focus": "Pentatònica menor",
+        "scale_ids": [
+          "minor_pentatonic"
+        ],
+        "keys": [
+          "La",
+          "Re"
+        ],
+        "keys_pc": [
+          9,
+          2
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 30,
+        "phase": "Pentatònica menor",
+        "focus": "Pentatònica menor",
+        "scale_ids": [
+          "minor_pentatonic"
+        ],
+        "keys": [
+          "Sol",
+          "Do"
+        ],
+        "keys_pc": [
+          7,
+          0
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 31,
+        "phase": "Pentatònica menor",
+        "focus": "Pentatònica menor",
+        "scale_ids": [
+          "minor_pentatonic"
+        ],
+        "keys": [
+          "Fa",
+          "Sib"
+        ],
+        "keys_pc": [
+          5,
+          10
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 32,
+        "phase": "Pentatònica menor",
+        "focus": "Pentatònica menor",
+        "scale_ids": [
+          "minor_pentatonic"
+        ],
+        "keys": [
+          "Mib",
+          "Lab"
+        ],
+        "keys_pc": [
+          3,
+          8
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 33,
+        "phase": "Pentatònica menor",
+        "focus": "Pentatònica menor",
+        "scale_ids": [
+          "minor_pentatonic"
+        ],
+        "keys": [
+          "Reb",
+          "Solb"
+        ],
+        "keys_pc": [
+          1,
+          6
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 34,
+        "phase": "Pentatònica menor",
+        "focus": "Pentatònica menor",
+        "scale_ids": [
+          "minor_pentatonic"
+        ],
+        "keys": [
+          "Si",
+          "Mi"
+        ],
+        "keys_pc": [
+          11,
+          4
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 35,
+        "phase": "Pentatònica major",
+        "focus": "Pentatònica major",
+        "scale_ids": [
+          "major_pentatonic"
+        ],
+        "keys": [
+          "Do",
+          "Fa",
+          "Sib"
+        ],
+        "keys_pc": [
+          0,
+          5,
+          10
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 36,
+        "phase": "Pentatònica major",
+        "focus": "Pentatònica major",
+        "scale_ids": [
+          "major_pentatonic"
+        ],
+        "keys": [
+          "Mib",
+          "Lab",
+          "Reb"
+        ],
+        "keys_pc": [
+          3,
+          8,
+          1
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 37,
+        "phase": "Pentatònica major",
+        "focus": "Pentatònica major",
+        "scale_ids": [
+          "major_pentatonic"
+        ],
+        "keys": [
+          "Solb",
+          "Si",
+          "Mi"
+        ],
+        "keys_pc": [
+          6,
+          11,
+          4
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 38,
+        "phase": "Pentatònica major",
+        "focus": "Pentatònica major",
+        "scale_ids": [
+          "major_pentatonic"
+        ],
+        "keys": [
+          "La",
+          "Re",
+          "Sol"
+        ],
+        "keys_pc": [
+          9,
+          2,
+          7
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 39,
+        "phase": "Escala de blues",
+        "focus": "Escala de blues",
+        "scale_ids": [
+          "blues"
+        ],
+        "keys": [
+          "La",
+          "Re",
+          "Sol",
+          "Do"
+        ],
+        "keys_pc": [
+          9,
+          2,
+          7,
+          0
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 40,
+        "phase": "Escala de blues",
+        "focus": "Escala de blues",
+        "scale_ids": [
+          "blues"
+        ],
+        "keys": [
+          "Fa",
+          "Sib",
+          "Mib",
+          "Lab"
+        ],
+        "keys_pc": [
+          5,
+          10,
+          3,
+          8
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 41,
+        "phase": "Escala de blues",
+        "focus": "Escala de blues",
+        "scale_ids": [
+          "blues"
+        ],
+        "keys": [
+          "Reb",
+          "Solb",
+          "Si",
+          "Mi"
+        ],
+        "keys_pc": [
+          1,
+          6,
+          11,
+          4
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 42,
+        "phase": "Els set modes",
+        "focus": "Escala major (jònica)",
+        "scale_ids": [
+          "major"
+        ],
+        "keys": [
+          "Do"
+        ],
+        "keys_pc": [
+          0
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "Comença a Do: totes les notes són de Do major, però la fonamental canvia."
+        ]
+      },
+      {
+        "week": 43,
+        "phase": "Els set modes",
+        "focus": "Mode dòric",
+        "scale_ids": [
+          "dorian"
+        ],
+        "keys": [
+          "Re"
+        ],
+        "keys_pc": [
+          2
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "Comença a Re: totes les notes són de Do major, però la fonamental canvia."
+        ]
+      },
+      {
+        "week": 44,
+        "phase": "Els set modes",
+        "focus": "Mode frigi",
+        "scale_ids": [
+          "phrygian"
+        ],
+        "keys": [
+          "Mi"
+        ],
+        "keys_pc": [
+          4
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "Comença a Mi: totes les notes són de Do major, però la fonamental canvia."
+        ]
+      },
+      {
+        "week": 45,
+        "phase": "Els set modes",
+        "focus": "Mode lidi",
+        "scale_ids": [
+          "lydian"
+        ],
+        "keys": [
+          "Fa"
+        ],
+        "keys_pc": [
+          5
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "Comença a Fa: totes les notes són de Do major, però la fonamental canvia."
+        ]
+      },
+      {
+        "week": 46,
+        "phase": "Els set modes",
+        "focus": "Mode mixolidi",
+        "scale_ids": [
+          "mixolydian"
+        ],
+        "keys": [
+          "Sol"
+        ],
+        "keys_pc": [
+          7
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "Comença a Sol: totes les notes són de Do major, però la fonamental canvia."
+        ]
+      },
+      {
+        "week": 47,
+        "phase": "Els set modes",
+        "focus": "Escala menor natural (eòlica)",
+        "scale_ids": [
+          "natural_minor"
+        ],
+        "keys": [
+          "La"
+        ],
+        "keys_pc": [
+          9
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "Comença a La: totes les notes són de Do major, però la fonamental canvia."
+        ]
+      },
+      {
+        "week": 48,
+        "phase": "Els set modes",
+        "focus": "Mode locri",
+        "scale_ids": [
+          "locrian"
+        ],
+        "keys": [
+          "Si"
+        ],
+        "keys_pc": [
+          11
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ],
+        "notes": [
+          "Comença a Si: totes les notes són de Do major, però la fonamental canvia."
+        ]
+      },
+      {
+        "week": 49,
+        "phase": "Menors harmònica i melòdica",
+        "focus": "Menor harmònica",
+        "scale_ids": [
+          "harmonic_minor"
+        ],
+        "keys": [
+          "La",
+          "Mi",
+          "Re"
+        ],
+        "keys_pc": [
+          9,
+          4,
+          2
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 50,
+        "phase": "Menors harmònica i melòdica",
+        "focus": "Menor melòdica",
+        "scale_ids": [
+          "melodic_minor"
+        ],
+        "keys": [
+          "La",
+          "Mi",
+          "Re"
+        ],
+        "keys_pc": [
+          9,
+          4,
+          2
+        ],
+        "bpm_start": 70,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 51,
+        "phase": "Repàs i aplicació",
+        "focus": "Repàs: tria 3 escales i toca-les en 3 tonalitats",
+        "scale_ids": [
+          "major",
+          "natural_minor",
+          "minor_pentatonic"
+        ],
+        "keys": [
+          "Do",
+          "Sol",
+          "La"
+        ],
+        "keys_pc": [
+          0,
+          7,
+          9
+        ],
+        "bpm_start": 80,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      },
+      {
+        "week": 52,
+        "phase": "Repàs i aplicació",
+        "focus": "Improvisació: blues de 12 compassos i progressions modals",
+        "scale_ids": [
+          "blues",
+          "dorian",
+          "mixolydian"
+        ],
+        "keys": [
+          "La",
+          "Mi",
+          "Re"
+        ],
+        "keys_pc": [
+          9,
+          4,
+          2
+        ],
+        "bpm_start": 80,
+        "daily": [
+          {
+            "day": 1,
+            "task": "Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 2,
+            "task": "Mateix patró amb la fonamental a la corda La.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 3,
+            "task": "Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 4,
+            "task": "Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.",
+            "bpm_delta": 5
+          },
+          {
+            "day": 5,
+            "task": "Toca l'escala sencera pujant el tempo.",
+            "bpm_delta": 10
+          },
+          {
+            "day": 6,
+            "task": "Aplicació: crea una línia de baix sobre una de les progressions típiques.",
+            "bpm_delta": 0
+          },
+          {
+            "day": 7,
+            "task": "Repàs i improvisació lliure amb la caixa de ritmes.",
+            "bpm_delta": 0
+          }
+        ]
+      }
+    ]
+  }
+}

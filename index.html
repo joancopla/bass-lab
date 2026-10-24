@@ -233,6 +233,83 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 .play-staff { margin-bottom: 0; }
 @media (max-width: 640px) { .play-top { grid-template-columns: 1fr; } .play-now { min-height: 0; } }
 
+/* ===================== Escales i arpegis ===================== */
+.sc-kicker { margin: 0; font-size: 13px; font-weight: 700; color: var(--muted); }
+.sc-top { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 12px; margin-bottom: 12px; align-items: start; }
+@media (max-width: 760px) { .sc-top { grid-template-columns: minmax(0, 1fr); } }
+.sc-plan { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+#scPlan { display: grid; gap: 12px; }
+.plan-head { display: flex; align-items: center; gap: 10px; }
+.plan-head > div { flex: 1; min-width: 0; text-align: center; }
+.plan-head .icon-btn { font-size: 20px; }
+.plan-head .icon-btn:disabled { opacity: .35; cursor: default; }
+.plan-focus { margin: 2px 0 0; font-family: var(--font-display); font-size: 22px; font-weight: 700; line-height: 1.15; }
+.seg.plan-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.seg.plan-days button { position: relative; min-width: 0; padding: 0; }
+.plan-days button.today::after {
+  content: ''; position: absolute; left: 50%; bottom: 5px; width: 5px; height: 5px; margin-left: -2.5px;
+  border-radius: 50%; background: var(--accent);
+}
+.plan-task { margin: 0; font-size: 16px; }
+.plan-task b { display: block; margin-bottom: 2px; font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--accent); font-variant-numeric: tabular-nums; }
+.plan-notes { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
+.plan-links { display: flex; gap: 4px 14px; flex-wrap: wrap; font-size: 14px; }
+.plan-load { display: grid; gap: 8px; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; }
+.plan-all { border-top: 1px solid var(--line); }
+.plan-all summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-weight: 700; color: var(--accent); }
+.phase { display: grid; gap: 6px; padding: 10px 0; border-top: 1px solid var(--line); }
+.phase > span { font-size: 14px; font-weight: 700; }
+.phase > span small { font-weight: 600; color: var(--muted); margin-left: 6px; }
+.phase .seg button { min-width: 44px; padding: 0 10px; font-size: 15px; }
+.phase .seg button.today { box-shadow: inset 0 -3px 0 var(--accent); }
+
+.sc-metro { display: grid; gap: 12px; justify-items: center; text-align: center; }
+.metro-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; }
+.metro-bpm { display: flex; align-items: center; gap: 6px; }
+.metro-bpm b { font-family: var(--font-display); font-weight: 700; font-size: 54px; line-height: 1; min-width: 2.2ch; color: var(--accent); font-variant-numeric: tabular-nums; }
+.metro-bpm .icon-btn { font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--text); width: 42px; }
+.pips { display: flex; gap: 8px; }
+.pips i { width: 12px; height: 12px; border-radius: 50%; background: var(--line); transition: background-color .08s, box-shadow .08s; }
+.pips i.on { background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+.pips i.acc.on { background: var(--oct-2); }
+.sc-metro .btn { width: 100%; }
+
+.sc-board { display: grid; gap: 12px; padding: 16px 8px 14px; }
+.sc-board > :not(.board-wrap):not(.board-hint) { padding: 0 8px; }
+.sc-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.sc-root { margin: 2px 0 2px; display: flex; align-items: baseline; gap: 12px; font-family: var(--font-display); font-weight: 700; font-size: clamp(40px, 8vw, 56px); line-height: 1; color: var(--accent); }
+.sc-root small { font-size: .42em; font-weight: 600; color: var(--muted); }
+.sc-notes { display: flex; flex-wrap: wrap; gap: 6px; }
+.sc-note {
+  min-width: 56px; min-height: 58px; padding: 4px 8px; border-radius: var(--r-md); border: 1px solid var(--line);
+  background: var(--card-2); display: grid; justify-items: center; align-content: center; line-height: 1.15;
+}
+.sc-note small { font-size: 12px; font-weight: 700; color: var(--muted); }
+.sc-note b { font-family: var(--font-display); font-size: 18px; font-weight: 600; }
+.sc-note span { font-size: 11px; color: var(--faint); }
+.sc-note.root { border-color: var(--oct-2); }
+.sc-note.root b { color: var(--oct-2); }
+.sc-note.now { border-color: var(--accent); background: var(--accent-soft); }
+.sc-info { min-height: 1.45em; }
+.sc-controls { display: grid; gap: 12px; padding-top: 14px !important; border-top: 1px solid var(--line); }
+.sc-controls .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.sc-controls .row { flex-wrap: nowrap; align-items: flex-start; }
+.sc-controls .row > span { min-width: 92px; padding-top: 12px; font-size: 14px; font-weight: 700; color: var(--muted); }
+.sc-controls .row > .seg { flex: 1; min-width: 0; }
+.sc-controls button:disabled { opacity: .4; cursor: default; }
+.fb .dot.root { fill: var(--oct-2); }
+.sc-about { margin-top: 12px; display: grid; gap: 10px; }
+.sc-about p, .sc-about ul { margin: 0; }
+.sc-about ul { padding-left: 18px; }
+.sc-about .formula { font-family: var(--font-display); font-weight: 600; font-size: 17px; letter-spacing: .04em; }
+@media (max-width: 640px) {
+  .sc-controls .row { flex-wrap: wrap; gap: 6px; }
+  .sc-controls .row > span { min-width: 0; width: 100%; padding-top: 0; }
+  .sc-head .btn { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .pips i { transition: none; } }
+
 .mod[disabled] { opacity: .5; cursor: default; }
 .mod[disabled]:active { transform: none; }
 
@@ -660,6 +737,56 @@ body.in-quiz .topbar { display: none; }
     </div>
   </section>
 
+  <!-- ============ ESCALES I ARPEGIS ============ -->
+  <section id="view-scales" hidden>
+    <div class="page-head">
+      <button class="icon-btn" data-go="home" aria-label="Tornar a l'inici">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <h2>Escales i arpegis</h2>
+    </div>
+    <div class="sc-top">
+      <div class="card sc-plan">
+        <div id="scPlan"></div>
+        <details class="plan-all" id="scAll">
+          <summary>Les 52 setmanes del pla</summary>
+          <div id="scAllBody"></div>
+        </details>
+      </div>
+      <div class="card sc-metro">
+        <div class="metro-head"><p class="sc-kicker">Metrònom</p><div class="pips" id="metroPips" aria-hidden="true"><i class="acc"></i><i></i><i></i><i></i></div></div>
+        <div class="metro-bpm">
+          <button class="icon-btn" data-sc="bpm" data-v="-5" aria-label="5 BPM menys">−5</button>
+          <button class="icon-btn" data-sc="bpm" data-v="-1" aria-label="1 BPM menys">−1</button>
+          <b id="metroBpm" aria-live="polite">60</b>
+          <button class="icon-btn" data-sc="bpm" data-v="1" aria-label="1 BPM més">+1</button>
+          <button class="icon-btn" data-sc="bpm" data-v="5" aria-label="5 BPM més">+5</button>
+        </div>
+        <p class="small" id="metroInfo"></p>
+        <button class="btn primary" id="metroToggle"></button>
+      </div>
+    </div>
+    <div class="card board-card sc-board">
+      <div class="sc-head">
+        <div id="scTitle"></div>
+        <button class="btn" id="scPlay"></button>
+      </div>
+      <div class="board-wrap" id="scalesBoard"></div>
+      <p class="board-hint" hidden>Llisca per veure més trasts</p>
+      <div class="sc-notes" id="scNotes"></div>
+      <p class="small sc-info" id="scInfo" aria-live="polite"></p>
+      <div class="sc-controls">
+        <div class="row"><span>Escala</span><div class="seg" id="scScales"></div></div>
+        <div class="row"><span>Arpegi</span><div class="seg" id="scArps"></div></div>
+        <div class="row"><span>To</span><div class="seg num" id="scKeys"></div></div>
+        <div class="row"><span>Fonamental</span><div class="seg" id="scStrings"></div></div>
+        <div class="row"><span>Posició</span><div class="seg" id="scPos"></div></div>
+        <div class="row"><span>Mostra</span><div class="seg" id="scLabels"></div></div>
+      </div>
+    </div>
+    <div class="card sc-about" id="scAbout"></div>
+  </section>
+
   <!-- ============ EXERCICI ============ -->
   <section id="view-quiz" hidden>
     <div class="quiz-bar">
@@ -711,6 +838,8 @@ body.in-quiz .topbar { display: none; }
 
 <div class="toast" id="toast" role="status" hidden></div>
 
+<!-- Còpia compacta de bass-lab-escales.json (així funciona obrint el fitxer directament) -->
+<script type="application/json" id="scales-data">{"meta":{"title":"Bass Lab — Escales i arpegis","language":"ca","version":1,"how_to_use":["Cada patró és una llista [string_offset, fret_offset] relativa a la nota fonamental.","string_offset 0 = la corda on hi ha la fonamental; 1 = la corda següent (més aguda), etc.","fret_offset es suma al trast de la fonamental (pot ser negatiu).","Per a un baix de 4 cordes, si la fonamental és a la corda Mi (0) o La (1), el patró hi cap sencer.","Validació: 5*string_offset + fret_offset == interval en semitons (afinació per quartes)."]},"instrument":{"strings":[{"index":0,"name":"Mi","en":"E","midi":28},{"index":1,"name":"La","en":"A","midi":33},{"index":2,"name":"Re","en":"D","midi":38},{"index":3,"name":"Sol","en":"G","midi":43}],"semitones_between_strings":5,"frets":24,"frets_note":"L'SR300 té 24 trasts; molts baixos tipus Fender en tenen 20 o 21."},"notes":[{"pc":0,"sharp":"Do","flat":"Do","en_sharp":"C","en_flat":"C"},{"pc":1,"sharp":"Do#","flat":"Reb","en_sharp":"C#","en_flat":"Db"},{"pc":2,"sharp":"Re","flat":"Re","en_sharp":"D","en_flat":"D"},{"pc":3,"sharp":"Re#","flat":"Mib","en_sharp":"D#","en_flat":"Eb"},{"pc":4,"sharp":"Mi","flat":"Mi","en_sharp":"E","en_flat":"E"},{"pc":5,"sharp":"Fa","flat":"Fa","en_sharp":"F","en_flat":"F"},{"pc":6,"sharp":"Fa#","flat":"Solb","en_sharp":"F#","en_flat":"Gb"},{"pc":7,"sharp":"Sol","flat":"Sol","en_sharp":"G","en_flat":"G"},{"pc":8,"sharp":"Sol#","flat":"Lab","en_sharp":"G#","en_flat":"Ab"},{"pc":9,"sharp":"La","flat":"La","en_sharp":"A","en_flat":"A"},{"pc":10,"sharp":"La#","flat":"Sib","en_sharp":"A#","en_flat":"Bb"},{"pc":11,"sharp":"Si","flat":"Si","en_sharp":"B","en_flat":"B"}],"key_spelling":{"flat_keys_pc":[1,3,5,6,8,10],"rule":"Les tonalitats amb bemolls (Fa, Sib, Mib, Lab, Reb, Solb) s'escriuen amb bemolls; la resta, amb sostinguts."},"circle_of_fourths_pc":[0,5,10,3,8,1,6,11,4,9,2,7],"intervals":[{"semitones":0,"degree":"1","name_ca":"Fonamental (uníson)"},{"semitones":1,"degree":"b2","name_ca":"Segona menor"},{"semitones":2,"degree":"2","name_ca":"Segona major"},{"semitones":3,"degree":"b3","name_ca":"Tercera menor"},{"semitones":4,"degree":"3","name_ca":"Tercera major"},{"semitones":5,"degree":"4","name_ca":"Quarta justa"},{"semitones":6,"degree":"#4/b5","name_ca":"Tríton (quarta augmentada / quinta disminuïda)"},{"semitones":7,"degree":"5","name_ca":"Quinta justa"},{"semitones":8,"degree":"b6","name_ca":"Sexta menor"},{"semitones":9,"degree":"6","name_ca":"Sexta major"},{"semitones":10,"degree":"b7","name_ca":"Setena menor"},{"semitones":11,"degree":"7","name_ca":"Setena major"},{"semitones":12,"degree":"8","name_ca":"Octava"}],"scales":[{"id":"major","name_ca":"Escala major (jònica)","name_en":"Major (Ionian)","family":"diatònica","intervals":[0,2,4,5,7,9,11,12],"pattern":[[0,0],[0,2],[1,-1],[1,0],[1,2],[2,-1],[2,1],[2,2]],"start_finger":2,"character":"Alegre, estable i lluminosa. És la referència de tota la teoria musical.","styles":["pop","rock","country","música tradicional"],"progressions":[["I","IV","V","I"],["I","V","vi","IV"],["ii","V","I"]],"bass_tips":["Comença la nota fonamental amb el dit del mig: així tot el patró cap en 4 trasts.","La 3a major és la nota que fa que soni 'alegre': escolta-la."],"degrees":["1","2","3","4","5","6","7","8"],"pattern_info":{"span_frets":4,"min_offset":-1,"max_offset":2}},{"id":"natural_minor","name_ca":"Escala menor natural (eòlica)","name_en":"Natural minor (Aeolian)","family":"diatònica","intervals":[0,2,3,5,7,8,10,12],"pattern":[[0,0],[0,2],[0,3],[1,0],[1,2],[1,3],[2,0],[2,2]],"start_finger":1,"character":"Trista, fosca i melancòlica.","styles":["rock","pop","metal","balades"],"progressions":[["i","iv","v","i"],["i","bVI","bVII","i"],["i","bVII","bVI","bVII"]],"bass_tips":["Fonamental amb el dit índex (1 dit per trast).","Cada escala major té una menor relativa que comparteix notes: Do major = La menor."],"degrees":["1","2","b3","4","5","b6","b7","8"],"pattern_info":{"span_frets":4,"min_offset":0,"max_offset":3}},{"id":"minor_pentatonic","name_ca":"Pentatònica menor","name_en":"Minor pentatonic","family":"pentatònica","intervals":[0,3,5,7,10,12],"pattern":[[0,0],[0,3],[1,0],[1,2],[2,0],[2,2]],"start_finger":1,"character":"Directa i 'cantable'. És l'escala més utilitzada en rock i blues.","styles":["rock","blues","funk","soul"],"progressions":[["i","iv","v"],["i","bVII","IV"],["blues de 12 compassos"]],"bass_tips":["Només 5 notes: no hi ha cap nota 'perillosa'.","Base perfecta per a riffs i línies de funk."],"degrees":["1","b3","4","5","b7","8"],"pattern_info":{"span_frets":4,"min_offset":0,"max_offset":3}},{"id":"major_pentatonic","name_ca":"Pentatònica major","name_en":"Major pentatonic","family":"pentatònica","intervals":[0,2,4,7,9,12],"pattern":[[0,0],[0,2],[1,-1],[1,2],[2,-1],[2,2]],"start_finger":2,"character":"Oberta i alegre, sense tensions.","styles":["country","pop","soul","motown"],"progressions":[["I","IV","V"],["I","vi","IV","V"]],"bass_tips":["Molt típica de les línies de baix de Motown i del country.","Té les mateixes notes que la pentatònica menor de la seva relativa (Do major = La menor)."],"degrees":["1","2","3","5","6","8"],"pattern_info":{"span_frets":4,"min_offset":-1,"max_offset":2}},{"id":"blues","name_ca":"Escala de blues","name_en":"Blues scale","family":"pentatònica","intervals":[0,3,5,6,7,10,12],"pattern":[[0,0],[0,3],[1,0],[1,1],[1,2],[2,0],[2,2]],"start_finger":1,"character":"Pentatònica menor amb la 'blue note' (b5), que hi afegeix tensió i color.","styles":["blues","rock","jazz","funk"],"progressions":[["blues de 12 compassos: I-I-I-I-IV-IV-I-I-V-IV-I-V"]],"bass_tips":["La b5 és una nota de pas: no t'hi quedis gaire estona.","Fes servir la b5 per anar de la 4a a la 5a cromàticament."],"degrees":["1","b3","4","#4/b5","5","b7","8"],"pattern_info":{"span_frets":4,"min_offset":0,"max_offset":3}},{"id":"dorian","name_ca":"Mode dòric","name_en":"Dorian","family":"mode","intervals":[0,2,3,5,7,9,10,12],"pattern":[[0,0],[0,2],[0,3],[1,0],[1,2],[1,4],[2,0],[2,2]],"start_finger":1,"character":"Menor però més lluminós que la menor natural, gràcies a la 6a major.","styles":["funk","jazz","soul","rock"],"progressions":[["i","IV"],["i7","IV7"]],"bass_tips":["És el 2n mode de l'escala major (Re dòric = notes de Do major).","Hi ha un estirament: el 6è grau a la corda del mig."],"degrees":["1","2","b3","4","5","6","b7","8"],"pattern_info":{"span_frets":5,"min_offset":0,"max_offset":4}},{"id":"phrygian","name_ca":"Mode frigi","name_en":"Phrygian","family":"mode","intervals":[0,1,3,5,7,8,10,12],"pattern":[[0,0],[0,1],[0,3],[1,0],[1,2],[1,3],[2,0],[2,2]],"start_finger":1,"character":"Fosc i exòtic, amb aire flamenc o espanyol per la b2.","styles":["flamenc","metal","música d'arrel mediterrània"],"progressions":[["i","bII"],["i","bII","bIII","bII"]],"bass_tips":["3r mode de l'escala major (Mi frigi = notes de Do major).","La b2 just al costat de la fonamental és el que li dona el caràcter."],"degrees":["1","b2","b3","4","5","b6","b7","8"],"pattern_info":{"span_frets":4,"min_offset":0,"max_offset":3}},{"id":"lydian","name_ca":"Mode lidi","name_en":"Lydian","family":"mode","intervals":[0,2,4,6,7,9,11,12],"pattern":[[0,0],[0,2],[1,-1],[1,1],[1,2],[2,-1],[2,1],[2,2]],"start_finger":2,"character":"Major, somiador i 'flotant', per la #4.","styles":["bandes sonores","jazz","rock progressiu"],"progressions":[["I","II"],["Imaj7","II7"]],"bass_tips":["4t mode de l'escala major (Fa lidi = notes de Do major).","Com l'escala major però amb la 4a pujada mig to."],"degrees":["1","2","3","#4/b5","5","6","7","8"],"pattern_info":{"span_frets":4,"min_offset":-1,"max_offset":2}},{"id":"mixolydian","name_ca":"Mode mixolidi","name_en":"Mixolydian","family":"mode","intervals":[0,2,4,5,7,9,10,12],"pattern":[[0,0],[0,2],[1,-1],[1,0],[1,2],[2,-1],[2,0],[2,2]],"start_finger":2,"character":"Major però amb un punt bluesy per la b7. Molt de rock i funk.","styles":["rock","funk","blues","country"],"progressions":[["I","bVII","IV","I"],["I7"]],"bass_tips":["5è mode de l'escala major (Sol mixolidi = notes de Do major).","És l'escala natural sobre un acord de 7a dominant."],"degrees":["1","2","3","4","5","6","b7","8"],"pattern_info":{"span_frets":4,"min_offset":-1,"max_offset":2}},{"id":"locrian","name_ca":"Mode locri","name_en":"Locrian","family":"mode","intervals":[0,1,3,5,6,8,10,12],"pattern":[[0,0],[0,1],[0,3],[1,0],[1,1],[1,3],[2,0],[2,2]],"start_finger":1,"character":"Molt inestable i tens, per la b5. És el mode menys utilitzat.","styles":["metal","jazz (sobre acords semidisminuïts)"],"progressions":[["iø7","V7","i (en tonalitat menor)"]],"bass_tips":["7è mode de l'escala major (Si locri = notes de Do major).","Es fa servir sobretot sobre l'acord m7b5."],"degrees":["1","b2","b3","4","#4/b5","b6","b7","8"],"pattern_info":{"span_frets":4,"min_offset":0,"max_offset":3}},{"id":"harmonic_minor","name_ca":"Menor harmònica","name_en":"Harmonic minor","family":"menor","intervals":[0,2,3,5,7,8,11,12],"pattern":[[0,0],[0,2],[0,3],[1,0],[1,2],[1,3],[2,1],[2,2]],"start_finger":1,"character":"Menor amb la 7a major: dramàtica, d'aire clàssic o oriental.","styles":["clàssica","metal neoclàssic","música d'Orient Mitjà","tango"],"progressions":[["i","iv","V7","i"]],"bass_tips":["El salt d'un to i mig entre la b6 i la 7 és el seu tret característic.","Apareix quan una cançó en menor fa servir un acord V major."],"degrees":["1","2","b3","4","5","b6","7","8"],"pattern_info":{"span_frets":4,"min_offset":0,"max_offset":3}},{"id":"melodic_minor","name_ca":"Menor melòdica (ascendent)","name_en":"Melodic minor (ascending)","family":"menor","intervals":[0,2,3,5,7,9,11,12],"pattern":[[0,0],[0,2],[0,3],[1,0],[1,2],[1,4],[2,1],[2,2]],"start_finger":1,"character":"Menor a la part baixa i major a la part alta. Molt usada en jazz.","styles":["jazz","fusió","clàssica"],"progressions":[["imMaj7"],["i","IV7"]],"bass_tips":["En clàssica, baixant es toca com la menor natural; en jazz, igual en les dues direccions.","Hi ha un estirament: el 6è grau a la corda del mig."],"degrees":["1","2","b3","4","5","6","7","8"],"pattern_info":{"span_frets":5,"min_offset":0,"max_offset":4}}],"arpeggios":[{"id":"major_triad","name_ca":"Tríada major","symbol":"","intervals":[0,4,7,12],"pattern":[[0,0],[1,-1],[1,2],[2,2]],"degrees":["1","3","5","8"],"pattern_info":{"span_frets":4,"min_offset":-1,"max_offset":2}},{"id":"minor_triad","name_ca":"Tríada menor","symbol":"m","intervals":[0,3,7,12],"pattern":[[0,0],[0,3],[1,2],[2,2]],"degrees":["1","b3","5","8"],"pattern_info":{"span_frets":4,"min_offset":0,"max_offset":3}},{"id":"dominant7","name_ca":"Setena de dominant","symbol":"7","intervals":[0,4,7,10],"pattern":[[0,0],[1,-1],[1,2],[2,0]],"degrees":["1","3","5","b7"],"pattern_info":{"span_frets":4,"min_offset":-1,"max_offset":2}},{"id":"major7","name_ca":"Setena major","symbol":"maj7","intervals":[0,4,7,11],"pattern":[[0,0],[1,-1],[1,2],[2,1]],"degrees":["1","3","5","7"],"pattern_info":{"span_frets":4,"min_offset":-1,"max_offset":2}},{"id":"minor7","name_ca":"Menor setena","symbol":"m7","intervals":[0,3,7,10],"pattern":[[0,0],[0,3],[1,2],[2,0]],"degrees":["1","b3","5","b7"],"pattern_info":{"span_frets":4,"min_offset":0,"max_offset":3}}],"practice_plan":{"weeks":52,"minutes_per_day":"5-10","principle":"Millor 10 minuts cada dia que dues hores un sol dia.","plan":[{"week":1,"phase":"Fonaments","focus":"Notes del mànec a les cordes Mi i La (trasts 0-12)","scale_ids":[],"keys":[],"keys_pc":[],"bpm_start":60,"notes":["Digues el nom de cada nota mentre la toques.","Troba totes les notes Do del mànec."],"daily":[{"day":1,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":2,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":3,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":4,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":5,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":6,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":7,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0}]},{"week":2,"phase":"Fonaments","focus":"Notes del mànec a les cordes Re i Sol + octaves","scale_ids":[],"keys":[],"keys_pc":[],"bpm_start":60,"notes":["Patró d'octava: 2 cordes amunt i 2 trasts amunt."],"daily":[{"day":1,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":2,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":3,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":4,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":5,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":6,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":7,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0}]},{"week":3,"phase":"Fonaments","focus":"Intervals: identificar-los al mànec","scale_ids":[],"keys":[],"keys_pc":[],"bpm_start":60,"notes":["Toca cada interval des de la fonamental i escolta'l."],"daily":[{"day":1,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":2,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":3,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":4,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":5,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":6,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":7,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0}]},{"week":4,"phase":"Fonaments","focus":"Arpegis: tríades i acords de 7a","scale_ids":[],"keys":[],"keys_pc":[],"bpm_start":60,"notes":["Fes servir la llista 'arpeggios' del fitxer."],"daily":[{"day":1,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":2,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":3,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":4,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":5,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":6,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0},{"day":7,"task":"Pràctica de 5-10 minuts del tema de la setmana.","bpm_delta":0}]},{"week":5,"phase":"Escala major","focus":"Escala major","scale_ids":["major"],"keys":["Do"],"keys_pc":[0],"bpm_start":60,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":6,"phase":"Escala major","focus":"Escala major","scale_ids":["major"],"keys":["Fa"],"keys_pc":[5],"bpm_start":62,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":7,"phase":"Escala major","focus":"Escala major","scale_ids":["major"],"keys":["Sib"],"keys_pc":[10],"bpm_start":64,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":8,"phase":"Escala major","focus":"Escala major","scale_ids":["major"],"keys":["Mib"],"keys_pc":[3],"bpm_start":66,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":9,"phase":"Escala major","focus":"Escala major","scale_ids":["major"],"keys":["Lab"],"keys_pc":[8],"bpm_start":68,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":10,"phase":"Escala major","focus":"Escala major","scale_ids":["major"],"keys":["Reb"],"keys_pc":[1],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":11,"phase":"Escala major","focus":"Escala major","scale_ids":["major"],"keys":["Solb"],"keys_pc":[6],"bpm_start":72,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":12,"phase":"Escala major","focus":"Escala major","scale_ids":["major"],"keys":["Si"],"keys_pc":[11],"bpm_start":74,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":13,"phase":"Escala major","focus":"Escala major","scale_ids":["major"],"keys":["Mi"],"keys_pc":[4],"bpm_start":76,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":14,"phase":"Escala major","focus":"Escala major","scale_ids":["major"],"keys":["La"],"keys_pc":[9],"bpm_start":78,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":15,"phase":"Escala major","focus":"Escala major","scale_ids":["major"],"keys":["Re"],"keys_pc":[2],"bpm_start":80,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":16,"phase":"Escala major","focus":"Escala major","scale_ids":["major"],"keys":["Sol"],"keys_pc":[7],"bpm_start":82,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":17,"phase":"Escala menor natural","focus":"Menor natural (relativa)","scale_ids":["natural_minor"],"keys":["La"],"keys_pc":[9],"bpm_start":60,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["És la relativa menor de Do major: les mateixes notes."]},{"week":18,"phase":"Escala menor natural","focus":"Menor natural (relativa)","scale_ids":["natural_minor"],"keys":["Re"],"keys_pc":[2],"bpm_start":62,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["És la relativa menor de Fa major: les mateixes notes."]},{"week":19,"phase":"Escala menor natural","focus":"Menor natural (relativa)","scale_ids":["natural_minor"],"keys":["Sol"],"keys_pc":[7],"bpm_start":64,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["És la relativa menor de Sib major: les mateixes notes."]},{"week":20,"phase":"Escala menor natural","focus":"Menor natural (relativa)","scale_ids":["natural_minor"],"keys":["Do"],"keys_pc":[0],"bpm_start":66,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["És la relativa menor de Mib major: les mateixes notes."]},{"week":21,"phase":"Escala menor natural","focus":"Menor natural (relativa)","scale_ids":["natural_minor"],"keys":["Fa"],"keys_pc":[5],"bpm_start":68,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["És la relativa menor de Lab major: les mateixes notes."]},{"week":22,"phase":"Escala menor natural","focus":"Menor natural (relativa)","scale_ids":["natural_minor"],"keys":["Sib"],"keys_pc":[10],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["És la relativa menor de Reb major: les mateixes notes."]},{"week":23,"phase":"Escala menor natural","focus":"Menor natural (relativa)","scale_ids":["natural_minor"],"keys":["Mib"],"keys_pc":[3],"bpm_start":72,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["És la relativa menor de Solb major: les mateixes notes."]},{"week":24,"phase":"Escala menor natural","focus":"Menor natural (relativa)","scale_ids":["natural_minor"],"keys":["Lab"],"keys_pc":[8],"bpm_start":74,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["És la relativa menor de Si major: les mateixes notes."]},{"week":25,"phase":"Escala menor natural","focus":"Menor natural (relativa)","scale_ids":["natural_minor"],"keys":["Reb"],"keys_pc":[1],"bpm_start":76,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["És la relativa menor de Mi major: les mateixes notes."]},{"week":26,"phase":"Escala menor natural","focus":"Menor natural (relativa)","scale_ids":["natural_minor"],"keys":["Solb"],"keys_pc":[6],"bpm_start":78,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["És la relativa menor de La major: les mateixes notes."]},{"week":27,"phase":"Escala menor natural","focus":"Menor natural (relativa)","scale_ids":["natural_minor"],"keys":["Si"],"keys_pc":[11],"bpm_start":80,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["És la relativa menor de Re major: les mateixes notes."]},{"week":28,"phase":"Escala menor natural","focus":"Menor natural (relativa)","scale_ids":["natural_minor"],"keys":["Mi"],"keys_pc":[4],"bpm_start":82,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["És la relativa menor de Sol major: les mateixes notes."]},{"week":29,"phase":"Pentatònica menor","focus":"Pentatònica menor","scale_ids":["minor_pentatonic"],"keys":["La","Re"],"keys_pc":[9,2],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":30,"phase":"Pentatònica menor","focus":"Pentatònica menor","scale_ids":["minor_pentatonic"],"keys":["Sol","Do"],"keys_pc":[7,0],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":31,"phase":"Pentatònica menor","focus":"Pentatònica menor","scale_ids":["minor_pentatonic"],"keys":["Fa","Sib"],"keys_pc":[5,10],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":32,"phase":"Pentatònica menor","focus":"Pentatònica menor","scale_ids":["minor_pentatonic"],"keys":["Mib","Lab"],"keys_pc":[3,8],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":33,"phase":"Pentatònica menor","focus":"Pentatònica menor","scale_ids":["minor_pentatonic"],"keys":["Reb","Solb"],"keys_pc":[1,6],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":34,"phase":"Pentatònica menor","focus":"Pentatònica menor","scale_ids":["minor_pentatonic"],"keys":["Si","Mi"],"keys_pc":[11,4],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":35,"phase":"Pentatònica major","focus":"Pentatònica major","scale_ids":["major_pentatonic"],"keys":["Do","Fa","Sib"],"keys_pc":[0,5,10],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":36,"phase":"Pentatònica major","focus":"Pentatònica major","scale_ids":["major_pentatonic"],"keys":["Mib","Lab","Reb"],"keys_pc":[3,8,1],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":37,"phase":"Pentatònica major","focus":"Pentatònica major","scale_ids":["major_pentatonic"],"keys":["Solb","Si","Mi"],"keys_pc":[6,11,4],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":38,"phase":"Pentatònica major","focus":"Pentatònica major","scale_ids":["major_pentatonic"],"keys":["La","Re","Sol"],"keys_pc":[9,2,7],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":39,"phase":"Escala de blues","focus":"Escala de blues","scale_ids":["blues"],"keys":["La","Re","Sol","Do"],"keys_pc":[9,2,7,0],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":40,"phase":"Escala de blues","focus":"Escala de blues","scale_ids":["blues"],"keys":["Fa","Sib","Mib","Lab"],"keys_pc":[5,10,3,8],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":41,"phase":"Escala de blues","focus":"Escala de blues","scale_ids":["blues"],"keys":["Reb","Solb","Si","Mi"],"keys_pc":[1,6,11,4],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":42,"phase":"Els set modes","focus":"Escala major (jònica)","scale_ids":["major"],"keys":["Do"],"keys_pc":[0],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["Comença a Do: totes les notes són de Do major, però la fonamental canvia."]},{"week":43,"phase":"Els set modes","focus":"Mode dòric","scale_ids":["dorian"],"keys":["Re"],"keys_pc":[2],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["Comença a Re: totes les notes són de Do major, però la fonamental canvia."]},{"week":44,"phase":"Els set modes","focus":"Mode frigi","scale_ids":["phrygian"],"keys":["Mi"],"keys_pc":[4],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["Comença a Mi: totes les notes són de Do major, però la fonamental canvia."]},{"week":45,"phase":"Els set modes","focus":"Mode lidi","scale_ids":["lydian"],"keys":["Fa"],"keys_pc":[5],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["Comença a Fa: totes les notes són de Do major, però la fonamental canvia."]},{"week":46,"phase":"Els set modes","focus":"Mode mixolidi","scale_ids":["mixolydian"],"keys":["Sol"],"keys_pc":[7],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["Comença a Sol: totes les notes són de Do major, però la fonamental canvia."]},{"week":47,"phase":"Els set modes","focus":"Escala menor natural (eòlica)","scale_ids":["natural_minor"],"keys":["La"],"keys_pc":[9],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["Comença a La: totes les notes són de Do major, però la fonamental canvia."]},{"week":48,"phase":"Els set modes","focus":"Mode locri","scale_ids":["locrian"],"keys":["Si"],"keys_pc":[11],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}],"notes":["Comença a Si: totes les notes són de Do major, però la fonamental canvia."]},{"week":49,"phase":"Menors harmònica i melòdica","focus":"Menor harmònica","scale_ids":["harmonic_minor"],"keys":["La","Mi","Re"],"keys_pc":[9,4,2],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":50,"phase":"Menors harmònica i melòdica","focus":"Menor melòdica","scale_ids":["melodic_minor"],"keys":["La","Mi","Re"],"keys_pc":[9,4,2],"bpm_start":70,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":51,"phase":"Repàs i aplicació","focus":"Repàs: tria 3 escales i toca-les en 3 tonalitats","scale_ids":["major","natural_minor","minor_pentatonic"],"keys":["Do","Sol","La"],"keys_pc":[0,7,9],"bpm_start":80,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]},{"week":52,"phase":"Repàs i aplicació","focus":"Improvisació: blues de 12 compassos i progressions modals","scale_ids":["blues","dorian","mixolydian"],"keys":["La","Mi","Re"],"keys_pc":[9,4,2],"bpm_start":80,"daily":[{"day":1,"task":"Aprèn el patró amb la fonamental a la corda Mi. Lent, amb metrònom.","bpm_delta":0},{"day":2,"task":"Mateix patró amb la fonamental a la corda La.","bpm_delta":0},{"day":3,"task":"Seqüències de 3 notes (1-2-3, 2-3-4, 3-4-5...) pujant i baixant.","bpm_delta":5},{"day":4,"task":"Intervals de tercera (1-3, 2-4, 3-5...) pujant i baixant.","bpm_delta":5},{"day":5,"task":"Toca l'escala sencera pujant el tempo.","bpm_delta":10},{"day":6,"task":"Aplicació: crea una línia de baix sobre una de les progressions típiques.","bpm_delta":0},{"day":7,"task":"Repàs i improvisació lliure amb la caixa de ritmes.","bpm_delta":0}]}]}}</script>
 <script>
 'use strict';
 
@@ -775,7 +904,116 @@ function isOctaveShape(a, b) {
   const ds = si(b.s) - si(a.s), df = b.f - a.f;
   return (ds === 2 && df === 2) || (ds === 3 && df === -3) || (ds === 0 && df === 12);
 }
+
+// --- Escales i arpegis (dades de bass-lab-escales.json, incrustades a la pàgina) ---
+const LETTER_PC = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+const MAJOR_STEPS = [0, 2, 4, 5, 7, 9, 11];
+const ACC_GLYPH = { '-2': '𝄫', '-1': '♭', '0': '', '1': '♯', '2': '𝄪' };
+const wrap12 = n => ((n % 12) + 18) % 12 - 6; // -6…5
+
+// Número de grau de cada nota. En les escales de 7 notes, una lletra per nota (així el lidi
+// té ♯4 i el locri ♭5); en la resta, el número que diu el JSON ("#4/b5" del blues → ♭5).
+const degreeNumbers = sc => sc.degrees.map((d, i) => (sc.intervals.length === 8 ? i + 1 : +d.match(/\d+/g).pop()));
+function degreeLabel(num, semis) {
+  const a = semis - MAJOR_STEPS[(num - 1) % 7] - 12 * Math.floor((num - 1) / 7);
+  return (a < 0 ? '♭'.repeat(-a) : '♯'.repeat(a)) + num;
+}
+function spellWith(sc, rootPc, root) {
+  const nums = degreeNumbers(sc), li = LETTERS.indexOf(root.letter);
+  return sc.intervals.map((iv, i) => {
+    const letter = LETTERS[(li + nums[i] - 1) % 7];
+    return { letter, acc: wrap12(rootPc + iv - LETTER_PC[letter]), num: nums[i], deg: degreeLabel(nums[i], iv), iv };
+  });
+}
+// Noms de les notes a partir dels graus. Si el to té dues grafies (Re♭ / Do♯), tria la que
+// necessita menys alteracions; en cas d'empat, la que diu la regla del JSON (flat_keys_pc).
+function spellScale(sc, rootPc, flatKeys) {
+  const opts = isNatural(rootPc) ? [{ letter: PC_SHARP[rootPc][0], acc: 0 }]
+    : [{ letter: PC_SHARP[rootPc][0], acc: 1 }, { letter: PC_FLAT[rootPc][0], acc: -1 }];
+  if (flatKeys.includes(rootPc)) opts.reverse();
+  const score = ns => ns.reduce((a, n) => a + Math.abs(n.acc) + (Math.abs(n.acc) > 1 ? 4 : 0), 0);
+  let best = null;
+  for (const root of opts) {
+    const notes = spellWith(sc, rootPc, root), s = score(notes);
+    if (!best || s < best.s) best = { root, notes, s };
+  }
+  return { ...best, preferred: opts[0], respelled: best.root !== opts[0] };
+}
+const noteName = (n, notation) => (notation === 'latin' ? LATIN[n.letter] : n.letter) + ACC_GLYPH[n.acc];
+
+// Posicions del patró: fonamental + offsets [corda, trast]. rootStr: 0 = Mi, 1 = La.
+// Si el patró cauria per sota del trast 0, puja la fonamental una octava (trast 12).
+function patternPositions(sc, rootPc, rootStr, high, strings, frets) {
+  const offs = sc.pattern.map(p => p[1]);
+  let rf = (((rootPc - strings[rootStr].midi) % 12) + 12) % 12;
+  if (rf + Math.min(...offs) < 0) rf += 12;
+  if (high) rf += 12;
+  if (rf + Math.max(...offs) > frets || sc.pattern.some(p => !strings[rootStr + p[0]])) return null;
+  return sc.pattern.map(([so, fo]) => {
+    const st = strings[rootStr + so];
+    return { s: st.en, f: rf + fo, midi: st.midi + rf + fo };
+  });
+}
+
+// Pla setmanal: dia del pla segons el dia en què es va començar (números de dia, UTC)
+function planDay(startDay, today, weeks = 52) {
+  const idx = Math.max(0, today - startDay);
+  return idx >= weeks * 7 ? { w: weeks, d: 7, done: true } : { w: Math.floor(idx / 7) + 1, d: (idx % 7) + 1, done: false };
+}
+// El tempo del dia és el de la setmana més l'ajust d'aquell dia (no s'acumula)
+const dayBpm = (week, d) => week.bpm_start + ((week.daily[d - 1] || {}).bpm_delta || 0);
 // ==END THEORY==
+
+function scaleSelfTest(data) {
+  const errors = [], all = data.scales.concat(data.arpeggios), byId = id => all.find(x => x.id === id);
+  const str = data.instrument.strings, flat = data.key_spelling.flat_keys_pc;
+  for (const sc of all) {
+    sc.pattern.forEach(([so, fo], i) => { if (5 * so + fo !== sc.intervals[i]) errors.push(`${sc.id}: patró ${i} no fa ${sc.intervals[i]} semitons`); });
+    const sp = spellScale(sc, 0, flat);
+    sp.notes.forEach((n, i) => {
+      const opts = sc.degrees[i].replace(/b/g, '♭').replace(/#/g, '♯').split('/');
+      if (!opts.includes(n.deg)) errors.push(`${sc.id}: grau ${n.deg}, el JSON diu ${sc.degrees[i]}`);
+    });
+    for (let pc = 0; pc < 12; pc++) {
+      if (spellScale(sc, pc, flat).notes.some(n => Math.abs(n.acc) > 1)) errors.push(`${sc.id} en ${pc}: dobles alteracions`);
+      for (const rs of [0, 1]) for (const hi of [false, true]) {
+        const pos = patternPositions(sc, pc, rs, hi, str, data.instrument.frets);
+        if (!pos) { if (!hi) errors.push(`${sc.id} en ${pc}: no hi cap`); continue; }
+        const root = pos[0].midi;
+        pos.forEach((p, i) => {
+          if (p.f < 0 || p.f > data.instrument.frets || pcOf(root) !== pc || p.midi !== root + sc.intervals[i] || midiAt(p.s, p.f) !== p.midi)
+            errors.push(`${sc.id} en ${pc}, corda ${rs}: posició ${i} incorrecta`);
+        });
+      }
+    }
+  }
+  const names = [
+    ['major', 0, 'Do Re Mi Fa Sol La Si Do'], ['major', 5, 'Fa Sol La Si♭ Do Re Mi Fa'],
+    ['natural_minor', 2, 'Re Mi Fa Sol La Si♭ Do Re'], ['major', 6, 'Sol♭ La♭ Si♭ Do♭ Re♭ Mi♭ Fa Sol♭'],
+    ['natural_minor', 1, 'Do♯ Re♯ Mi Fa♯ Sol♯ La Si Do♯'], ['blues', 9, 'La Do Re Mi♭ Mi Sol La'],
+    ['lydian', 5, 'Fa Sol La Si Do Re Mi Fa'], ['locrian', 11, 'Si Do Re Mi Fa Sol La Si'],
+    ['major_triad', 7, 'Sol Si Re Sol'], ['dominant7', 9, 'La Do♯ Mi Sol'],
+  ];
+  for (const [id, pc, exp] of names) {
+    const got = spellScale(byId(id), pc, flat).notes.map(n => noteName(n, 'latin')).join(' ');
+    if (got !== exp) errors.push(`${id} en ${pc}: ${got}, esperat ${exp}`);
+  }
+  const degs = spellScale(byId('lydian'), 5, flat).notes.map(n => n.deg).join(' ') + ' | ' + spellScale(byId('locrian'), 11, flat).notes.map(n => n.deg).join(' ');
+  if (degs !== '1 2 3 ♯4 5 6 7 8 | 1 ♭2 ♭3 4 ♭5 ♭6 ♭7 8') errors.push('graus lidi/locri: ' + degs);
+  // Fonamental: [escala, to, corda, trast esperat, MIDI esperat]
+  for (const [id, pc, rs, f, m] of [['major', 4, 0, 12, 40], ['major', 9, 1, 12, 45], ['major', 7, 0, 3, 31], ['natural_minor', 9, 0, 5, 33], ['natural_minor', 4, 0, 0, 28]]) {
+    const p = patternPositions(byId(id), pc, rs, false, str, data.instrument.frets)[0];
+    if (p.f !== f || p.midi !== m) errors.push(`${id} en ${pc}: fonamental al trast ${p.f} (${p.midi}), esperat ${f} (${m})`);
+  }
+  const plan = data.practice_plan.plan;
+  if (dayBpm(plan[10], 3) !== 77 || dayBpm(plan[10], 5) !== 82 || dayBpm(plan[10], 7) !== 72) errors.push('BPM del dia');
+  const pd = [planDay(100, 100), planDay(100, 110), planDay(100, 463), planDay(100, 464), planDay(100, 90)].map(x => x.w + '.' + x.d).join(' ');
+  if (pd !== '1.1 2.4 52.7 52.7 1.1') errors.push('dia del pla: ' + pd);
+  for (const w of plan) for (const id of w.scale_ids) if (!byId(id)) errors.push(`setmana ${w.week}: no existeix ${id}`);
+  if (errors.length) console.error('[Bass Lab] Escales amb errors:\n' + errors.join('\n'));
+  else console.info('[Bass Lab] Escales OK: patrons, graus, noms, posicions i pla.');
+  return errors;
+}
 
 function selfTest() {
   const errors = [];
@@ -1074,7 +1312,7 @@ function playMidi(midi) {
 const SINGLE_MARKERS = [3, 5, 7, 9, 15, 17, 19, 21];
 const DOUBLE_MARKERS = [12, 24];
 
-// opts: { dots:[{s,f,cls,label,key,anim,fill}], links, heat, onTap(s,f), focus, range }
+// opts: { dots:[{s,f,cls,label,key,anim,fill}], links, heat, onTap(s,f), focus, range, strings }
 // La part fixa (fusta, trasts, cordes) només es redibuixa si canvia la geometria; els punts
 // van en una capa pròpia perquè es puguin moure (el punt amb `key` llisca a la nova posició).
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1085,8 +1323,10 @@ function renderFretboard(host, opts = {}) {
   const [rMin, rMax] = opts.range || [cfg.fretMin, cfg.fretMax];
   host._fb = opts;
   host._onTap = onTap;
-  const strs = instrumentStrings(cfg.strings).slice().reverse(); // aguda a dalt, greu a baix
-  const active = new Set(opts.range ? instrumentStrings(cfg.strings).map(x => x.id) : activeStringIds());
+  // opts.strings: nombre de cordes fix (les escales sempre en dibuixen 4), amb totes actives
+  const nStr = opts.strings || cfg.strings;
+  const strs = instrumentStrings(nStr).slice().reverse(); // aguda a dalt, greu a baix
+  const active = new Set(opts.range || opts.strings ? instrumentStrings(nStr).map(x => x.id) : activeStringIds());
   const W = host.clientWidth || 600;
   const narrow = W < 700;
 
@@ -1119,7 +1359,7 @@ function renderFretboard(host, opts = {}) {
   const glowId = 'glow-' + host.id;
 
   // ---- Capa fixa ----
-  const key = [totalW, H, from, to, rMin, rMax, cfg.strings, [...active].join(''), !!onTap, cfg.notation].join('|');
+  const key = [totalW, H, from, to, rMin, rMax, nStr, [...active].join(''), !!onTap, cfg.notation].join('|');
   const fresh = host._key !== key || !host.querySelector('svg .dyn');
   if (fresh) {
     let svg = `<svg class="fb" width="${totalW}" height="${H}" viewBox="0 0 ${totalW} ${H}" role="img" aria-label="Màstil">
@@ -1857,13 +2097,15 @@ const fmtSec = ms => (ms / 1000).toFixed(1).replace('.', ',') + ' s';
 // Canvia de pantalla. `then` s'executa amb la pantalla nova ja visible (dins la transició).
 function show(view, then) {
   const update = () => {
-    for (const v of ['home', 'config', 'explore', 'stats', 'play', 'quiz', 'summary']) $('#view-' + v).hidden = v !== view;
+    if (view !== 'scales') scStopAll();
+    for (const v of ['home', 'config', 'explore', 'stats', 'play', 'scales', 'quiz', 'summary']) $('#view-' + v).hidden = v !== view;
     document.body.classList.toggle('in-quiz', view === 'quiz');
     if (view === 'home') renderHome();
     if (view === 'config') syncConfig();
     if (view === 'explore') renderExplore();
     if (view === 'stats') renderStats();
     if (view === 'play') renderPlay();
+    if (view === 'scales') renderScales();
     window.scrollTo(0, 0);
     if (then) then();
     syncIndicators();
@@ -1984,7 +2226,7 @@ function renderHome() {
       : '<span class="new">Comença</span>';
     const bar = pct != null ? `<span class="bar"><i style="--p:${pct}%"></i></span>` : '';
     return `<button class="mod" data-start="${id}"><span class="t">${M.title}</span><span class="d">${M.desc}</span><span class="s">${stat}</span>${bar}</button>`;
-  }).join('') + reviewRow() + `<button class="mod alt" data-go="explore"><span class="t">Mapa de connexions</span><span class="d">Tria una nota i mira totes les seves posicions i formes d'octava.</span><span class="s"><span class="new">Obre</span></span></button>`
+  }).join('') + reviewRow() + scalesRow() + `<button class="mod alt" data-go="explore"><span class="t">Mapa de connexions</span><span class="d">Tria una nota i mira totes les seves posicions i formes d'octava.</span><span class="s"><span class="new">Obre</span></span></button>`
     + `<button class="mod alt" data-go="play"><span class="t">Toca lliure</span><span class="d">Toca qualsevol posició i escolta com sona, amb el nom i la partitura.</span><span class="s"><span class="new">Obre</span></span></button>`;
 }
 
@@ -2097,6 +2339,343 @@ function playTap(s, f) {
   vibrate($('#playBoard'), s, f);
 }
 
+/* =====================================================================
+   9b. ESCALES I ARPEGIS, PLA SETMANAL I METRÒNOM
+   ===================================================================== */
+const SCD = JSON.parse($('#scales-data').textContent);
+const SC_ALL = SCD.scales.concat(SCD.arpeggios);
+const SC_FLAT = SCD.key_spelling.flat_keys_pc;
+const SC_STR = SCD.instrument.strings, SC_FRETS = Math.min(MAX_FRET, SCD.instrument.frets);
+const PLAN = SCD.practice_plan.plan;
+const SC_SHORT = {
+  major: 'Major', natural_minor: 'Menor natural', minor_pentatonic: 'Pentatònica menor', major_pentatonic: 'Pentatònica major',
+  blues: 'Blues', dorian: 'Dòric', phrygian: 'Frigi', lydian: 'Lidi', mixolydian: 'Mixolidi', locrian: 'Locri',
+  harmonic_minor: 'Menor harmònica', melodic_minor: 'Menor melòdica',
+  major_triad: 'Tríada major', minor_triad: 'Tríada menor', dominant7: '7 de dominant', major7: 'Setena major', minor7: 'Menor 7',
+};
+const scById = id => SC_ALL.find(x => x.id === id);
+const isArp = sc => SCD.arpeggios.includes(sc);
+const scShort = sc => SC_SHORT[sc.id] || sc.name_ca;
+const K_SCALES = 'basslab.scales';
+const scState = Object.assign({ start: null, id: 'major', key: 0, str: 0, high: false, labels: 'deg' }, LS.get(K_SCALES, {}));
+if (!scById(scState.id)) scState.id = 'major';
+if (!(scState.key >= 0 && scState.key < 12)) scState.key = 0;
+if (![0, 1].includes(scState.str)) scState.str = 0;
+const saveSc = () => LS.set(K_SCALES, scState);
+
+const dispNot = () => (cfg.notation === 'english' ? 'english' : 'latin');
+const keyName = (pc, nt) => spell(pc, SC_FLAT.includes(pc) ? 'flat' : 'sharp', nt);
+const dayNum = (d = new Date()) => Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 864e5);
+const isoOf = n => new Date(n * 864e5).toISOString().slice(0, 10);
+const planToday = () => planDay(scState.start ? Math.floor(Date.parse(scState.start) / 864e5) : dayNum(), dayNum(), PLAN.length);
+const scIntervalName = iv => (SCD.intervals.find(x => x.semitones === iv) || {}).name_ca || '';
+
+let scView = null;        // setmana i dia que es miren al pla ({ w, d })
+let scBpm = 60;
+let scPlayIdx = null;     // nota que sona ara mateix a «Toca l'escala»
+let scSeq = null;
+
+function scCurrent() {
+  const sc = scById(scState.id);
+  const sp = spellScale(sc, scState.key, SC_FLAT);
+  let pos = patternPositions(sc, scState.key, scState.str, scState.high, SC_STR, SC_FRETS);
+  if (!pos) { scState.high = false; pos = patternPositions(sc, scState.key, scState.str, false, SC_STR, SC_FRETS); }
+  return { sc, sp, pos };
+}
+
+function renderScales() {
+  if (!scState.start) { scState.start = isoOf(dayNum()); saveSc(); }
+  if (!scView) { const t = planToday(); scView = { w: t.w, d: t.d }; scBpm = dayBpm(PLAN[t.w - 1], t.d); }
+  $('#scAll').open = !!scState.allOpen;
+  renderScPlan();
+  renderScControls();
+  renderScaleBoard(true);
+  renderScAbout();
+  renderMetro();
+}
+
+// ---- Pla setmanal ----
+function renderScPlan() {
+  const t = planToday(), W = PLAN[scView.w - 1], d = scView.d, nt = dispNot();
+  const curWeek = scView.w === t.w, isToday = curWeek && d === t.d;
+  const keys = W.keys_pc.map(pc => keyName(pc, nt)).join(', ');
+  const days = W.daily.map(x => {
+    const today = curWeek && x.day === t.d;
+    return `<button data-sc="day" data-v="${x.day}" class="${x.day === d ? 'on' : ''}${today ? ' today' : ''}" aria-label="Dia ${x.day}${today ? ', avui' : ''}">${x.day}</button>`;
+  }).join('');
+  let load = '';
+  if (W.scale_ids.length) {
+    const first = `${W.scale_ids[0]}|${W.keys_pc[0] != null ? W.keys_pc[0] : ''}`;
+    const loaded = scState.id === W.scale_ids[0] && (W.keys_pc[0] == null || scState.key === W.keys_pc[0]);
+    load = `<div class="plan-load"><button class="btn${loaded ? '' : ' primary'}" data-sc="load" data-v="${first}">${loaded ? 'És al mànec ✓' : 'Carrega-la al mànec'}</button>`;
+    if (W.scale_ids.length > 1) load += `<div class="seg">${W.scale_ids.map(id => `<button data-sc="load" data-v="${id}|" class="${scState.id === id ? 'on' : ''}">${scShort(scById(id))}</button>`).join('')}</div>`;
+    if (W.keys_pc.length > 1) load += `<div class="seg num">${W.keys_pc.map(pc => `<button data-sc="load" data-v="|${pc}" class="${scState.key === pc ? 'on' : ''}">${keyName(pc, nt)}</button>`).join('')}</div>`;
+    load += '</div>';
+  }
+  const links = isToday ? '' : `<div class="plan-links"><button class="link" data-sc="now">Torna a avui</button><button class="link" data-sc="settoday">Marca aquest dia com a avui</button></div>`;
+  $('#scPlan').innerHTML = `
+    <div class="plan-head">
+      <button class="icon-btn" data-sc="week" data-v="-1" aria-label="Setmana anterior"${scView.w <= 1 ? ' disabled' : ''}>‹</button>
+      <div><p class="sc-kicker">${isToday ? '<span class="tag">Avui</span> ' : ''}Setmana ${scView.w} de ${PLAN.length} · ${W.phase}</p>
+        <h3 class="plan-focus">${W.focus}${keys && W.focus.indexOf(':') < 0 ? ' · ' + keys : ''}</h3></div>
+      <button class="icon-btn" data-sc="week" data-v="1" aria-label="Setmana següent"${scView.w >= PLAN.length ? ' disabled' : ''}>›</button>
+    </div>
+    <div class="seg num plan-days">${days}</div>
+    <p class="plan-task"><b>Dia ${d} · ${dayBpm(W, d)} BPM</b>${W.daily[d - 1].task}</p>
+    ${W.notes && W.notes.length ? `<ul class="plan-notes">${W.notes.map(n => `<li>${n}</li>`).join('')}</ul>` : ''}
+    ${t.done && isToday ? `<p class="small">És l'últim dia del pla de ${PLAN.length} setmanes.</p>` : ''}
+    ${load}${links}`;
+  renderScAll(t);
+}
+function renderScAll(t) {
+  const phases = [];
+  for (const w of PLAN) {
+    let p = phases[phases.length - 1];
+    if (!p || p.name !== w.phase) phases.push(p = { name: w.phase, weeks: [] });
+    p.weeks.push(w.week);
+  }
+  $('#scAllBody').innerHTML = phases.map(p => `<div class="phase"><span>${p.name}<small>setmanes ${p.weeks[0]}${p.weeks.length > 1 ? '–' + p.weeks[p.weeks.length - 1] : ''}</small></span>
+    <div class="seg num">${p.weeks.map(w => `<button data-sc="goweek" data-v="${w}" class="${w === scView.w ? 'on' : ''}${w === t.w ? ' today' : ''}" aria-label="Setmana ${w}${w === t.w ? ', aquesta setmana' : ''}">${w}</button>`).join('')}</div></div>`).join('')
+    + `<p class="small" style="padding-top:10px">${SCD.practice_plan.principle} De ${SCD.practice_plan.minutes_per_day} minuts al dia. Vas començar el ${new Date(scState.start + 'T12:00').toLocaleDateString('ca-ES', { day: 'numeric', month: 'long', year: 'numeric' })}.</p>`;
+}
+function scGoWeek(w) {
+  const t = planToday();
+  w = Math.max(1, Math.min(PLAN.length, w));
+  scView = { w, d: w === t.w ? t.d : 1 };
+  scBpm = dayBpm(PLAN[w - 1], scView.d);
+}
+
+// ---- Mànec ----
+function renderScControls() {
+  const nt = dispNot(), sc = scById(scState.id);
+  const chip = list => list.map(x => `<button data-sc="scale" data-v="${x.id}" class="${x.id === scState.id ? 'on' : ''}">${scShort(x)}</button>`).join('');
+  $('#scScales').innerHTML = chip(SCD.scales);
+  $('#scArps').innerHTML = chip(SCD.arpeggios);
+  $('#scKeys').innerHTML = ALL_PCS.map(pc => `<button data-sc="key" data-v="${pc}" class="${pc === scState.key ? 'on' : ''}">${keyName(pc, nt)}</button>`).join('');
+  $('#scStrings').innerHTML = [0, 1].map(i => `<button data-sc="str" data-v="${i}" class="${i === scState.str ? 'on' : ''}">Corda ${SC_STR[i].name} (${SC_STR[i].en})</button>`).join('');
+  const lo = patternPositions(sc, scState.key, scState.str, false, SC_STR, SC_FRETS);
+  const hi = patternPositions(sc, scState.key, scState.str, true, SC_STR, SC_FRETS);
+  if (!hi) scState.high = false;
+  $('#scPos').innerHTML = `<button data-sc="pos" data-v="0" class="${scState.high ? '' : 'on'}">Trast ${lo[0].f}</button>`
+    + `<button data-sc="pos" data-v="1" class="${scState.high ? 'on' : ''}"${hi ? '' : ' disabled'}>${hi ? 'Trast ' + hi[0].f : 'Octava amunt: no hi cap'}</button>`;
+  $('#scLabels').innerHTML = `<button data-sc="labels" data-v="deg" class="${scState.labels === 'deg' ? 'on' : ''}">Graus</button>`
+    + `<button data-sc="labels" data-v="names" class="${scState.labels === 'names' ? 'on' : ''}">Notes</button>`;
+}
+
+function renderScaleBoard(appear = false) {
+  const { sc, sp, pos } = scCurrent(), nt = dispNot();
+  const host = $('#scalesBoard');
+  const first = appear && !host.querySelector('.dyn [data-key]');
+  const dots = pos.map((p, i) => {
+    const n = sp.notes[i];
+    return {
+      s: p.s, f: p.f, key: 'n' + i,
+      cls: scPlayIdx === i ? 'target' : n.num % 7 === 1 ? 'root' : '',
+      label: scState.labels === 'deg' ? n.deg : noteName(n, nt),
+      delay: first && !reduceMotion() ? 60 + i * 45 : null,
+    };
+  });
+  const fs = pos.map(p => p.f), focus = Math.round((Math.min(...fs) + Math.max(...fs)) / 2);
+  renderFretboard(host, { dots, range: [0, SC_FRETS], strings: 4, onTap: scTap, focus });
+
+  const root = sp.root, kind = isArp(sc) ? 'arpegi' : 'escala';
+  $('#scTitle').innerHTML = `<p class="sc-kicker">${sc.name_ca}</p>
+    <h3 class="sc-root">${noteName(root, 'latin')}<small>${noteName(root, 'english')}${sc.symbol ? sc.symbol : ''}</small></h3>
+    <p class="small">Fonamental a la corda ${SC_STR[scState.str].name}, trast ${pos[0].f}${sc.start_finger ? ` · comença amb el dit ${sc.start_finger}` : ''}${
+      sp.respelled ? `. S'escriu des de ${noteName(root, nt)} i no des de ${noteName(sp.preferred, nt)}: així té menys alteracions.` : ''}</p>`;
+  $('#scNotes').innerHTML = sp.notes.map((n, i) =>
+    `<button class="sc-note${n.num % 7 === 1 ? ' root' : ''}${scPlayIdx === i ? ' now' : ''}" data-sc="note" data-v="${i}" aria-label="${n.deg}: ${noteName(n, 'latin')}"><small>${n.deg}</small><b>${noteName(n, 'latin')}</b><span>${noteName(n, 'english')}</span></button>`).join('');
+  $('#scPlay').innerHTML = scSeq
+    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>Atura`
+    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>Toca ${kind === 'arpegi' ? "l'arpegi" : "l'escala"}`;
+  warmMidis(pos.map(p => p.midi));
+}
+
+function renderScAbout() {
+  const sc = scById(scState.id), sp = spellScale(sc, scState.key, SC_FLAT);
+  let h = `<h3>${sc.name_ca}${sc.name_en ? ` <span class="small">· ${sc.name_en}</span>` : ''}</h3>
+    <p class="formula">${sp.notes.map(n => n.deg).join('  ')}</p>`;
+  if (sc.character) h += `<p>${sc.character}</p>`;
+  if (sc.bass_tips && sc.bass_tips.length) h += `<ul>${sc.bass_tips.map(x => `<li>${x}</li>`).join('')}</ul>`;
+  if (sc.styles && sc.styles.length) h += `<p class="small">Estils: ${sc.styles.join(', ')}.</p>`;
+  if (sc.progressions && sc.progressions.length) h += `<p class="small">Progressions típiques: ${sc.progressions.map(p => p.join('–')).join(' · ')}.</p>`;
+  if (!sc.character) h += `<p class="small">${sp.notes.map(n => `${n.deg}: ${scIntervalName(n.iv)}`).join(' · ')}.</p>`;
+  $('#scAbout').innerHTML = h;
+}
+
+function scInfo(i) {
+  const { sp, pos } = scCurrent(), n = sp.notes[i], p = pos[i];
+  $('#scInfo').textContent = `${noteName(n, 'latin')} (${noteName(n, 'english')}) · grau ${n.deg}, ${scIntervalName(n.iv).toLowerCase()} · ${posText(p.s, p.f, true)} · sona ${sciName(p.midi, n.acc < 0 ? 'flat' : 'sharp')}`;
+}
+function scTap(s, f) {
+  const midi = midiAt(s, f), host = $('#scalesBoard');
+  playMidi(midi); vibrate(host, s, f);
+  const { sp, pos } = scCurrent();
+  const i = pos.findIndex(p => p.s === s && p.f === f);
+  if (i >= 0) { scInfo(i); return; }
+  const same = sp.notes.find(n => pcOf(scState.key + n.iv) === pcOf(midi));
+  $('#scInfo').textContent = same
+    ? `${noteName(same, 'latin')} · grau ${same.deg}: és de l'${isArp(scById(scState.id)) ? 'arpegi' : 'escala'}, però fora d'aquest patró · ${posText(s, f, true)}`
+    : `${pcLabel(pcOf(midi), 'latin')} · no és de l'${isArp(scById(scState.id)) ? 'arpegi' : 'escala'} · ${posText(s, f, true)}`;
+}
+// Precalcula el so de les notes del patró perquè la primera pulsació no tingui retard
+function warmMidis(list) {
+  if (!actx) return;
+  const todo = list.slice();
+  const step = () => { const m = todo.shift(); if (m == null || !actx) return; stringBuffer(actx, freq(m)); setTimeout(step, 10); };
+  setTimeout(step, 30);
+}
+
+// ---- Metrònom i «Toca l'escala»: un sol rellotge de Web Audio amb planificació anticipada ----
+const clock = { on: false, click: false, beat: 0, next: 0, timer: null, seq: null };
+function clockRun() {
+  const c = ensureAudio(); if (!c) return false;
+  if (clock.on) return true;
+  clock.on = true; clock.beat = 0; clock.next = c.currentTime + 0.1;
+  clock.timer = setInterval(clockTick, 25);
+  clockTick();
+  return true;
+}
+function clockTick() {
+  if (!actx) return;
+  while (clock.next < actx.currentTime + 0.12) {
+    scheduleBeat(clock.beat, clock.next);
+    clock.next += 60 / scBpm;
+    clock.beat++;
+  }
+}
+function clockIdle() {
+  if (clock.click || clock.seq || !clock.on) return;
+  clearInterval(clock.timer); clock.timer = null; clock.on = false;
+}
+function clickAt(t, accent) {
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = 'triangle'; o.frequency.value = accent ? 1760 : 1175;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(accent ? 0.9 : 0.5, t + 0.002);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+  o.connect(g).connect(master);
+  o.start(t); o.stop(t + 0.06);
+}
+function playAt(midi, t) {
+  if (!cfg.sound) return;
+  if (voice) voice.stop(t);
+  voice = bassVoice(actx, master, freq(midi), t);
+}
+function scheduleBeat(n, t) {
+  if (clock.click) clickAt(t, n % 4 === 0);
+  const q = clock.seq;
+  let step = null;
+  if (q) {
+    if (q.pos < q.order.length) { step = q.order[q.pos++]; playAt(q.notes[step].midi, t); }
+    else { step = 'end'; clock.seq = null; }
+  }
+  const click = clock.click;
+  setTimeout(() => beatUI(n, click, q, step), Math.max(0, (t - actx.currentTime) * 1000));
+}
+function beatUI(n, click, q, step) {
+  if (click && clock.click) $('#metroPips').querySelectorAll('i').forEach((p, i) => p.classList.toggle('on', i === n % 4));
+  if (!q || q !== scSeq || $('#view-scales').hidden) return;
+  if (step === 'end') { stopSeq(); return; }
+  scPlayIdx = step;
+  renderScaleBoard();
+  const p = q.notes[step];
+  vibrate($('#scalesBoard'), p.s, p.f);
+  scInfo(step);
+}
+function stopSeq() {
+  const was = scSeq;
+  scSeq = null; clock.seq = null; scPlayIdx = null;
+  clockIdle();
+  if (was && !$('#view-scales').hidden) renderScaleBoard();
+}
+function scPlayToggle() {
+  if (scSeq) { stopSeq(); return; }
+  if (!cfg.sound) { toast('El so està desactivat. Activa\'l amb la icona de l\'altaveu.'); return; }
+  const { pos } = scCurrent(), n = pos.length;
+  // Pujant i baixant, una nota per temps
+  const order = [...Array(n).keys(), ...Array.from({ length: n - 1 }, (_, i) => n - 2 - i)];
+  scSeq = clock.seq = { notes: pos, order, pos: 0 };
+  if (!clockRun()) { scSeq = clock.seq = null; return; }
+  renderScaleBoard();
+}
+function metroToggle() {
+  if (clock.click) {
+    clock.click = false; clockIdle();
+  } else {
+    if (!cfg.sound) { toast('El so està desactivat. Activa\'l amb la icona de l\'altaveu.'); return; }
+    clock.click = true;
+    if (!clockRun()) clock.click = false;
+  }
+  renderMetro();
+}
+function renderMetro() {
+  const W = PLAN[scView.w - 1], target = dayBpm(W, scView.d);
+  $('#metroBpm').textContent = scBpm;
+  $('#metroInfo').innerHTML = scBpm === target
+    ? `BPM del dia ${scView.d} de la setmana ${scView.w}`
+    : `El pla diu ${target} BPM. <button class="link" data-sc="bpmreset">Torna-hi</button>`;
+  $('#metroToggle').innerHTML = clock.click
+    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>Atura`
+    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>Engega`;
+  if (!clock.click) $('#metroPips').querySelectorAll('i').forEach(p => p.classList.remove('on'));
+}
+function scStopAll() {
+  if (scSeq) stopSeq();
+  if (clock.click) { clock.click = false; clockIdle(); if (scView) renderMetro(); }
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) scStopAll(); });
+
+function scAction(kind, v) {
+  const t = planToday();
+  const board = () => { stopSeq(); saveSc(); renderScControls(); renderScaleBoard(); renderScAbout(); renderScPlan(); $('#scInfo').textContent = ''; };
+  const playRoot = () => { const { pos } = scCurrent(); playMidi(pos[0].midi); vibrate($('#scalesBoard'), pos[0].s, pos[0].f); };
+  switch (kind) {
+    case 'scale': scState.id = v; board(); playRoot(); break;
+    case 'key': scState.key = +v; board(); playRoot(); break;
+    case 'str': scState.str = +v; board(); playRoot(); break;
+    case 'pos': scState.high = v === '1'; board(); playRoot(); break;
+    case 'labels': scState.labels = v; saveSc(); renderScControls(); renderScaleBoard(); break;
+    case 'note': { const i = +v, { pos } = scCurrent(); playMidi(pos[i].midi); vibrate($('#scalesBoard'), pos[i].s, pos[i].f); scInfo(i); break; }
+    case 'week': scGoWeek(scView.w + +v); renderScPlan(); renderMetro(); break;
+    case 'goweek': scGoWeek(+v); renderScPlan(); renderMetro(); break;
+    case 'day': scView.d = +v; scBpm = dayBpm(PLAN[scView.w - 1], scView.d); renderScPlan(); renderMetro(); break;
+    case 'now': scView = { w: t.w, d: t.d }; scBpm = dayBpm(PLAN[t.w - 1], t.d); renderScPlan(); renderMetro(); break;
+    case 'settoday':
+      scState.start = isoOf(dayNum() - ((scView.w - 1) * 7 + scView.d - 1)); saveSc();
+      renderScPlan(); toast(`Avui és el dia ${scView.d} de la setmana ${scView.w}.`); break;
+    case 'load': {
+      const [id, pc] = v.split('|');
+      if (id) scState.id = id;
+      if (pc !== '') scState.key = +pc;
+      // Els dies 1 i 2 diuen a quina corda va la fonamental
+      const task = PLAN[scView.w - 1].daily[scView.d - 1].task;
+      if (/corda Mi\b/.test(task)) scState.str = 0; else if (/corda La\b/.test(task)) scState.str = 1;
+      scState.high = false;
+      board(); playRoot();
+      $('.sc-board').scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'start' });
+      break;
+    }
+    case 'bpm': scBpm = Math.max(30, Math.min(240, scBpm + +v)); renderMetro(); break;
+    case 'bpmreset': scBpm = dayBpm(PLAN[scView.w - 1], scView.d); renderMetro(); break;
+  }
+  syncIndicators();
+}
+$('#metroToggle').addEventListener('click', metroToggle);
+$('#scPlay').addEventListener('click', scPlayToggle);
+$('#scAll').addEventListener('toggle', () => { scState.allOpen = $('#scAll').open; saveSc(); syncIndicators(); });
+
+// Fila de l'inici: la tasca d'avui
+function scalesRow() {
+  const desc = 'Patrons al mànec amb els graus, pla de 52 setmanes i metrònom.';
+  if (!scState.start) return `<button class="mod" data-go="scales"><span class="t">Escales i arpegis</span><span class="d">${desc}</span><span class="s"><span class="new">Comença el pla</span></span></button>`;
+  const t = planToday(), W = PLAN[t.w - 1], nt = dispNot();
+  const keys = W.keys_pc.map(pc => keyName(pc, nt)).join(', ');
+  return `<button class="mod" data-go="scales"><span class="t">Escales i arpegis</span>`
+    + `<span class="d">Avui, setmana ${t.w} dia ${t.d}: ${W.focus}${keys && W.focus.indexOf(':') < 0 ? ' en ' + keys : ''}. ${W.daily[t.d - 1].task}</span>`
+    + `<span class="s"><b>${dayBpm(W, t.d)}</b><small>BPM</small></span></button>`;
+}
+
 function syncConfig() {
   syncSegs();
   $('#stringChips').innerHTML = instrumentStrings(cfg.strings).map(s =>
@@ -2123,6 +2702,7 @@ function afterCfg() {
   if (!$('#view-config').hidden) syncConfig();
   if (!$('#view-home').hidden) renderHome();
   if (!$('#view-explore').hidden) renderExplore();
+  if (!cfg.sound) scStopAll();
   syncSegs();
   syncIndicators();
 }
@@ -2147,6 +2727,9 @@ document.addEventListener('click', e => {
     cfg[seg.dataset.key] = t === 'num' ? +v : t === 'bool' ? v === '1' : v;
     afterCfg(); return;
   }
+
+  const scb = e.target.closest('[data-sc]');
+  if (scb) { if (!scb.disabled) scAction(scb.dataset.sc, scb.dataset.v); return; }
 
   const ex = e.target.closest('[data-explore]');
   if (ex) { explorePc = +ex.dataset.explore; renderExplore(); syncIndicators(); playMidi(lowestMidi(explorePc)); return; }
@@ -2204,11 +2787,12 @@ document.addEventListener('keydown', e => {
 let resizeTimer = null;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => { ['board', 'previewBoard', 'homeBoard', 'sumBoard', 'exploreBoard', 'heatBoard', 'playBoard'].forEach(id => redraw($('#' + id))); syncIndicators(); }, 150);
+  resizeTimer = setTimeout(() => { ['board', 'previewBoard', 'homeBoard', 'sumBoard', 'exploreBoard', 'heatBoard', 'playBoard', 'scalesBoard'].forEach(id => redraw($('#' + id))); syncIndicators(); }, 150);
 });
 
 document.addEventListener('touchstart', () => {}, { passive: true });
 selfTest();
+scaleSelfTest(SCD);
 applyTheme();
 show('home');
 </script>
