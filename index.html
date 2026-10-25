@@ -916,14 +916,16 @@ body.in-quiz .topbar { display: none; }
       <h2>Mapa de connexions</h2>
     </div>
     <div class="card explore">
+      <div class="seg" id="exploreMode" role="group" aria-label="Què es mostra"></div>
       <div class="seg num" id="explorePcs"></div>
+      <div class="seg num" id="exploreIvs" hidden></div>
       <div class="board-wrap" id="exploreBoard"></div>
       <p class="board-hint" hidden>Llisca per veure més trasts</p>
       <div class="legend" id="exploreLegend"></div>
-      <p class="small">Cada color és una octava. Les línies marquen les formes d'octava: 2 cordes amunt i 2 trasts, 3 cordes amunt i 3 trasts enrere, o 12 trasts a la mateixa corda. Toca un punt per escoltar-lo.</p>
+      <p class="small" id="exploreInfo"></p>
     </div>
     <div class="actions" style="margin-top:14px">
-      <button class="btn primary" data-start="m6">Practica les octaves</button>
+      <button class="btn primary" id="exploreStart" data-start="m6">Practica les octaves</button>
     </div>
   </section>
 
@@ -2268,7 +2270,8 @@ const MODULES = {
       const dots = [{ s: ref.s, f: ref.f, cls: 'target', key: 'q', label: nameOf(ref.midi) }];
       promptEl.innerHTML = `<h2>Escolta i troba-la</h2><div class="sub">Sona la nota marcada i després una altra a prop. <button class="link" id="earReplay">Torna-les a escoltar</button></div>`;
       answersEl.className = 'answers'; answersEl.innerHTML = ''; answersEl.onclick = null;
-      const draw = () => renderFretboard(boardEl, { dots, onTap, focus: ref.f });
+      const links = [];
+      const draw = () => renderFretboard(boardEl, { dots, links, onTap, focus: ref.f });
       const listen = () => {
         clearTimeout(q.play2);
         playMidi(ref.midi); vibrate(boardEl, ref.s, ref.f);
@@ -2284,16 +2287,17 @@ const MODULES = {
         dots[0].cls = 'reveal';
         if (m === target) {
           dots.push({ s, f, cls: 'ok', anim: 'pop', label: tName });
+          links.push({ a: ref, b: { s, f }, cls: 'ok' });
           draw(); vibrate(boardEl, s, f);
-          resolve(true, m, `Correcte: ${tName}, ${intervalName(iv)}`);
+          resolve(true, m, `Correcte: ${tName}, ${intervalName(iv)} (${shapeText(ref, { s, f })})`);
           return;
         }
         dots.push({ s, f, cls: 'err', anim: 'shake', label: nameOf(m) });
-        for (const t of targets) dots.push({ s: t.s, f: t.f, cls: 'reveal', label: tName });
+        for (const t of targets) { dots.push({ s: t.s, f: t.f, cls: 'reveal', label: tName }); links.push({ a: ref, b: t, cls: 'shape' }); }
         draw();
         const near = nearest(targets, s, f);
         vibrate(boardEl, near.s, near.f);
-        resolve(false, target, `Era ${tName}: ${intervalName(iv)}.`);
+        resolve(false, target, `Era ${tName}: ${intervalName(iv)} (${shapeText(ref, nearest(targets, ref.s, ref.f))}).`);
       }
       draw();
       q.t0 = performance.now() + 900; // el temps compta des que sona la segona nota
@@ -2454,6 +2458,54 @@ const MODULES = {
     },
     failDots() { return []; },
   },
+
+  // Intervals al màstil: des de la nota marcada, toca l'interval demanat a l'altura exacta
+  iv: {
+    title: 'Intervals al màstil', desc: 'Des de la nota marcada, toca l\'interval que et demanen, amunt o avall.',
+    candidates() {
+      const pos = positionsInRange(), mids = new Set(pos.map(p => p.midi));
+      const roots = pos.filter(p => allowedPc(pcOf(p.midi)));
+      const out = [];
+      for (let iv = -12; iv <= 12; iv++) if (iv && roots.some(r => mids.has(r.midi + iv))) out.push({ iv, key: `iv|${iv > 0 ? '+' : ''}${iv}` });
+      return out;
+    },
+    render(q) {
+      const iv = q.item.iv, pos = positionsInRange();
+      const roots = pos.filter(p => allowedPc(pcOf(p.midi)) && pos.some(t => t.midi === p.midi + iv));
+      const root = roots[Math.floor(Math.random() * roots.length)];
+      const target = root.midi + iv, targets = pos.filter(p => p.midi === target);
+      const name = m => pcShort(pcOf(m), q.notation, q.spelling);
+      const dots = [{ s: root.s, f: root.f, cls: 'root', key: 'r', label: name(root.midi) }], links = [];
+      promptEl.innerHTML = `<div class="ask">Des de ${name(root.midi)}</div><div class="big">${INTERVALS[Math.abs(iv)]} ${iv > 0 ? 'amunt' : 'avall'}</div><div class="sub">A l'altura exacta. Toca la nota marcada per escoltar-la.</div>`;
+      answersEl.className = 'answers'; answersEl.innerHTML = ''; answersEl.onclick = null;
+      const draw = () => renderFretboard(boardEl, { dots, links, onTap, focus: root.f });
+      function onTap(s, f) {
+        if (q.done) return;
+        if (s === root.s && f === root.f) { playMidi(root.midi); vibrate(boardEl, s, f); return; }
+        const m = midiAt(s, f);
+        if (m === target) {
+          recordPos(s, f, true);
+          dots.push({ s, f, cls: 'ok', anim: 'pop', label: name(m) });
+          links.push({ a: root, b: { s, f }, cls: 'ok' });
+          draw(); vibrate(boardEl, s, f);
+          resolve(true, m, `Correcte: ${name(root.midi)} → ${name(m)}, ${shapeText(root, { s, f })}`);
+          return;
+        }
+        dots.push({ s, f, cls: 'err', anim: 'shake', label: name(m) });
+        for (const t of targets) { recordPos(t.s, t.f, false); dots.push({ s: t.s, f: t.f, cls: 'reveal', label: name(target) }); links.push({ a: root, b: t, cls: 'shape' }); }
+        draw();
+        const nr = nearest(targets, root.s, root.f);
+        vibrate(boardEl, nr.s, nr.f);
+        resolve(false, target, pcOf(m) === pcOf(target)
+          ? `Nota correcta, però una octava massa ${m > target ? 'aguda' : 'greu'}. Mira les formes marcades.`
+          : `Era ${name(target)}: ${shapeText(root, nr)}.`);
+      }
+      draw();
+      if (cfg.sound) playMidi(root.midi);
+    },
+    failLabel(key) { return [intervalName(+key.split('|')[1]), '']; },
+    failDots() { return []; },
+  },
 };
 
 /* ---- Lectura de frases: tonalitats i generació ---- */
@@ -2505,7 +2557,8 @@ const sdName = (sc, root) => (SD_CHORD[sc.id] ? `Arpegi ${de(root + SD_CHORD[sc.
 const de = x => (x.startsWith('Arpegi') ? "de l'a" + x.slice(1) : (/^[AEIOU]/.test(x) ? "d'" : 'de ') + x);
 const sdRoots = () => positionsInRange().filter(p => allowedPc(pcOf(p.midi)));
 
-const INTERVALS = ['', 'segona menor', 'segona major', 'tercera menor', 'tercera major', 'quarta justa', 'tritò', 'quinta justa'];
+const INTERVALS = ['', 'segona menor', 'segona major', 'tercera menor', 'tercera major', 'quarta justa', 'tritó', 'quinta justa', 'sexta menor', 'sexta major', 'setena menor', 'setena major', 'octava'];
+const IV_SHORT = ['', '2m', '2M', '3m', '3M', '4J', 'Tritó', '5J', '6m', '6M', '7m', '7M', '8a'];
 const intervalName = iv => `${INTERVALS[Math.abs(iv)]} ${iv > 0 ? 'amunt' : 'avall'}`;
 
 function nearest(targets, s, f) {
@@ -2827,12 +2880,59 @@ let explorePc = 4; // Mi / E
 // Posició més greu de la nota dins el rang (per fer-la sonar en triar-la)
 const lowestMidi = pc => { const p = positionsInRange().filter(x => pcOf(x.midi) === pc).sort((a, b) => a.midi - b.midi)[0]; return p ? p.midi : null; };
 
+// Mapa de connexions: octaves (per defecte) o intervals des d'una fonamental
+let exploreMode = 'oct', exploreIv = 7, exploreRoot = null, exploreRootUser = false; // User: la fonamental l'ha triat l'usuari tocant-la
+const strIdx = id => STRINGS.findIndex(x => x.id === id);
+// Forma d'un interval al mànec: «1 corda amunt, 2 trasts endavant» (amunt = cap a la corda aguda)
+function shapeText(a, b) {
+  const ds = strIdx(b.s) - strIdx(a.s), df = b.f - a.f, n = (k, one, many) => `${Math.abs(k)} ${Math.abs(k) === 1 ? one : many}`;
+  const c = ds === 0 ? 'mateixa corda' : `${n(ds, 'corda', 'cordes')} ${ds > 0 ? 'amunt' : 'avall'}`;
+  const t = df === 0 ? 'mateix trast' : `${n(df, 'trast', 'trasts')} ${df > 0 ? 'endavant' : 'enrere'}`;
+  return `${c}, ${t}`;
+}
+// Fonamental per defecte: la posició des d'on es veuen més formes de l'interval (amunt i avall);
+// si empaten, la de la corda més greu
+function exploreDefaultRoot(pc) {
+  const pos = positionsInRange(), n = r => pos.filter(p => Math.abs(p.midi - r.midi) === exploreIv).length;
+  return pos.filter(p => pcOf(p.midi) === pc)
+    .sort((a, b) => n(b) - n(a) || strIdx(a.s) - strIdx(b.s) || a.f - b.f)[0] || null;
+}
+function renderExploreIv(notation) {
+  if (!exploreRoot || pcOf(midiAt(exploreRoot.s, exploreRoot.f)) !== explorePc) exploreRoot = exploreDefaultRoot(explorePc);
+  const host = $('#exploreBoard'), onTap = (s, f) => {
+    exploreRoot = { s, f }; exploreRootUser = true; explorePc = pcOf(midiAt(s, f));
+    renderExplore();
+    const r = midiAt(s, f), up = positionsInRange().filter(p => p.midi === r + exploreIv);
+    playMidi(r); vibrate(host, s, f);
+    if (up.length) setTimeout(() => { const t = nearest(up, s, f); playMidi(t.midi); vibrate(host, t.s, t.f); }, 450);
+  };
+  if (!exploreRoot) { renderFretboard(host, { dots: [], onTap }); $('#exploreInfo').textContent = 'Aquesta nota no és dins el rang.'; $('#exploreLegend').innerHTML = ''; return; }
+  const root = { ...exploreRoot, midi: midiAt(exploreRoot.s, exploreRoot.f) }, iv = exploreIv;
+  const name = m => pcShort(pcOf(m), notation, cfg.accidentals === 'flat' ? 'flat' : 'sharp');
+  const up = positionsInRange().filter(p => p.midi === root.midi + iv), down = positionsInRange().filter(p => p.midi === root.midi - iv);
+  const dots = [{ s: root.s, f: root.f, cls: 'root', label: name(root.midi) }]
+    .concat(up.map(p => ({ s: p.s, f: p.f, label: name(p.midi) })), down.map(p => ({ s: p.s, f: p.f, fill: 'var(--oct-1)', label: name(p.midi) })));
+  const links = up.map(b => ({ a: root, b })).concat(down.map(b => ({ a: root, b, cls: 'shape' })));
+  renderFretboard(host, { dots, links, onTap, focus: root.f });
+  const shapes = list => [...new Set(list.map(p => shapeText(root, p)))].join(' · ') || 'no n\'hi ha cap dins el rang';
+  $('#exploreLegend').innerHTML = `<span><i style="background:var(--oct-2)"></i>Fonamental</span><span><i style="background:var(--accent)"></i>${IV_SHORT[iv]} amunt</span><span><i style="background:var(--oct-1)"></i>${IV_SHORT[iv]} avall</span>`;
+  $('#exploreInfo').innerHTML = `<b>${INTERVALS[iv][0].toUpperCase() + INTERVALS[iv].slice(1)}</b> (${iv} ${iv === 1 ? 'semitò' : 'semitons'}). Amunt: ${shapes(up)}. Avall: ${shapes(down)}. Toca un punt per fer-lo fonamental i escoltar l'interval.`;
+}
+
 function renderExplore() {
   const notation = cfg.notation === 'english' ? 'english' : 'latin';
   const pcs = cfg.accidentals === 'natural' ? NATURAL_PCS : ALL_PCS;
   if (!pcs.includes(explorePc)) explorePc = 4;
+  $('#exploreMode').innerHTML = [['oct', 'Octaves'], ['iv', 'Intervals']].map(([v, t]) => `<button data-exmode="${v}" class="${exploreMode === v ? 'on' : ''}">${t}</button>`).join('');
   $('#explorePcs').innerHTML = pcs.map(p =>
     `<button data-explore="${p}" class="${p === explorePc ? 'on' : ''}">${pcLabel(p, notation)}</button>`).join('');
+  const ivMode = exploreMode === 'iv';
+  $('#exploreIvs').hidden = !ivMode;
+  $('#exploreIvs').innerHTML = IV_SHORT.slice(1).map((t, i) => `<button data-exiv="${i + 1}" class="${exploreIv === i + 1 ? 'on' : ''}" aria-label="${INTERVALS[i + 1]}">${t}</button>`).join('');
+  $('#exploreStart').dataset.start = ivMode ? 'iv' : 'm6';
+  $('#exploreStart').textContent = ivMode ? 'Practica els intervals' : 'Practica les octaves';
+  if (ivMode) { renderExploreIv(notation); return; }
+  $('#exploreInfo').textContent = "Cada color és una octava. Les línies marquen les formes d'octava: 2 cordes amunt i 2 trasts, 3 cordes amunt i 3 trasts enrere, o 12 trasts a la mateixa corda. Toca un punt per escoltar-lo.";
   const pos = positionsInRange().filter(p => pcOf(p.midi) === explorePc);
   const octave = p => Math.floor(p.midi / 12) - 1;
   const octs = [...new Set(pos.map(octave))].sort((a, b) => a - b);
@@ -4499,7 +4599,20 @@ document.addEventListener('click', e => {
   if (scb) { if (!scb.disabled) scAction(scb.dataset.sc, scb.dataset.v); return; }
 
   const ex = e.target.closest('[data-explore]');
-  if (ex) { explorePc = +ex.dataset.explore; renderExplore(); syncIndicators(); playMidi(lowestMidi(explorePc)); return; }
+  if (ex) {
+    explorePc = +ex.dataset.explore; exploreRoot = null; exploreRootUser = false; renderExplore(); syncIndicators();
+    playMidi(exploreMode === 'iv' && exploreRoot ? midiAt(exploreRoot.s, exploreRoot.f) : lowestMidi(explorePc));
+    return;
+  }
+  const exm = e.target.closest('[data-exmode]');
+  if (exm) { exploreMode = exm.dataset.exmode; renderExplore(); return; }
+  const exi = e.target.closest('[data-exiv]');
+  if (exi) {
+    exploreIv = +exi.dataset.exiv; if (!exploreRootUser) exploreRoot = null; renderExplore();
+    // Sona l'interval des de la fonamental
+    if (exploreRoot) { const r = midiAt(exploreRoot.s, exploreRoot.f), up = positionsInRange().filter(p => p.midi === r + exploreIv); playMidi(r); if (up.length) setTimeout(() => playMidi(r + exploreIv), 450); }
+    return;
+  }
 
   const rng = e.target.closest('[data-range]');
   if (rng) { [cfg.fretMin, cfg.fretMax] = rng.dataset.range.split('-').map(Number); afterCfg(); return; }

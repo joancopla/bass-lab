@@ -38,6 +38,7 @@ Idioma de la interfície: **català**.
 - **Oïda (relativa)**: sona una nota marcada al màstil i després una altra a prop (fins a una quinta amunt o avall); l'usuari la troba al màstil. Cal el so activat.
 - **Graus de l'escala**: amb la fonamental marcada al màstil, toca un grau d'una escala o arpegi, o digues quin grau és un punt marcat. Les notes i els graus surten d'una lletra per grau, com a la pantalla d'Escales.
 - **Lectura de frases**: 4–8 notes en clau de fa per tocar seguides a l'altura exacta. En acabar es mostren els noms i es pot escoltar la frase.
+- **Intervals al màstil**: des d'una nota marcada, toca l'interval demanat (fins a l'octava, amunt o avall) a l'altura exacta. En respondre es dibuixa la forma.
 - **Repàs d'errors**: sessió que barreja mòduls amb els ítems de pes alt (errors no compensats) que encaixen amb la configuració; s'acaba sola quan ja no en queden.
 
 ### Eines sense preguntes
@@ -160,7 +161,7 @@ Alteracions: ♯ = sostingut, ♭ = bemoll (Do♯ = C♯, Re♭ = D♭). En mode
 2. **Afinador pel micròfon** (excepció a "Detecció de notes pel micròfon"): YIN, suposant la corda a l'aire més propera per evitar errors d'octava, mode "harmònic del trast 12", agulla de ±50 cèntims i verd a ±3. Desactivar echoCancellation, noiseSuppression i autoGainControl. Apagar el micròfon en sortir de la pantalla.
 3. ~~**Escales i arpegis al màstil**~~ — fet el 25/10/2026: veure-les (pantalla «Escales i arpegis») i l'exercici **Graus de l'escala** (mòdul `sd`). Amb la fonamental marcada, «toca la ♭3 de La menor» (qualsevol posició de la nota dins el rang) o «quin grau és?» amb un punt a prop (fins a 2 cordes i 4 trasts). Escales: major, menor natural, pentatòniques major i menor, i arpegis maj7, 7 i m7. Pes per escala × grau × sentit.
 4. ~~**Lectura de frases curtes**~~ — fet el 25/10/2026: mòdul `ph`. 4–8 notes en una tonalitat major o menor (amb armadura, fins a 5 alteracions i segons el filtre d'alteracions de la configuració), que comencen en una nota de l'acord, van sobretot per graus conjunts i acaben en 1, 3 o 5. Es toquen seguides a l'altura exacta. Una nota fallada es marca, sona la correcta i es continua. Pes per tonalitat.
-5. **Intervals al màstil**: la forma de cada interval, enllaçada amb l'exercici d'oïda.
+5. ~~**Intervals al màstil**~~ — fet el 25/10/2026: al Mapa de connexions, commutador «Octaves / Intervals» (tries nota i interval, i es veuen totes les posicions a l'altura exacta amunt i avall, unides a la fonamental, amb la forma descrita; tocar un punt el fa fonamental). Exercici **Intervals al màstil** (mòdul `iv`, ±1–12 semitons, altura exacta). L'oïda dibuixa la forma en respondre.
 
 Pendent de l'usuari: fer-la servir una setmana, provar-la al mòbil real i escoltar el so amb auriculars.
 
