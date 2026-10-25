@@ -16,7 +16,7 @@ Idioma de la interfície: **català**.
 - Ha de funcionar obrint el fitxer directament al navegador.
 - Responsive: ordinador i mòbil, amb botons i trasts prou grans per tocar amb el dit.
 - Persistència amb `localStorage`: configuració, progrés i estadístiques.
-- So amb la Web Audio API, generat per síntesi. Sense samples externs.
+- So amb la Web Audio API, generat per síntesi. Sense samples externs. Excepció: les bases de bateria són fitxers d'àudio reals de `/drums` (mai bateria sintètica).
 
 ## Disseny
 - Les captures de referència són a `/design/`. Inspira't en el seu estil visual (paleta, tipografia, espais, sensació general) sense copiar-lo literalment ni fer servir cap logotip, nom o text de la marca original.
@@ -56,6 +56,12 @@ Idioma de la interfície: **català**.
   - Cada patró s'escriu en La, amb la fonamental a la corda Mi, trast 5: `corda+trast/durada` en semicorxeres, `x` nota morta, `r` silenci, `T`/`P` polze i pop, `|` compàs. Es transporta a qualsevol to amb la fonamental a la corda Mi o La (mateixa regla del trast 12). Graus i noms surten d'una lletra per grau des de la fonamental.
   - Cada targeta té tablatura amb els comptes del ritme, el mànec, la partitura en clau de fa plegable (figures, barres, silencis i notes mortes amb cap en x) i un reproductor amb metrònom i BPM propis. El swing va a 2:1; les notes mortes i el slap tenen veus pròpies.
   - Afegits validats per l'usuari: selector major/menor a la tríada; als patrons 8 i 9, segon compàs sobre el IV que acaba a mig to de la fonamental per tornar a començar.
+- **Bases de bateria** (`/drums`, format a `drums/README.md`): només fitxers d'àudio de bateria real descrits a `drums.json` (nom, estil, BPM original, compàs i compassos). Sense bateria sintètica.
+  - Per a un estil i un tempo es tria la versió de BPM més proper i només s'estira ±15%; si no n'hi ha cap prou a prop, s'usa la més propera al límit i s'avisa. El control de tempo amb bateria va de −30% a +10% del BPM de l'exercici.
+  - Time-stretch propi (sense dependències): WSOLA que talla la base a cada cop, col·loca cada cop al seu temps nou i no en duplica cap, circular i amb encadenaments de 2 ms perquè el bucle (`loop=true`) no tingui cap tall. Verificat amb un to de prova: to ±1,2 cèntims, cops a menys de 2 ms del temps.
+  - Compte enrere d'un compàs (clic del metrònom) i després baix i bateria amb el mateix rellotge. Cada patró suggereix un estil (rock, funk, reggae, shuffle); al metrònom de les escales es tria Clic o un estil.
+  - Obrint el fitxer directament (`file://`) no es pot llegir `/drums`: hi ha un botó per triar la carpeta a mà. A GitHub Pages funciona sol.
+  - Els fitxers es publiquen al repo: només gravacions pròpies o loops amb llicència que en permeti la redistribució.
 
 ## Configuració
 - Baix de **4 cordes** (E A D G) o **5 cordes** (B E A D G), en afinació estàndard.

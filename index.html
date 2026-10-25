@@ -448,6 +448,11 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 }
 .pt-play .btn { min-height: 46px; padding: 0 18px; }
 .pt-play .btn.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.pt-drinfo { margin: -4px 0 0; }
+.pt-controls .seg button small, .metro-src button small { font-size: 11px; font-weight: 700; color: var(--oct-2); opacity: 1; }
+.metro-src { justify-content: center; }
+.metro-src button { min-height: 38px; padding: 0 12px; font-size: 13px; }
+.metro-dr:empty { display: none; }
 .pt-bpm { display: flex; align-items: center; gap: 6px; margin-left: auto; }
 .pt-bpm b { font-family: var(--font-display); font-weight: 700; font-size: 28px; color: var(--accent); min-width: 2.2ch; text-align: center; font-variant-numeric: tabular-nums; }
 .pt-bpm small { font-size: 12px; font-weight: 700; color: var(--muted); margin: 0 4px 0 -2px; }
@@ -903,6 +908,8 @@ body.in-quiz .topbar { display: none; }
     </div>
   </section>
 
+  <input type="file" id="drumsPick" webkitdirectory multiple hidden>
+
   <!-- ============ 12 PATRONS ============ -->
   <section id="view-patterns" hidden>
     <div class="page-head">
@@ -969,6 +976,8 @@ body.in-quiz .topbar { display: none; }
           <button class="icon-btn" data-sc="bpm" data-v="5" aria-label="5 BPM més">+5</button>
         </div>
         <p class="small" id="metroInfo"></p>
+        <div class="seg metro-src" id="metroSrc" role="group" aria-label="So del metrònom"></div>
+        <p class="small metro-dr" id="metroDr"></p>
         <button class="btn primary" id="metroToggle"></button>
       </div>
     </div>
@@ -2726,6 +2735,7 @@ const scState = Object.assign({ start: null, id: 'major', key: 0, str: 0, high: 
 if (!scById(scState.id)) scState.id = 'major';
 if (!(scState.key >= 0 && scState.key < 12)) scState.key = 0;
 if (![0, 1].includes(scState.str)) scState.str = 0;
+if (typeof scState.drum !== 'string') scState.drum = '';
 // Notació pròpia d'Escales i de la Roda (a part de la dels exercicis); per defecte, la de la configuració
 if (!['latin', 'english'].includes(scState.nt)) scState.nt = cfg.notation === 'english' ? 'english' : 'latin';
 scState.sig = !!scState.sig; // pentagrama: false = alteracions a cada nota, true = amb armadura
@@ -2957,11 +2967,11 @@ function warmMidis(list) {
 }
 
 // ---- Metrònom i «Toca l'escala»: un sol rellotge de Web Audio amb planificació anticipada ----
-const clock = { on: false, click: false, beat: 0, next: 0, timer: null, seq: null };
-function clockRun() {
+const clock = { on: false, click: false, beat: 0, next: 0, timer: null, seq: null, drums: null };
+function clockRun(t0 = null) {
   const c = ensureAudio(); if (!c) return false;
   if (clock.on) return true;
-  clock.on = true; clock.beat = 0; clock.next = c.currentTime + 0.1;
+  clock.on = true; clock.beat = 0; clock.next = t0 != null ? t0 : c.currentTime + 0.1;
   clock.timer = setInterval(clockTick, 25);
   clockTick();
   return true;
@@ -2975,7 +2985,7 @@ function clockTick() {
   }
 }
 function clockIdle() {
-  if (clock.click || clock.seq || !clock.on) return;
+  if (clock.click || clock.seq || clock.drums || !clock.on) return;
   clearInterval(clock.timer); clock.timer = null; clock.on = false;
 }
 function clickAt(t, accent) {
@@ -2996,15 +3006,17 @@ function scheduleBeat(n, t) {
   if (clock.click) clickAt(t, n % 4 === 0);
   const q = clock.seq;
   let step = null;
-  if (q) {
+  // Amb bateria, l'escala comença al primer temps del compàs
+  if (q && q.wait && n % 4 === 0) q.wait = false;
+  if (q && !q.wait) {
     if (q.pos < q.order.length) { step = q.order[q.pos++]; playAt(q.notes[step].midi, t); }
     else { step = 'end'; clock.seq = null; }
   }
-  const click = clock.click;
+  const click = clock.click || !!clock.drums;
   setTimeout(() => beatUI(n, click, q, step), Math.max(0, (t - actx.currentTime) * 1000));
 }
 function beatUI(n, click, q, step) {
-  if (click && clock.click) $('#metroPips').querySelectorAll('i').forEach((p, i) => p.classList.toggle('on', i === n % 4));
+  if (click && (clock.click || clock.drums)) $('#metroPips').querySelectorAll('i').forEach((p, i) => p.classList.toggle('on', i === n % 4));
   if (!q || q !== scSeq || $('#view-scales').hidden) return;
   if (step === 'end') { stopSeq(); return; }
   scPlayIdx = step;
@@ -3025,34 +3037,67 @@ function scPlayToggle() {
   const { pos } = scCurrent(), n = pos.length;
   // Pujant i baixant, una nota per temps
   const order = [...Array(n).keys(), ...Array.from({ length: n - 1 }, (_, i) => n - 2 - i)];
-  scSeq = clock.seq = { notes: pos, order, pos: 0 };
+  scSeq = clock.seq = { notes: pos, order, pos: 0, wait: !!clock.drums };
   if (!clockRun()) { scSeq = clock.seq = null; return; }
   renderScaleBoard();
 }
 function metroToggle() {
-  if (clock.click) {
-    clock.click = false; clockIdle();
-  } else {
-    if (!cfg.sound) { toast('El so està desactivat. Activa\'l amb la icona de l\'altaveu.'); return; }
-    clock.click = true;
-    if (!clockRun()) clock.click = false;
-  }
+  if (clock.click || clock.drums || scDrumWait) { metroStop(); return; }
+  if (!cfg.sound) { toast('El so està desactivat. Activa\'l amb la icona de l\'altaveu.'); return; }
+  if (scState.drum && drHas(scState.drum)) { scDrumsStart(); return; }
+  clock.click = true;
+  if (!clockRun()) clock.click = false;
+  renderMetro();
+}
+let scDrumWait = false, scDrumTok = 0;
+function metroStop() {
+  scDrumTok++; scDrumWait = false; clock.click = false;
+  if (clock.drums) { drumsStop(); clock.drums = null; }
+  clockIdle(); if (scView) renderMetro();
+}
+// Base de bateria al tempo del dia: compte enrere d'un compàs i el rellotge alineat amb la base
+async function scDrumsStart() {
+  const tok = ++scDrumTok;
+  scDrumWait = true; renderMetro();
+  let prep = null;
+  try { prep = await drumsPrepare(scState.drum, Math.round(scBpm)); } catch (e) { console.warn('[Bass Lab] Bateria:', e.message); }
+  if (tok !== scDrumTok) return;
+  scDrumWait = false;
+  if (!prep) { toast("No s'ha pogut carregar la base de bateria."); renderMetro(); return; }
+  if (scSeq) stopSeq();
+  if (clock.drums) drumsStop();
+  clearInterval(clock.timer); clock.on = false; clock.drums = null;
+  scBpm = prep.bpm;
+  const t0 = countIn(actx.currentTime + 0.1, prep.beats, prep.bpm);
+  drumsStartAt(prep, t0);
+  prep.t0 = t0;
+  clock.drums = prep; clockRun(t0);
   renderMetro();
 }
 function renderMetro() {
   const W = PLAN[scView.w - 1], target = dayBpm(W, scView.d);
-  $('#metroBpm').textContent = scBpm;
-  $('#metroInfo').innerHTML = scBpm === target
+  $('#metroBpm').textContent = Math.round(scBpm);
+  const srcs = [['', 'Clic'], ...drStyles().map(st => [st, drStyleName(st)])];
+  $('#metroSrc').innerHTML = srcs.map(([st, t]) => `<button data-sc="drum" data-v="${st}" class="${scState.drum === st ? 'on' : ''}"${st && !drHas(st) ? ' disabled' : ''}>${t}</button>`).join('');
+  $('#metroDr').innerHTML = scState.drum
+    ? (dr.status !== 'ok' ? drumsNotice() : clock.drums ? drumsText(clock.drums) : scDrumWait ? 'Preparant la base…' : `Compte enrere d'un compàs i després la base. Tempo de ${scBpmRange().join(' a ')} BPM.`)
+    : '';
+  $('#metroInfo').innerHTML = Math.round(scBpm) === target
     ? `BPM del dia ${scView.d} de la setmana ${scView.w}`
     : `El pla diu ${target} BPM. <button class="link" data-sc="bpmreset">Torna-hi</button>`;
-  $('#metroToggle').innerHTML = clock.click
+  $('#metroToggle').innerHTML = clock.click || clock.drums || scDrumWait
     ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>Atura`
     : `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>Engega`;
-  if (!clock.click) $('#metroPips').querySelectorAll('i').forEach(p => p.classList.remove('on'));
+  if (!clock.click && !clock.drums) $('#metroPips').querySelectorAll('i').forEach(p => p.classList.remove('on'));
+}
+// Amb bateria, el tempo va de −30% a +10% del BPM del dia
+function scBpmRange() {
+  const target = dayBpm(PLAN[scView.w - 1], scView.d);
+  return scState.drum && drHas(scState.drum) ? [Math.round(target * 0.7), Math.round(target * 1.1)] : [30, 240];
 }
 function scStopAll() {
   if (scSeq) stopSeq();
-  if (clock.click) { clock.click = false; clockIdle(); if (scView) renderMetro(); }
+  if (clock.click || clock.drums || scDrumWait) metroStop();
 }
 document.addEventListener('visibilitychange', () => { if (document.hidden) scStopAll(); });
 
@@ -3092,8 +3137,20 @@ function scAction(kind, v) {
       $('.sc-board').scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'start' });
       break;
     }
-    case 'bpm': scBpm = Math.max(30, Math.min(240, scBpm + +v)); renderMetro(); break;
-    case 'bpmreset': scBpm = dayBpm(PLAN[scView.w - 1], scView.d); renderMetro(); break;
+    case 'bpm': {
+      const [lo, hi] = scBpmRange();
+      scBpm = Math.max(lo, Math.min(hi, Math.round(scBpm) + +v));
+      if (clock.drums) scDrumsStart(); else renderMetro();
+      break;
+    }
+    case 'bpmreset': scBpm = dayBpm(PLAN[scView.w - 1], scView.d); if (clock.drums) scDrumsStart(); else renderMetro(); break;
+    case 'drum': {
+      scState.drum = v; saveSc();
+      const [lo, hi] = scBpmRange();
+      scBpm = Math.max(lo, Math.min(hi, Math.round(scBpm)));
+      if (clock.drums || clock.click) { metroStop(); metroToggle(); } else renderMetro();
+      break;
+    }
   }
   syncIndicators();
 }
@@ -3132,6 +3189,201 @@ function courseGo() {
     if (W.scale_ids.length) scAction('load', `${W.scale_ids[0]}|${W.keys_pc[0] != null ? W.keys_pc[0] : ''}`);
   });
 }
+
+/* =====================================================================
+   9b1. BASES DE BATERIA (fitxers d'àudio reals de /drums)
+   ===================================================================== */
+// drums/drums.json: { "loops": [{ "file", "name", "style", "bpm", "meter": "4/4", "bars" }] }.
+// Per a cada estil hi pot haver diverses versions: es tria la de BPM més proper i només
+// s'estira el tempo ±15% com a màxim (time-stretch propi, sense canviar el to).
+const DR_STYLES = [['rock', 'Rock'], ['funk', 'Funk'], ['reggae', 'Reggae'], ['shuffle', 'Shuffle']];
+const DR_MAX = 0.15;
+const dr = { list: [], status: 'loading', files: null, raw: new Map(), str: new Map(), src: null, gain: null };
+const drStyleName = st => (DR_STYLES.find(x => x[0] === st) || [st, st.charAt(0).toUpperCase() + st.slice(1)])[1];
+const drStyles = () => [...new Set([...DR_STYLES.map(x => x[0]), ...dr.list.map(l => l.style)])];
+const drHas = st => dr.list.some(l => l.style === st && l.beats === 4);
+
+async function drumsLoad(fileList) {
+  try {
+    let json;
+    if (fileList) {
+      // Per nom i per camí dins la carpeta triada (rock/rock-90.wav)
+      const files = new Map([...fileList].flatMap(f => [[f.name, f], [(f.webkitRelativePath || '').split('/').slice(1).join('/'), f]]));
+      if (!files.has('drums.json')) throw new Error('falta drums.json');
+      json = JSON.parse(await files.get('drums.json').text());
+      dr.files = files; dr.raw.clear(); dr.str.clear();
+    } else {
+      const r = await fetch('drums/drums.json', { cache: 'no-cache' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      json = await r.json();
+    }
+    dr.list = (json.loops || []).filter(l => l && l.file && l.style && l.bpm > 0).map(l => ({
+      file: String(l.file), name: String(l.name || l.file), style: String(l.style).toLowerCase(), bpm: +l.bpm,
+      meter: String(l.meter || '4/4'), beats: parseInt(l.meter, 10) || 4, bars: l.bars > 0 ? +l.bars : null,
+    }));
+    dr.status = dr.list.length ? 'ok' : 'empty';
+  } catch (e) {
+    // Obrint l'index.html directament (file://) el navegador no deixa llegir la carpeta
+    dr.status = !fileList && location.protocol === 'file:' ? 'file' : 'error';
+    console.warn('[Bass Lab] Bateria:', e.message);
+  }
+  drumsChanged();
+}
+function drumsChanged() {
+  if (!$('#view-patterns').hidden) renderPatterns();
+  if (!$('#view-scales').hidden && scView) renderMetro();
+}
+// Avís quan no hi ha bases (amb el botó per triar la carpeta si s'ha obert el fitxer directament)
+function drumsNotice() {
+  if (dr.status === 'loading') return 'Carregant les bases de bateria…';
+  if (dr.status === 'file') return `Obrint el fitxer directament, el navegador no deixa llegir /drums. <button class="link" data-drpick>Carrega la carpeta de bateries</button>`;
+  if (dr.status === 'error') return `No s'ha pogut llegir drums/drums.json. <button class="link" data-drpick>Tria la carpeta</button>`;
+  if (dr.status === 'empty') return 'Encara no hi ha bases: afegeix fitxers de bateria a /drums i descriu-los a drums.json.';
+  return '';
+}
+
+// Versió més propera al tempo demanat i factor d'estirament (limitat a ±15%)
+function drumsPick(style, bpm, beats = 4) {
+  const vs = dr.list.filter(l => l.style === style && l.beats === beats && !l.broken);
+  if (!vs.length) return null;
+  const dist = l => Math.abs(Math.log(bpm / l.bpm));
+  const loop = vs.reduce((a, b) => (dist(b) < dist(a) ? b : a));
+  const want = bpm / loop.bpm, rate = Math.min(1 + DR_MAX, Math.max(1 - DR_MAX, want));
+  return { loop, rate, clamped: Math.abs(rate - want) > 1e-6 };
+}
+function drumsRaw(loop) {
+  if (!dr.raw.has(loop.file)) dr.raw.set(loop.file, (async () => {
+    const c = ensureAudio();
+    let ab;
+    if (dr.files) {
+      const f = dr.files.get(loop.file);
+      if (!f) throw new Error('no trobat: ' + loop.file);
+      ab = await f.arrayBuffer();
+    } else {
+      const r = await fetch('drums/' + loop.file.split('/').map(encodeURIComponent).join('/'));
+      if (!r.ok) throw new Error(`${loop.file}: HTTP ${r.status}`);
+      ab = await r.arrayBuffer();
+    }
+    return c.decodeAudioData(ab);
+  })().catch(e => { dr.raw.delete(loop.file); loop.broken = true; throw e; }));
+  return dr.raw.get(loop.file);
+}
+
+// ---- Time-stretch per a bateria: WSOLA que respecta els cops, circular perquè el bucle no tingui cap tall ----
+// 1. Es detecten els cops (pujades sobtades d'energia als aguts) i la base es talla just abans de cada un.
+// 2. Cada tros comença exactament al seu temps nou, amb el cop sencer (sense fosa d'entrada).
+// 3. Dins de cada tros, finestres de 30 ms superposades a la meitat; cada finestra es pren de la
+//    posició ideal ± 5 ms on la forma d'ona encaixa millor amb la continuació de l'anterior.
+// 4. Cap tros llegeix més enllà del cop següent, de manera que cap cop es duplica ni s'avança.
+// La lectura i l'escriptura donen la volta: el final de la base enllaça amb el principi.
+function drumOnsets(x, sr) {
+  const hop = 128, n = Math.floor(x.length / hop), e = new Float32Array(n);
+  for (let k = 0; k < n; k++) {
+    let s = 0;
+    for (let i = Math.max(1, k * hop); i < (k + 1) * hop; i++) { const d = x[i] - x[i - 1]; s += d * d; }
+    e[k] = s;
+  }
+  const mean = e.reduce((a, b) => a + b, 0) / n, gap = sr * 0.05, out = [0];
+  for (let k = 1; k < n; k++) {
+    let avg = 0;
+    for (let m = Math.max(0, k - 8); m < k; m++) avg += e[m];
+    avg /= Math.min(8, k);
+    const pos = (k - 1) * hop; // una mica abans de l'atac
+    if (e[k] > 4 * avg + 1e-9 && e[k] > 1.5 * mean && pos - out[out.length - 1] > gap && x.length - pos > gap) out.push(pos);
+  }
+  return out;
+}
+function wsola(c, buf, rate) {
+  if (Math.abs(rate - 1) < 0.002) return buf;
+  const N = buf.length, sr = buf.sampleRate, nch = buf.numberOfChannels;
+  const outLen = Math.round(N / rate);
+  const W = Math.round(sr * 0.03 / 2) * 2, tol = Math.round(sr * 0.005);
+  const ins = Array.from({ length: nch }, (_, i) => buf.getChannelData(i));
+  const mono = new Float32Array(N);
+  for (const d of ins) for (let i = 0; i < N; i++) mono[i] += d[i] / nch;
+  const win = Float32Array.from({ length: W }, (_, j) => 0.5 - 0.5 * Math.cos(2 * Math.PI * j / W));
+  const out = ins.map(() => new Float32Array(outLen));
+  const at = i => ((i % N) + N) % N;
+  const X = Math.round(sr * 0.002); // encadenament de 2 ms entre trossos (els talls són 3–6 ms abans del cop)
+  const cuts = drumOnsets(mono, sr);
+  cuts.forEach((a, si) => {
+    const b = si + 1 < cuts.length ? cuts[si + 1] : N + cuts[0];   // l'últim tros dona la volta
+    const A = Math.round(a / rate), Lout = Math.round(b / rate) - A, T = Lout + X;
+    const tmp = ins.map(() => new Float32Array(T)), nrm = new Float32Array(T);
+    const frames = Math.max(1, Math.round(Lout / (W / 2)));
+    const Hs = Lout / frames, Ha = (b - a) / frames;
+    let prev = a;
+    for (let k = 0; k <= frames; k++) {
+      const ideal = a + Math.round(k * Ha);
+      if (ideal >= b + X) break;
+      let best = ideal;
+      if (k > 0) {
+        const nat = prev + Math.round(Hs);
+        let bestC = -Infinity;
+        for (let p = Math.max(a, ideal - tol); p <= ideal + tol && p < b; p += 2) {
+          let sc = 0;
+          for (let j = 0; j < W && p + j < b; j += 6) sc += mono[at(p + j)] * mono[at(nat + j)];
+          if (sc > bestC) { bestC = sc; best = p; }
+        }
+      }
+      const o = Math.round(k * Hs);
+      for (let j = 0; j < W; j++) {
+        if (best + j >= b + X || o + j >= T) break;
+        const w = k === 0 && j < W / 2 ? 1 : win[j];   // el cop entra sencer, sense fosa de finestra
+        const ii = at(best + j);
+        for (let ch = 0; ch < nch; ch++) tmp[ch][o + j] += ins[ch][ii] * w;
+        nrm[o + j] += w;
+      }
+      prev = best;
+    }
+    // On només hi arriba la cua d'una finestra, el so s'esvaeix en lloc de tallar-se; i encadenament als extrems
+    for (let i = 0; i < T; i++) {
+      const g = (i < X ? i / X : 1) * (i >= Lout ? 1 - (i - Lout) / X : 1) / Math.max(nrm[i], 0.5);
+      const oi = (A + i) % outLen;
+      for (let ch = 0; ch < nch; ch++) out[ch][oi] += tmp[ch][i] * g;
+    }
+  });
+  const res = c.createBuffer(nch, outLen, sr);
+  out.forEach((d, ch) => res.copyToChannel(d, ch));
+  return res;
+}
+// Prepara la base per a un estil i un tempo: { buffer, bpm real, loop, clamped, beats, bars, dur }
+async function drumsPrepare(style, bpm) {
+  const pick = drumsPick(style, bpm);
+  if (!pick) return null;
+  const raw = await drumsRaw(pick.loop), c = ensureAudio();
+  const key = pick.loop.file + '|' + pick.rate.toFixed(4);
+  if (!dr.str.has(key)) dr.str.set(key, wsola(c, raw, pick.rate));
+  const buffer = dr.str.get(key), beats = pick.loop.beats;
+  // Compassos: els del JSON o, si no hi són, els que surten de la durada i el BPM original
+  const bars = pick.loop.bars || Math.max(1, Math.round(raw.duration * pick.loop.bpm / 60 / beats));
+  return { buffer, loop: pick.loop, clamped: pick.clamped, beats, bars, dur: buffer.duration, bpm: bars * beats * 60 / buffer.duration };
+}
+// Compte enrere d'un compàs amb el clic del metrònom; torna l'hora del primer temps
+function countIn(t, beats, bpm) {
+  for (let i = 0; i < beats; i++) clickAt(t + i * 60 / bpm, i === 0);
+  return t + beats * 60 / bpm;
+}
+function drumsStartAt(prep, t0) {
+  drumsStop();
+  const c = ensureAudio();
+  dr.src = c.createBufferSource(); dr.src.buffer = prep.buffer; dr.src.loop = true;
+  dr.gain = c.createGain(); dr.gain.gain.value = 0.9;
+  dr.src.connect(dr.gain).connect(master);
+  dr.src.start(t0);
+}
+function drumsStop() {
+  if (!dr.src) return;
+  try { dr.src.stop(); } catch (e) { /* ja aturada */ }
+  dr.src.disconnect(); dr.src = null;
+}
+// Text de la base que sona: nom, BPM original i ajust aplicat
+function drumsText(prep) {
+  const pct = Math.round((prep.bpm / prep.loop.bpm - 1) * 100);
+  return `Base «${prep.loop.name}» (${prep.loop.bpm} BPM) a ${Math.round(prep.bpm)} BPM${pct ? ` (${pct > 0 ? '+' : ''}${pct}%)` : ''}${
+    prep.clamped ? ". No n'hi ha cap més a prop: només s'ajusta ±15%." : '.'}`;
+}
+document.addEventListener('change', e => { if (e.target.id === 'drumsPick' && e.target.files.length) drumsLoad(e.target.files); });
 
 /* =====================================================================
    9b2. 12 PATRONS QUE TOT BAIXISTA HA DE SABER
@@ -3179,6 +3431,9 @@ const PT = [
     text: "El polze (T) colpeja la corda greu contra l'últim trast i l'índex (P) estira la de l'octava i la deixa anar. Les notes mortes del mig mantenen les semicorxeres i el groove." },
 ];
 const ptById = id => PT.find(p => p.id === id);
+// Base de bateria suggerida per a cada patró
+const PT_DRUM = { root8: 'rock', root5: 'rock', root58: 'rock', octaves: 'funk', triad: 'rock', sixth: 'funk',
+  boogie: 'shuffle', approach: 'rock', walking: 'shuffle', ghost: 'funk', onedrop: 'reggae', slap: 'funk' };
 const PT_STR = ['E', 'A', 'D', 'G'];
 const DEG_NUM = [1, 2, 2, 3, 3, 4, 4, 5, 6, 6, 7, 7]; // grau per a cada distància en semitons (♭3 → 3, ♭7 → 7…)
 const ptSeq = (p, v = 0) => (p.variants ? p.variants[Math.min(v, p.variants.length - 1)][1] : p.seq);
@@ -3283,8 +3538,10 @@ function ptCard(id) {
   if (![0, 1].includes(c.str)) c.str = 0;
   if (!(c.bpm >= 30 && c.bpm <= 240)) c.bpm = p.bpm;
   if (!(c.v >= 0)) c.v = 0;
+  if (typeof c.drum !== 'string') c.drum = '';
   return c;
 }
+const ptBpmRange = (p, c) => (c.drum && drHas(c.drum) ? [Math.round(p.bpm * 0.7), Math.round(p.bpm * 1.1)] : [30, 240]);
 const ptLayoutOf = id => { const c = ptCard(id); return ptLayout(ptById(id), c.key, c.str, c.v); };
 const ptLearnedN = () => PT.filter(p => ptState.learned[p.id]).length;
 const ptStyles = () => [...new Set(PT.flatMap(p => p.styles))];
@@ -3474,8 +3731,9 @@ function renderPtCard(id, onlyDynamic = false) {
     <div class="row"><span>To</span><div class="pt-key">
       <select class="pt-select" data-ptsel="key" data-id="${id}" aria-label="Tonalitat">${ALL_PCS.map(pc => `<option value="${pc}"${pc === c.key ? ' selected' : ''}>${keyName(pc, nt)}</option>`).join('')}</select>
       <div class="seg">${[0, 1].map(i => `<button data-pt="str" data-id="${id}" data-v="${i}" class="${c.str === i ? 'on' : ''}">Corda ${SC_STR[i].name}</button>`).join('')}</div></div></div>
+    ${ptDrumRow(p, c)}
     <div class="row pt-play">
-      <button class="btn primary" data-pt="play" data-id="${id}">${ico(playing)}${playing ? 'Atura' : 'Toca'}</button>
+      <button class="btn primary" data-pt="play" data-id="${id}">${ico(playing)}${ptPlay.id === id && ptPlay.wait ? 'Preparant…' : playing ? 'Atura' : 'Toca'}</button>
       <button class="btn${clicking ? ' on' : ''}" data-pt="click" data-id="${id}" aria-pressed="${clicking}">Metrònom${clicking ? ' ✓' : ''}</button>
       <div class="pt-bpm">
         <button class="icon-btn" data-pt="bpm" data-id="${id}" data-v="-5" aria-label="5 BPM menys">−5</button>
@@ -3485,6 +3743,17 @@ function renderPtCard(id, onlyDynamic = false) {
         <button class="icon-btn" data-pt="bpm" data-id="${id}" data-v="5" aria-label="5 BPM més">+5</button>
       </div>
     </div>`;
+}
+
+function ptDrumRow(p, c) {
+  const sug = PT_DRUM[p.id];
+  if (dr.status !== 'ok') return `<div class="row"><span>Bateria</span><p class="small pt-drinfo">${drumsNotice()}</p></div>`;
+  const btn = st => `<button data-pt="drum" data-id="${p.id}" data-v="${st}" class="${c.drum === st ? 'on' : ''}"${st && !drHas(st) ? ' disabled' : ''}>${st ? drStyleName(st) : 'Sense'}${st === sug ? ' <small>suggerida</small>' : ''}</button>`;
+  const live = ptPlay.id === p.id && ptPlay.drums;
+  const info = live ? drumsText(ptPlay.drums)
+    : c.drum ? `Compte enrere d'un compàs i baix i bateria alhora. Tempo de ${ptBpmRange(p, c).join(' a ')} BPM.`
+    : `Tria una base per tocar amb bateria real${drHas(sug) ? ` (la suggerida és ${drStyleName(sug).toLowerCase()})` : ''}.`;
+  return `<div class="row"><span>Bateria</span><div class="seg">${['', ...drStyles()].map(btn).join('')}</div></div><p class="small pt-drinfo">${info}</p>`;
 }
 
 // Targeta destacada de l'inici, sota el curs
@@ -3505,28 +3774,29 @@ function ptOpen(id) {
 }
 
 // ---- So: un rellotge propi amb planificació anticipada (semicorxeres, swing i metrònom) ----
-const ptPlay = { id: null, play: false, click: false, timer: null, items: null, L: null, len: 16, k: 0, loop: 0, cu: 0, ct: 0, now: null, ui: [] };
+const ptPlay = { id: null, play: false, click: false, timer: null, items: null, L: null, len: 16, k: 0, loop: 0, cu: 0, ct: 0, now: null, ui: [], bpm: null, drums: null, tok: 0, wait: false };
 function ptClear() { clearInterval(ptPlay.timer); ptPlay.ui.forEach(clearTimeout); ptPlay.ui = []; ptPlay.timer = null; }
 function ptStop() {
   if (!ptPlay.id) return;
   const id = ptPlay.id;
-  ptClear();
-  Object.assign(ptPlay, { id: null, play: false, click: false, now: null });
+  ptClear(); ptPlay.tok++;
+  if (ptPlay.drums) drumsStop();
+  Object.assign(ptPlay, { id: null, play: false, click: false, now: null, bpm: null, drums: null, wait: false });
   if (!$('#view-patterns').hidden && $('#pt-' + id)) renderPtCard(id);
 }
-function ptStart(id) {
+function ptStart(id, t0 = null, bpm = null) {
   const c = ensureAudio(); if (!c) return false;
   const L = ptLayoutOf(id), items = [];
   for (let u = 0; u < L.len; u += 4) items.push({ u, click: true });
   L.ev.forEach((e, i) => { if (e.kind !== 'rest') items.push({ u: e.u, i }); });
   items.sort((a, b) => a.u - b.u || (a.click ? -1 : 1));
-  Object.assign(ptPlay, { id, items, L, len: L.len, k: 0, loop: 0, cu: 0, ct: c.currentTime + 0.1, now: null });
+  Object.assign(ptPlay, { id, items, L, len: L.len, k: 0, loop: 0, cu: 0, ct: t0 != null ? t0 : c.currentTime + 0.1, now: null, bpm });
   ptPlay.timer = setInterval(ptTick, 25);
   return true;
 }
 function ptTick() {
   if (!actx || !ptPlay.id) return;
-  const p = ptById(ptPlay.id), u = 60 / ptCard(p.id).bpm / 4;
+  const p = ptById(ptPlay.id), u = 60 / (ptPlay.bpm || ptCard(p.id).bpm) / 4;
   for (;;) {
     const it = ptPlay.items[ptPlay.k], absU = ptPlay.loop * ptPlay.len + it.u;
     const t = ptPlay.ct + (absU - ptPlay.cu) * u;
@@ -3550,13 +3820,34 @@ function ptTick() {
 }
 // Si canvia el patró mentre sona (to, corda, acord), torna a començar amb les notes noves
 function ptRestart(id) {
-  if (ptPlay.id !== id) return;
-  const { play, click } = ptPlay;
+  if (ptPlay.id !== id || ptPlay.wait) return;
+  const { play, click, drums, bpm } = ptPlay;
   ptClear(); ptPlay.id = null;
-  if (ptStart(id)) Object.assign(ptPlay, { play, click });
+  // Amb bateria, el patró nou entra al compàs següent de la base
+  let t0 = null;
+  if (drums) { const bar = drums.beats * 60 / drums.bpm; t0 = drums.t0 + Math.ceil((actx.currentTime + 0.08 - drums.t0) / bar) * bar; }
+  if (ptStart(id, t0, bpm)) Object.assign(ptPlay, { play, click, drums });
+}
+// Toca amb bateria: prepara la base, compte enrere d'un compàs i baix i bateria alhora
+async function ptDrumStart(id) {
+  const c = ptCard(id), tok = ++ptPlay.tok;
+  if (ptPlay.id) ptStop();
+  ptPlay.tok = tok; ptPlay.id = id; ptPlay.wait = true; ptPlay.play = true;
+  renderPtCard(id);
+  let prep = null;
+  try { prep = await drumsPrepare(c.drum, c.bpm); } catch (e) { console.warn('[Bass Lab] Bateria:', e.message); }
+  if (tok !== ptPlay.tok) return;
+  ptPlay.wait = false; ptPlay.id = null;
+  if (!prep) { ptPlay.play = false; toast("No s'ha pogut carregar la base de bateria."); renderPtCard(id); return; }
+  const t0 = countIn(actx.currentTime + 0.1, prep.beats, prep.bpm);
+  drumsStartAt(prep, t0);
+  prep.t0 = t0;
+  if (!ptStart(id, t0, prep.bpm)) { drumsStop(); return; }
+  Object.assign(ptPlay, { play: true, drums: prep });
+  renderPtCard(id);
 }
 
-function ptAction(kind, id, v) {
+async function ptAction(kind, id, v) {
   const c = id ? ptCard(id) : null;
   switch (kind) {
     case 'level': ptState.level = +v; savePt(); renderPatterns(); break;
@@ -3575,13 +3866,30 @@ function ptAction(kind, id, v) {
     }
     case 'v': c.v = +v; savePt(); ptRestart(id); renderPtCard(id); ptPreview(id); break;
     case 'str': c.str = +v; savePt(); ptRestart(id); renderPtCard(id); ptPreview(id); break;
-    case 'bpm': c.bpm = Math.max(30, Math.min(240, c.bpm + +v)); savePt(); renderPtCard(id); break;
+    case 'bpm': {
+      const [lo, hi] = ptBpmRange(ptById(id), c);
+      c.bpm = Math.max(lo, Math.min(hi, c.bpm + +v)); savePt();
+      if (ptPlay.id === id && ptPlay.drums) ptDrumStart(id); else renderPtCard(id);
+      break;
+    }
+    case 'drum': {
+      c.drum = v;
+      const [lo, hi] = ptBpmRange(ptById(id), c);
+      c.bpm = Math.max(lo, Math.min(hi, c.bpm)); savePt();
+      if (ptPlay.id === id) { const was = ptPlay.play; ptStop(); if (was && v) ptDrumStart(id); }
+      renderPtCard(id);
+      break;
+    }
     case 'play': case 'click': {
       if (!cfg.sound) { toast('El so està desactivat. Activa\'l amb la icona de l\'altaveu.'); return; }
       if (ptPlay.id && ptPlay.id !== id) ptStop();
+      // Amb una base triada, «Toca» fa sonar baix i bateria junts
+      if (kind === 'play' && c.drum && drHas(c.drum) && !ptPlay.play) { const click = ptPlay.id === id && ptPlay.click; await ptDrumStart(id); if (click && ptPlay.id === id) { ptPlay.click = true; renderPtCard(id); } break; }
+      if (kind === 'play' && ptPlay.wait) { ptStop(); break; }
       if (!ptPlay.id && !ptStart(id)) return;
       ptPlay[kind] = !ptPlay[kind];
       if (!ptPlay.play) { ptPlay.now = null; ptPlay.ui.forEach(clearTimeout); ptPlay.ui = []; }
+      if (!ptPlay.play && ptPlay.drums) { ptStop(); break; }
       if (!ptPlay.play && !ptPlay.click) ptStop(); else { ptTick(); renderPtCard(id); }
       break;
     }
@@ -3780,6 +4088,7 @@ document.addEventListener('click', e => {
   if (whc) { const k = WH_KEYS[wh.i], c = diatonicChords(k, wh.minor)[+whc.dataset.whchord]; playMidi(lowMidi(pcOfNote(c.note))); return; }
   if (e.target.closest('[data-whgo]')) { whGo(); return; }
   if (e.target.closest('[data-course]')) { courseGo(); return; }
+  if (e.target.closest('[data-drpick]')) { $('#drumsPick').click(); return; }
   const pto = e.target.closest('[data-ptopen]');
   if (pto) { ptOpen(pto.dataset.ptopen); return; }
   const ptb = e.target.closest('[data-pt]');
@@ -3851,6 +4160,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
 selfTest();
 scaleSelfTest(SCD);
 patternSelfTest();
+drumsLoad();
 wheelSelfTest(SC_MAJOR, SC_FLAT);
 applyTheme();
 show('home');

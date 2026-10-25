@@ -1,0 +1,11 @@
+{
+  "exemple": {
+    "file": "rock-90.wav",
+    "name": "Rock bàsic",
+    "style": "rock",
+    "bpm": 90,
+    "meter": "4/4",
+    "bars": 2
+  },
+  "loops": []
+}
