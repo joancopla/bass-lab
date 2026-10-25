@@ -2,3 +2,7 @@ design/
 
 # Bases descarregades per provar (sense llicència per publicar)
 drums/*/
+
+# Servidor local per obrir l'app amb les bases reals
+Bass Lab.bat
+serve-local.js
