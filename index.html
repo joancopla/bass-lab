@@ -453,6 +453,8 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 .metro-src { justify-content: center; }
 .metro-src button { min-height: 38px; padding: 0 12px; font-size: 13px; }
 .metro-dr:empty { display: none; }
+.metro-dr .seg { margin-bottom: 8px; }
+.bass-vol-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .pt-bpm { display: flex; align-items: center; gap: 6px; margin-left: auto; }
 .dr-tempos button { font-variant-numeric: tabular-nums; min-width: 48px; }
 .metro-bpm { flex-wrap: wrap; }
@@ -974,7 +976,8 @@ body.in-quiz .topbar { display: none; }
         <div class="metro-bpm" id="metroBpmBox"></div>
         <p class="small" id="metroInfo"></p>
         <div class="seg metro-src" id="metroSrc" role="group" aria-label="So del metrònom"></div>
-        <p class="small metro-dr" id="metroDr"></p>
+        <div class="small metro-dr" id="metroDr"></div>
+        <div class="bass-vol-row"><span class="small">Volum del baix</span><span id="metroVol"></span></div>
         <button class="btn primary" id="metroToggle"></button>
       </div>
     </div>
@@ -1406,6 +1409,7 @@ const DEFAULT_CFG = {
   v: 2, strings: 4, active: { B: true, E: true, A: true, D: true, G: true },
   fretMin: 0, fretMax: 12, accidentals: 'natural', notation: 'mixed',
   sound: true, sessionSize: 20, allPositions: false, theme: 'dark',
+  bassVol: 1, // volum del baix que toca l'app (patrons i escales), per tocar-hi a sobre
 };
 const RANGE_PRESETS = [[0, 5], [0, 12], [0, 20]];
 const ZONE_PRESETS = [[0, 4], [5, 9], [10, 15], [12, 20]]; // mòdul 7
@@ -1423,6 +1427,7 @@ function sanitize(c) {
   if (![0, 10, 20, 50].includes(c.sessionSize)) c.sessionSize = 20;
   c.sound = !!c.sound; c.allPositions = !!c.allPositions;
   if (!['dark', 'light', 'auto'].includes(c.theme)) c.theme = 'dark';
+  if (![1, 0.5, 0.25, 0].includes(c.bassVol)) c.bassVol = 1;
   if (!instrumentStrings(c.strings).some(s => c.active[s.id])) STRINGS.forEach(s => (c.active[s.id] = true));
   return c;
 }
@@ -1511,7 +1516,7 @@ function pickWeighted(cands, lastKey) {
 /* =====================================================================
    5. ÀUDIO (síntesi, altura real)
    ===================================================================== */
-let actx = null, master = null;
+let actx = null, master = null, bassBus = null;
 function ensureAudio() {
   if (!actx) {
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -1520,6 +1525,8 @@ function ensureAudio() {
     const comp = actx.createDynamicsCompressor();
     master = actx.createGain(); master.gain.value = 0.9;
     master.connect(comp); comp.connect(actx.destination);
+    // El baix que toca l'app en reproduir (patrons i escales) passa per aquí, amb volum propi
+    bassBus = actx.createGain(); bassBus.gain.value = cfg.bassVol; bassBus.connect(master);
     warmVoices();
   }
   if (actx.state === 'suspended') actx.resume();
@@ -2997,7 +3004,7 @@ function clickAt(t, accent) {
 function playAt(midi, t) {
   if (!cfg.sound) return;
   if (voice) voice.stop(t);
-  voice = bassVoice(actx, master, freq(midi), t);
+  voice = bassVoice(actx, bassBus, freq(midi), t);
 }
 function scheduleBeat(n, t) {
   if (clock.click) clickAt(t, n % 4 === 0);
@@ -3057,7 +3064,7 @@ async function scDrumsStart() {
   const tok = ++scDrumTok;
   scDrumWait = true; renderMetro();
   let prep = null;
-  try { prep = await drumsPrepare(scState.drum, Math.round(scBpm)); } catch (e) { console.warn('[Bass Lab] Bateria:', e.message); }
+  try { prep = await drumsPrepare(scState.drum, Math.round(scBpm), !!scState.synth); } catch (e) { console.warn('[Bass Lab] Bateria:', e.message); }
   if (tok !== scDrumTok) return;
   scDrumWait = false;
   if (!prep) { toast("No s'ha pogut carregar la base de bateria."); renderMetro(); return; }
@@ -3085,9 +3092,13 @@ function renderMetro() {
       <button class="icon-btn" data-sc="bpm" data-v="5" aria-label="5 BPM més">+5</button>`;
   const srcs = [['', 'Clic'], ...drStyles().map(st => [st, drStyleName(st)])];
   $('#metroSrc').innerHTML = srcs.map(([st, t]) => `<button data-sc="drum" data-v="${st}" class="${scState.drum === st ? 'on' : ''}"${st && !drAvail(st) ? ' disabled' : ''}>${t}</button>`).join('');
+  $('#metroVol').innerHTML = bassVolSeg();
+  const kind = scState.drum && drHas(scState.drum) ? drKindSeg(!!scState.synth, 'data-sc="synth"') : '';
   $('#metroDr').innerHTML = scState.drum
-    ? (clock.drums ? drumsText(clock.drums) : scDrumWait ? 'Preparant la base…' : `Compte enrere d'un compàs i després la base.${
-      real ? ' Tria el tempo entre els de les gravacions.' : ' Sense fitxers d\'aquest estil a /drums: sona una bateria sintètica, al tempo que triïs.'}`)
+    ? kind + (clock.drums ? drumsText(clock.drums) : scDrumWait ? 'Preparant la base…' : `Compte enrere d'un compàs i després la base.${
+      real ? ' Tria el tempo entre els de les gravacions.'
+      : drHas(scState.drum) ? ' Bateria sintètica, al tempo que triïs.'
+      : ' Sense fitxers d\'aquest estil a /drums: sona una bateria sintètica, al tempo que triïs.'}`)
     : '';
   $('#metroInfo').innerHTML = n === target
     ? `BPM del dia ${scView.d} de la setmana ${scView.w}`
@@ -3099,7 +3110,7 @@ function renderMetro() {
   if (!clock.click && !clock.drums) $('#metroPips').querySelectorAll('i').forEach(p => p.classList.remove('on'));
 }
 // Amb bateria real, el tempo es tria entre els de les gravacions; amb clic o sintètica, lliure
-const scReal = () => !!scState.drum && drHas(scState.drum);
+const scReal = () => !!scState.drum && drHas(scState.drum) && !scState.synth;
 function scStopAll() {
   if (scSeq) stopSeq();
   if (clock.click || clock.drums || scDrumWait) metroStop();
@@ -3152,6 +3163,12 @@ function scAction(kind, v) {
       scState.drum = v; saveSc();
       // Amb bateria real, la gravació més propera al BPM del dia
       if (scReal()) scBpm = drNearest(v, dayBpm(PLAN[scView.w - 1], scView.d));
+      if (clock.drums || clock.click) { metroStop(); metroToggle(); } else renderMetro();
+      break;
+    }
+    case 'synth': {
+      scState.synth = v === '1'; saveSc();
+      if (scReal()) scBpm = drNearest(scState.drum, scBpm);
       if (clock.drums || clock.click) { metroStop(); metroToggle(); } else renderMetro();
       break;
     }
@@ -3209,6 +3226,23 @@ const drHas = st => dr.list.some(l => l.style === st && l.beats === 4 && !l.brok
 // Amb fitxers reals, el tempo es tria entre els de les gravacions (sense estirar-les)
 const drTempos = st => [...new Set(dr.list.filter(l => l.style === st && l.beats === 4 && !l.broken).map(l => l.bpm))].sort((a, b) => a - b);
 const drNearest = (st, bpm) => drTempos(st).reduce((a, b) => (Math.abs(Math.log(bpm / b)) < Math.abs(Math.log(bpm / a)) ? b : a));
+// Volum del baix que toca l'app (patrons i «Toca l'escala»), per tocar-hi a sobre. No afecta les notes del màstil.
+const BASS_VOLS = [[1, '100%'], [0.5, '50%'], [0.25, '25%'], [0, 'Mut']];
+const bassVolSeg = () => `<div class="seg" role="group" aria-label="Volum del baix">${BASS_VOLS.map(([v, t]) =>
+  `<button data-bassvol="${v}" class="${cfg.bassVol === v ? 'on' : ''}" aria-pressed="${cfg.bassVol === v}">${t}</button>`).join('')}</div>`;
+function setBassVol(v) {
+  cfg.bassVol = v; saveCfg();
+  if (bassBus) {
+    const g = bassBus.gain, t = actx.currentTime;
+    g.cancelScheduledValues(t);
+    // Rampa curta perquè no peti; si l'àudio està aturat, el valor directament
+    if (actx.state === 'running') { g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(v, t + 0.03); } else g.value = v;
+  }
+  document.querySelectorAll('[data-bassvol]').forEach(b => { const on = +b.dataset.bassvol === v; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+}
+// Commutador real / sintètica, només quan l'estil té fitxers reals
+const drKindSeg = (synth, attrs) => `<div class="seg" role="group" aria-label="Tipus de bateria">${[['0', 'Real'], ['1', 'Sintètica']].map(([v, t]) =>
+  `<button ${attrs} data-v="${v}" class="${(v === '1') === synth ? 'on' : ''}">${t}</button>`).join('')}</div>`;
 const drTempoSeg = (st, cur, attrs) => `<div class="seg dr-tempos" role="group" aria-label="Tempo de la base">${drTempos(st).map(t =>
   `<button ${attrs} data-v="${t}" class="${t === cur ? 'on' : ''}">${t}</button>`).join('')}</div>`;
 
@@ -3416,8 +3450,8 @@ async function synthLoop(style, bpm) {
 }
 
 // Prepara la base per a un estil i un tempo: { buffer, bpm real, loop, clamped, beats, bars, dur }
-async function drumsPrepare(style, bpm) {
-  const pick = drumsPick(style, bpm);
+async function drumsPrepare(style, bpm, synth = false) {
+  const pick = synth ? null : drumsPick(style, bpm);
   if (!pick) {
     // Sense fitxers reals de l'estil: bateria sintètica al tempo exacte (no cal estirar-la)
     if (!DR_SYNTH[style]) return null;
@@ -3454,7 +3488,8 @@ function drumsStop() {
 }
 // Text de la base que sona: nom, BPM original i ajust aplicat
 function drumsText(prep) {
-  if (prep.loop.synth) return `Bateria sintètica (${drStyleName(prep.loop.style).toLowerCase()}) a ${Math.round(prep.bpm)} BPM. Quan hi hagi fitxers d'aquest estil a /drums, sonarà la bateria real.`;
+  if (prep.loop.synth) return `Bateria sintètica (${drStyleName(prep.loop.style).toLowerCase()}) a ${Math.round(prep.bpm)} BPM.${
+    drHas(prep.loop.style) ? '' : " Quan hi hagi fitxers d'aquest estil a /drums, sonarà la bateria real."}`;
   const pct = Math.round((prep.bpm / prep.loop.bpm - 1) * 100);
   if (!pct) return `Base «${prep.loop.name}» al seu tempo original, ${prep.loop.bpm} BPM.`;
   return `Base «${prep.loop.name}» (${prep.loop.bpm} BPM) a ${Math.round(prep.bpm)} BPM (${pct > 0 ? '+' : ''}${pct}%)${
@@ -3619,7 +3654,7 @@ function ptCard(id) {
   return c;
 }
 // Amb bateria real, el tempo de la targeta és sempre un dels de les gravacions
-const ptReal = c => !!c.drum && drHas(c.drum);
+const ptReal = c => !!c.drum && drHas(c.drum) && !c.synth;
 function ptSnap(c) { if (ptReal(c) && !drTempos(c.drum).includes(c.bpm)) c.bpm = drNearest(c.drum, c.bpm); }
 const ptLayoutOf = id => { const c = ptCard(id); return ptLayout(ptById(id), c.key, c.str, c.v); };
 const ptLearnedN = () => PT.filter(p => ptState.learned[p.id]).length;
@@ -3812,6 +3847,7 @@ function renderPtCard(id, onlyDynamic = false) {
       <select class="pt-select" data-ptsel="key" data-id="${id}" aria-label="Tonalitat">${ALL_PCS.map(pc => `<option value="${pc}"${pc === c.key ? ' selected' : ''}>${keyName(pc, nt)}</option>`).join('')}</select>
       <div class="seg">${[0, 1].map(i => `<button data-pt="str" data-id="${id}" data-v="${i}" class="${c.str === i ? 'on' : ''}">Corda ${SC_STR[i].name}</button>`).join('')}</div></div></div>
     ${ptDrumRow(p, c)}
+    <div class="row"><span>Volum del baix</span>${bassVolSeg()}</div>
     <div class="row pt-play">
       <button class="btn primary" data-pt="play" data-id="${id}">${ico(playing)}${ptPlay.id === id && ptPlay.wait ? 'Preparant…' : playing ? 'Atura' : 'Toca'}</button>
       <button class="btn${clicking ? ' on' : ''}" data-pt="click" data-id="${id}" aria-pressed="${clicking}">Metrònom${clicking ? ' ✓' : ''}</button>
@@ -3833,9 +3869,12 @@ function ptDrumRow(p, c) {
   const live = ptPlay.id === p.id && ptPlay.drums;
   const info = live ? drumsText(ptPlay.drums)
     : c.drum ? `Compte enrere d'un compàs i baix i bateria alhora. ${
-      ptReal(c) ? `Tria el tempo entre els de les gravacions (el patró va a ${p.bpm} BPM).` : `No hi ha fitxers de ${drStyleName(c.drum).toLowerCase()} a /drums: sona una bateria sintètica, al tempo que triïs.`}`
+      ptReal(c) ? `Tria el tempo entre els de les gravacions (el patró va a ${p.bpm} BPM).`
+      : drHas(c.drum) ? 'Bateria sintètica, al tempo que triïs.'
+      : `No hi ha fitxers de ${drStyleName(c.drum).toLowerCase()} a /drums: sona una bateria sintètica, al tempo que triïs.`}`
     : `Tria una base per tocar amb bateria (la suggerida és ${drStyleName(sug).toLowerCase()}).${dr.status !== 'ok' ? ' ' + drumsNotice() : ''}`;
-  return `<div class="row"><span>Bateria</span><div class="seg">${['', ...drStyles()].map(btn).join('')}</div></div><p class="small pt-drinfo">${info}</p>`;
+  const kind = c.drum && drHas(c.drum) ? `<div class="row"><span></span>${drKindSeg(!!c.synth, `data-pt="synth" data-id="${p.id}"`)}</div>` : '';
+  return `<div class="row"><span>Bateria</span><div class="seg">${['', ...drStyles()].map(btn).join('')}</div></div>${kind}<p class="small pt-drinfo">${info}</p>`;
 }
 
 // Targeta destacada de l'inici, sota el curs
@@ -3888,9 +3927,9 @@ function ptTick() {
     if (it.click) { if (ptPlay.click) clickAt(ts, it.u === 0); }
     else if (ptPlay.play && cfg.sound) {
       const e = ptPlay.L.ev[it.i];
-      if (e.kind === 'dead') deadVoice(actx, master, freq(e.midi), ts);
+      if (e.kind === 'dead') deadVoice(actx, bassBus, freq(e.midi), ts);
       else {
-        const v = e.tech ? slapVoice(actx, master, freq(e.midi), ts, e.tech === 'P') : bassVoice(actx, master, freq(e.midi), ts);
+        const v = e.tech ? slapVoice(actx, bassBus, freq(e.midi), ts, e.tech === 'P') : bassVoice(actx, bassBus, freq(e.midi), ts);
         v.stop(ts + e.d * u * (p.gate || 0.92));
       }
       const id = p.id, i = it.i;
@@ -3918,7 +3957,7 @@ async function ptDrumStart(id) {
   ptPlay.tok = tok; ptPlay.id = id; ptPlay.wait = true; ptPlay.play = true;
   renderPtCard(id);
   let prep = null;
-  try { prep = await drumsPrepare(c.drum, c.bpm); } catch (e) { console.warn('[Bass Lab] Bateria:', e.message); }
+  try { prep = await drumsPrepare(c.drum, c.bpm, !!c.synth); } catch (e) { console.warn('[Bass Lab] Bateria:', e.message); }
   if (tok !== ptPlay.tok) return;
   ptPlay.wait = false; ptPlay.id = null;
   if (!prep) { ptPlay.play = false; toast("No s'ha pogut carregar la base de bateria."); renderPtCard(id); return; }
@@ -3958,6 +3997,15 @@ async function ptAction(kind, id, v) {
       c.drum = v;
       // Amb bateria real, la gravació més propera al tempo del patró
       if (ptReal(c)) c.bpm = drNearest(v, ptById(id).bpm);
+      savePt();
+      if (ptPlay.id === id) { const was = ptPlay.play; ptStop(); if (was && v) ptDrumStart(id); }
+      renderPtCard(id);
+      break;
+    }
+    case 'synth': {
+      c.synth = v === '1';
+      // En tornar a la real, la gravació més propera al tempo que hi havia
+      if (ptReal(c)) c.bpm = drNearest(c.drum, c.bpm);
       savePt();
       if (ptPlay.id === id) { const was = ptPlay.play; ptStop(); if (was && v) ptDrumStart(id); }
       renderPtCard(id);
@@ -4172,6 +4220,8 @@ document.addEventListener('click', e => {
   if (e.target.closest('[data-whgo]')) { whGo(); return; }
   if (e.target.closest('[data-course]')) { courseGo(); return; }
   if (e.target.closest('[data-drpick]')) { $('#drumsPick').click(); return; }
+  const bv = e.target.closest('[data-bassvol]');
+  if (bv) { setBassVol(+bv.dataset.bassvol); return; }
   const pto = e.target.closest('[data-ptopen]');
   if (pto) { ptOpen(pto.dataset.ptopen); return; }
   const ptb = e.target.closest('[data-pt]');
