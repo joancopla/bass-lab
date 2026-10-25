@@ -154,10 +154,15 @@ Alteracions: ♯ = sostingut, ♭ = bemoll (Do♯ = C♯, Re♭ = D♭). En mode
 - Comptes d'usuari, sincronització o backend.
 
 ## Pendent (anotat el 30/09/2026, per ordre de prioritat)
-1. **Exportar i importar el progrés** (configuració, pesos, estadístiques i historial) com a fitxer JSON des de la configuració. Motiu: Safari esborra el `localStorage` després de 7 dies sense visitar la web; també serveix per passar el progrés entre aparells.
+1. ~~**Exportar i importar el progrés**~~ — fet el 25/10/2026: targeta «Còpia de seguretat» a Configuració. Desa totes les claus `basslab.*` en un JSON (`{ app: 'bass-lab', format: 1, date, data }`); en recuperar, mostra la data i un resum i demana confirmació abans de substituir-ho tot, i després recarrega l'app.
 2. **Afinador pel micròfon** (excepció a "Detecció de notes pel micròfon"): YIN, suposant la corda a l'aire més propera per evitar errors d'octava, mode "harmònic del trast 12", agulla de ±50 cèntims i verd a ±3. Desactivar echoCancellation, noiseSuppression i autoGainControl. Apagar el micròfon en sortir de la pantalla.
 3. **Escales i arpegis al màstil**: veure-les ja està fet (25/10/2026, mòdul «Escales i arpegis»). Falta l'exercici amb preguntes ("toca la tercera de Sol").
 4. **Lectura de frases curtes**: 4–8 notes en clau de fa per llegir i tocar seguides.
 5. **Intervals al màstil**: la forma de cada interval, enllaçada amb l'exercici d'oïda.
 
 Pendent de l'usuari: fer-la servir una setmana, provar-la al mòbil real i escoltar el so amb auriculars.
+
+## Idees per més endavant (anotades el 25/10/2026, després dels pendents 1–5)
+- **Lectura de ritme**: pentagrama amb figures (negres, corxeres, semicorxeres, silencis) sobre una sola nota, per tocar-lo amb la bateria. Aprofita el motor de ritme dels patrons.
+- **Progressions i línies de baix**: una progressió (I–IV–V, ii–V–I, blues de 12 compassos) amb bateria, i l'usuari hi posa la línia. Es mostren les fonamentals al mànec i, si es vol, una línia de mostra amb aproximacions. Enllaça la Roda harmònica amb els patrons.
+- **Notes de l'acord al mànec**: surt un acord (Do7, Lam7…) i cal trobar-ne totes les notes dins la zona. Base per improvisar i per al walking.

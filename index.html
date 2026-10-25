@@ -659,6 +659,9 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 .fails li { padding: 8px 12px; border-radius: var(--r-sm); background: var(--err-soft); font-size: 14px; font-weight: 650; }
 .fails li b { color: var(--err); font-family: var(--font-display); font-weight: 700; }
 .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.backup-card .actions { margin-top: 12px; }
+.backup-confirm { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; }
+.backup-confirm p { margin: 0 0 8px; font-size: 14px; }
 
 /* Toast */
 .toast {
@@ -836,6 +839,17 @@ body.in-quiz .topbar { display: none; }
         <div class="seg" data-key="sessionSize" data-type="num">
           <button data-val="10">10 preguntes</button><button data-val="20">20</button><button data-val="50">50</button><button data-val="0">Lliure</button>
         </div>
+      </div>
+
+      <div class="card backup-card">
+        <h3>Còpia de seguretat</h3>
+        <p class="small">Configuració, pesos, estadístiques, historial, pla d'escales i patrons apresos, en un fitxer. Safari esborra les dades de les webs que no visites en 7 dies: desa'n una còpia de tant en tant. També serveix per passar el progrés a un altre aparell.</p>
+        <div class="actions">
+          <button class="btn" id="btnExport">Desa el progrés</button>
+          <button class="btn" id="btnImport">Recupera'l…</button>
+        </div>
+        <input type="file" id="importFile" accept=".json,application/json" hidden>
+        <div class="backup-confirm" id="importConfirm" hidden></div>
       </div>
     </div>
   </section>
@@ -2684,6 +2698,57 @@ function resetStats() {
   toast('Estadístiques reiniciades.');
 }
 
+/* ---- Còpia de seguretat: totes les dades basslab.* en un fitxer JSON ---- */
+const BACKUP_APP = 'bass-lab', BACKUP_FORMAT = 1;
+const backupKeys = () => Object.keys(localStorage).filter(k => k.startsWith('basslab.'));
+const isoDay = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+function exportProgress() {
+  const data = {};
+  try { for (const k of backupKeys()) data[k] = JSON.parse(localStorage.getItem(k)); } catch (e) { toast("No s'han pogut llegir les dades."); return; }
+  const now = new Date(), json = JSON.stringify({ app: BACKUP_APP, format: BACKUP_FORMAT, date: now.toISOString(), data }, null, 1);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+  a.download = `bass-lab-progres-${isoDay(now)}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  toast('Progrés desat: ' + a.download);
+}
+// Resum d'una còpia per confirmar-la abans de substituir res
+function backupSummary(data) {
+  const st = data['basslab.stats'] || {}, mods = Object.values(st.modules || {});
+  const answers = mods.reduce((s, m) => s + (m.n || 0), 0), sessions = (st.sessions || []).length;
+  const learned = Object.keys((data['basslab.patterns'] || {}).learned || {}).filter(k => data['basslab.patterns'].learned[k]).length;
+  const start = (data['basslab.scales'] || {}).start;
+  return [`${answers} respostes`, `${sessions} sessions`, `${learned} patrons apresos`, start ? `pla d'escales des del ${new Date(start + 'T12:00').toLocaleDateString('ca-ES')}` : 'pla d\'escales sense començar'].join(' · ');
+}
+let importPending = null;
+async function readImport(file) {
+  const box = $('#importConfirm');
+  importPending = null;
+  let b;
+  try { b = JSON.parse(await file.text()); } catch (e) { b = null; }
+  const ok = b && b.app === BACKUP_APP && b.data && typeof b.data === 'object'
+    && Object.keys(b.data).length && Object.keys(b.data).every(k => k.startsWith('basslab.'));
+  if (!ok) { box.hidden = true; toast('Aquest fitxer no és una còpia de Bass Lab.'); return; }
+  if (b.format > BACKUP_FORMAT) { box.hidden = true; toast('Aquesta còpia és d\'una versió més nova de l\'app.'); return; }
+  importPending = b.data;
+  const when = new Date(b.date);
+  box.innerHTML = `<p><b>Còpia del ${isNaN(when) ? '?' : when.toLocaleString('ca-ES', { dateStyle: 'long', timeStyle: 'short' })}</b><br>${backupSummary(b.data)}</p>
+    <p class="small">Substituirà tot el progrés que hi ha ara en aquest navegador.</p>
+    <div class="actions"><button class="btn danger" data-import="yes">Substitueix el progrés</button><button class="btn" data-import="no">Cancel·la</button></div>`;
+  box.hidden = false;
+}
+function applyImport() {
+  if (!importPending) return;
+  try {
+    for (const k of backupKeys()) localStorage.removeItem(k);
+    for (const [k, v] of Object.entries(importPending)) localStorage.setItem(k, JSON.stringify(v));
+    sessionStorage.setItem('basslab-imported', '1');
+  } catch (e) { toast("No s'ha pogut desar la còpia en aquest navegador."); return; }
+  // Es torna a carregar l'app perquè tot l'estat surti de les dades noves
+  location.reload();
+}
+
 // Toca lliure: tot el màstil i totes les cordes, sense preguntes
 let playLast = null;
 function renderPlay() {
@@ -4255,6 +4320,15 @@ $('#fretMax').addEventListener('change', e => { cfg.fretMax = +e.target.value; i
 
 $('#btnNext').addEventListener('click', () => goNext());
 $('#btnReset').addEventListener('click', resetStats);
+$('#btnExport').addEventListener('click', exportProgress);
+$('#btnImport').addEventListener('click', () => { $('#importFile').value = ''; $('#importFile').click(); });
+$('#importFile').addEventListener('change', e => { if (e.target.files[0]) readImport(e.target.files[0]); });
+$('#importConfirm').addEventListener('click', e => {
+  const b = e.target.closest('[data-import]');
+  if (!b) return;
+  if (b.dataset.import === 'yes') applyImport(); else { importPending = null; $('#importConfirm').hidden = true; }
+});
+try { if (sessionStorage.getItem('basslab-imported')) { sessionStorage.removeItem('basslab-imported'); setTimeout(() => toast('Progrés recuperat.'), 300); } } catch (e) { /* sense sessionStorage */ }
 // Sortir d'una sessió amb respostes demana tocar la creu (o Esc) dues vegades
 let exitArmed = null;
 function disarmExit() { clearTimeout(exitArmed); exitArmed = null; $('#quizExit').classList.remove('armed'); }
