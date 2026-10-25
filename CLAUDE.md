@@ -52,6 +52,10 @@ Idioma de la interfície: **català**.
   - **Notació pròpia** (llatina o anglesa) compartida per Escales i la Roda, a part de la dels exercicis.
 - **Roda harmònica** (cercle de quintes en SVG propi): fora, les 12 majors en ordre de quintes amb el nombre d'alteracions; dins, les relatives menors. En triar una tonalitat es ressalten el I, el IV i el V i les relatives ii, iii i vi (en una menor: i, iv, v, III, VI, VII), i es mostren els 7 acords diatònics. «Veure al mànec» obre l'escala major (o la menor natural) a la pantalla d'escales. La roda és fixa, amb Do a dalt.
   - `key_spelling` decideix només la fonamental de la major. La relativa i els acords surten de l'escala, una lletra per grau (Mi → Do♯ m, i no Re♭ m). Fa♯/Sol♭ mostra les dues grafies, però s'escriu amb bemolls.
+- **12 patrons que tot baixista ha de saber** (dades a `PT` dins l'`index.html`): targeta destacada a l'inici, sota el curs, amb la barra d'apresos i el patró següent; pantalla pròpia amb una targeta per patró, ordenades per nivell (1–5) i filtrables per nivell, estil i estat.
+  - Cada patró s'escriu en La, amb la fonamental a la corda Mi, trast 5: `corda+trast/durada` en semicorxeres, `x` nota morta, `r` silenci, `T`/`P` polze i pop, `|` compàs. Es transporta a qualsevol to amb la fonamental a la corda Mi o La (mateixa regla del trast 12). Graus i noms surten d'una lletra per grau des de la fonamental.
+  - Cada targeta té tablatura amb els comptes del ritme, el mànec, la partitura en clau de fa plegable (figures, barres, silencis i notes mortes amb cap en x) i un reproductor amb metrònom i BPM propis. El swing va a 2:1; les notes mortes i el slap tenen veus pròpies.
+  - Afegits validats per l'usuari: selector major/menor a la tríada; als patrons 8 i 9, segon compàs sobre el IV que acaba a mig to de la fonamental per tornar a començar.
 
 ## Configuració
 - Baix de **4 cordes** (E A D G) o **5 cordes** (B E A D G), en afinació estàndard.

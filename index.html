@@ -372,6 +372,90 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 .sc-staff-info { margin-top: -6px; }
 .seg button small { font-size: .78em; font-weight: 600; opacity: .7; margin-left: 4px; }
 .wh-not { justify-self: center; }
+
+/* ===================== 12 patrons ===================== */
+.pt-feature { border-color: color-mix(in srgb, var(--oct-2) 45%, var(--line));
+  background:
+    radial-gradient(520px 220px at 0% 0%, color-mix(in srgb, var(--oct-2) 12%, transparent), transparent 70%),
+    linear-gradient(135deg, var(--card-top), var(--card));
+  box-shadow: inset 0 1px 0 var(--edge-hi), 0 0 0 1px color-mix(in srgb, var(--oct-2) 10%, transparent), var(--shadow); }
+.pt-feature::before { background: var(--oct-2); }
+.pt-feature .kicker { color: var(--oct-2); }
+.pt-feature .tag { background: color-mix(in srgb, var(--oct-2) 14%, transparent); color: var(--oct-2); }
+.pt-progress { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.pt-progress > span { font-size: 14px; color: var(--muted); font-weight: 650; white-space: nowrap; }
+.pt-progress b { font-family: var(--font-display); font-size: 20px; color: var(--text); font-variant-numeric: tabular-nums; }
+.pt-bar { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 4px; }
+.pt-bar i { height: 8px; border-radius: 4px; background: var(--line); transition: background-color .3s; }
+.pt-bar i.on { background: var(--oct-2); }
+@media (prefers-reduced-motion: reduce) { .pt-bar i { transition: none; } }
+.pt-top { display: grid; gap: 14px; margin-bottom: 12px; }
+.pt-filters { padding-top: 14px; }
+.pt-list { display: grid; gap: 12px; }
+.pt-card { display: grid; gap: 12px; padding: 18px 8px 14px; scroll-margin-top: 12px; }
+.pt-card > :not(.board-wrap) { margin-left: 10px; margin-right: 10px; }
+.pt-card.learned { border-color: color-mix(in srgb, var(--oct-2) 40%, var(--line)); }
+.pt-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.pt-meta { margin: 0 0 4px; display: flex; flex-wrap: wrap; gap: 6px; }
+.pt-level, .pt-style { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.pt-level { background: var(--accent-soft); color: var(--accent); }
+.pt-style { border: 1px solid var(--line); color: var(--muted); }
+.pt-name { margin: 0; display: flex; align-items: baseline; gap: 10px; font-family: var(--font-display); font-weight: 700; font-size: clamp(22px, 3.6vw, 28px); line-height: 1.15; }
+.pt-name span { color: var(--faint); font-size: .75em; font-variant-numeric: tabular-nums; }
+.pt-learn { min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--card-2); color: var(--muted); font-weight: 700; font-size: 14px; }
+.pt-learn:hover { border-color: var(--line-strong); color: var(--text); }
+.pt-learn.on { border-color: var(--oct-2); color: var(--oct-2); background: color-mix(in srgb, var(--oct-2) 12%, transparent); }
+.pt-degs { margin: 0; font-family: var(--font-display); font-size: 18px; font-weight: 600; }
+.pt-degs b { font-family: var(--font); font-size: 13px; color: var(--muted); margin-right: 6px; }
+.pt-degs span { display: block; font-family: var(--font); font-size: 13px; font-weight: 600; color: var(--muted); margin-top: 2px; }
+.pt-text { margin: 0; max-width: 72ch; }
+.pt-tab { display: grid; justify-items: center; padding: 8px 4px 2px; border-radius: var(--r-md); background: var(--card-2); }
+.tab { display: block; width: 100%; height: auto; }
+.tab .tab-line { stroke: var(--staff-line); stroke-width: 1; }
+.tab .tab-bar { stroke: var(--staff-line); stroke-width: 1.4; }
+.tab .tab-bar.end { stroke-width: 3; }
+.tab text { font-family: var(--font-display); text-anchor: middle; dominant-baseline: central; }
+.tab .tab-s { font-size: 11px; font-weight: 700; fill: var(--muted); }
+.tab .tab-n rect { fill: var(--card-2); }
+.tab .tab-n text { font-size: 14px; font-weight: 700; fill: var(--text); }
+.tab .tab-n.dead text { fill: var(--muted); }
+.tab .tab-n.now rect { fill: var(--accent); }
+.tab .tab-n.now text { fill: var(--on-primary, #fff); }
+.tab .tab-chord { font-size: 12px; font-weight: 700; fill: var(--accent); text-anchor: start; }
+.tab .tab-tech { font-size: 11px; font-weight: 700; fill: var(--oct-2); }
+.tab .tab-count { font-size: 11px; font-weight: 600; fill: var(--faint); }
+.tab .tab-count.on { fill: var(--muted); font-weight: 800; }
+.pt-staff summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-weight: 700; color: var(--accent); }
+.pt-staff .sc-staff { padding: 6px 2px 4px !important; }
+.pt-st { display: block; width: 100%; height: auto; }
+.pt-st .tsig { font-family: var(--font-display); font-weight: 800; font-size: 19px; fill: var(--staff-ink); text-anchor: middle; dominant-baseline: central; }
+.pt-st .barline { stroke: var(--staff-line); stroke-width: 1.2; }
+.pt-st .rest, .pt-st .beam, .pt-st .flag { fill: var(--staff-ink); }
+.pt-st .rest-line { fill: none; stroke: var(--staff-ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pt-st .head-open { fill: none; stroke: var(--staff-ink); stroke-width: 1.8; }
+.pt-st .xhead { stroke: var(--staff-ink); stroke-width: 1.8; stroke-linecap: round; }
+.pt-st .pt-chord { font-family: var(--font-display); font-weight: 700; font-size: 12px; fill: var(--accent); dominant-baseline: central; }
+.pt-st .pt-tech { font-family: var(--font-display); font-weight: 700; font-size: 11px; fill: var(--oct-2); text-anchor: middle; }
+.pt-st .note.now .head, .pt-st .note.now .acc-fill { fill: var(--accent); }
+.pt-st .note.now .stem, .pt-st .note.now .xhead, .pt-st .note.now .acc-line, .pt-st .note.now .ledger, .pt-st .note.now .head-open { stroke: var(--accent); }
+.pt-controls { display: grid; gap: 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+.pt-controls .row { display: flex; align-items: center; gap: 10px 12px; flex-wrap: wrap; }
+.pt-controls .row > span { min-width: 58px; font-size: 14px; font-weight: 700; color: var(--muted); }
+.pt-key { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pt-select {
+  min-height: 44px; padding: 0 12px; border-radius: var(--r-sm); background: var(--card-2);
+  border: 1px solid var(--line); color: var(--text); font-family: var(--font-display); font-size: 16px; font-weight: 600;
+}
+.pt-play .btn { min-height: 46px; padding: 0 18px; }
+.pt-play .btn.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.pt-bpm { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.pt-bpm b { font-family: var(--font-display); font-weight: 700; font-size: 28px; color: var(--accent); min-width: 2.2ch; text-align: center; font-variant-numeric: tabular-nums; }
+.pt-bpm small { font-size: 12px; font-weight: 700; color: var(--muted); margin: 0 4px 0 -2px; }
+.pt-bpm .icon-btn { font-family: var(--font-display); font-weight: 600; font-size: 14px; color: var(--text); width: 40px; height: 40px; }
+@media (max-width: 640px) {
+  .pt-bpm { margin-left: 0; width: 100%; justify-content: space-between; }
+  .pt-play .btn { flex: 1 1 120px; }
+}
 .sc-controls { display: grid; gap: 12px; padding-top: 14px !important; border-top: 1px solid var(--line); }
 .sc-controls .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .sc-controls .row { flex-wrap: nowrap; align-items: flex-start; }
@@ -624,6 +708,7 @@ body.in-quiz .topbar { display: none; }
   <!-- ============ INICI ============ -->
   <section id="view-home">
     <div class="card course" id="course"></div>
+    <div class="card course pt-feature" id="ptFeature"></div>
     <div class="home-head">
       <div class="hero-mini" id="heroMini">
         <svg class="hero-strings" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
@@ -816,6 +901,27 @@ body.in-quiz .topbar { display: none; }
     <div class="actions" style="margin-top:14px">
       <button class="btn primary" data-start="m6">Practica les octaves</button>
     </div>
+  </section>
+
+  <!-- ============ 12 PATRONS ============ -->
+  <section id="view-patterns" hidden>
+    <div class="page-head">
+      <button class="icon-btn" data-go="home" aria-label="Tornar a l'inici">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <h2>12 patrons que tot baixista ha de saber</h2>
+    </div>
+    <div class="card pt-top">
+      <div id="ptProgress"></div>
+      <div class="sc-controls pt-filters">
+        <div class="row"><span>Nivell</span><div class="seg num" id="ptLevel"></div></div>
+        <div class="row"><span>Estil</span><div class="seg" id="ptStyle"></div></div>
+        <div class="row"><span>Estat</span><div class="seg" id="ptStatus"></div></div>
+        <div class="row"><span>Mostra</span><div class="seg" id="ptLabels"></div></div>
+        <div class="row"><span>Notació</span><div class="seg" id="ptNot"></div></div>
+      </div>
+    </div>
+    <div class="pt-list" id="ptList"></div>
   </section>
 
   <!-- ============ RODA HARMÒNICA ============ -->
@@ -1495,16 +1601,17 @@ function warmVoices() {
   setTimeout(step, 50);
 }
 
-function bassVoice(c, dest, f, t) {
+// opt: { bright, end, decay, gain } per a atacs més brillants (slap) o més apagats (notes mortes)
+function bassVoice(c, dest, f, t, opt = {}) {
   const buf = stringBuffer(c, f);
   const src = c.createBufferSource(); src.buffer = buf;
   // To: brillant a l'atac i més rodó després, amb una mica de cos als greus
   const tone = c.createBiquadFilter(); tone.type = 'lowpass'; tone.Q.value = 0.7;
-  tone.frequency.setValueAtTime(1900, t);
-  tone.frequency.exponentialRampToValueAtTime(620, t + 0.5);
+  tone.frequency.setValueAtTime(opt.bright || 1900, t);
+  tone.frequency.exponentialRampToValueAtTime(opt.end || 620, t + (opt.decay || 0.5));
   const body = c.createBiquadFilter(); body.type = 'peaking'; body.frequency.value = 140; body.Q.value = 0.8; body.gain.value = 4;
   const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 28; hp.Q.value = 0.7;
-  const out = c.createGain(); out.gain.value = 0.75;
+  const out = c.createGain(); out.gain.value = opt.gain || 0.75;
   src.connect(hp).connect(body).connect(tone).connect(out).connect(dest);
   src.start(t);
   return { stop(at) { out.gain.setTargetAtTime(0, at, 0.012); src.stop(at + 0.1); } };
@@ -1518,6 +1625,33 @@ function playMidi(midi) {
   const t = c.currentTime + 0.005;
   if (voice) voice.stop(t);
   voice = bassVoice(c, master, freq(midi), t);
+}
+
+// Soroll filtrat curt: el cop dels dits a la corda (notes mortes i atac del slap)
+let noiseBuf = null;
+function noiseBurst(c, dest, t, { f = 220, q = 1.2, type = 'bandpass', dur = 0.05, gain = 0.5 } = {}) {
+  if (!noiseBuf || noiseBuf.sampleRate !== c.sampleRate) {
+    noiseBuf = c.createBuffer(1, Math.floor(c.sampleRate * 0.2), c.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const src = c.createBufferSource(); src.buffer = noiseBuf;
+  const flt = c.createBiquadFilter(); flt.type = type; flt.frequency.value = f; flt.Q.value = q;
+  const g = c.createGain();
+  g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  src.connect(flt).connect(g).connect(dest);
+  src.start(t); src.stop(t + dur + 0.02);
+}
+// Nota morta: la corda apagada amb la mà esquerra. Cop greu sense to i una mica de corda que s'apaga de seguida.
+function deadVoice(c, dest, f, t) {
+  noiseBurst(c, dest, t, { f: 240, q: 1.4, dur: 0.06, gain: 0.9 });
+  const v = bassVoice(c, dest, f, t, { bright: 900, end: 300, decay: 0.05, gain: 0.35 });
+  v.stop(t + 0.035);
+}
+// Slap: el polze (T) colpeja la corda contra l'últim trast; el pop (P) l'estira i la deixa anar. Atac molt brillant.
+function slapVoice(c, dest, f, t, pop) {
+  noiseBurst(c, dest, t, { f: pop ? 3200 : 2000, type: 'highpass', q: 0.7, dur: pop ? 0.016 : 0.012, gain: pop ? 0.4 : 0.28 });
+  return bassVoice(c, dest, f, t, pop ? { bright: 6500, end: 1300, decay: 0.25, gain: 0.8 } : { bright: 4500, end: 900, decay: 0.3, gain: 0.85 });
 }
 
 /* =====================================================================
@@ -2323,7 +2457,8 @@ const fmtSec = ms => (ms / 1000).toFixed(1).replace('.', ',') + ' s';
 function show(view, then) {
   const update = () => {
     if (view !== 'scales') scStopAll();
-    for (const v of ['home', 'config', 'explore', 'stats', 'play', 'scales', 'wheel', 'quiz', 'summary']) $('#view-' + v).hidden = v !== view;
+    if (view !== 'patterns') ptStop();
+    for (const v of ['home', 'config', 'explore', 'stats', 'play', 'scales', 'patterns', 'wheel', 'quiz', 'summary']) $('#view-' + v).hidden = v !== view;
     document.body.classList.toggle('in-quiz', view === 'quiz');
     if (view === 'home') renderHome();
     if (view === 'config') syncConfig();
@@ -2332,6 +2467,7 @@ function show(view, then) {
     if (view === 'play') renderPlay();
     if (view === 'scales') renderScales();
     if (view === 'wheel') renderWheel();
+    if (view === 'patterns') renderPatterns();
     window.scrollTo(0, 0);
     if (then) then();
     syncIndicators();
@@ -2444,6 +2580,7 @@ function renderHome() {
     NOT_LABEL[cfg.notation]}${cfg.allPositions ? ', totes les posicions' : ''}. <button class="link" data-go="config">Canvia</button>`;
   renderHero();
   renderCourse();
+  renderPtFeature();
 
   $('#modules').innerHTML = Object.entries(MODULES).map(([id, M]) => {
     const st = stats.modules[id];
@@ -2699,7 +2836,7 @@ function renderScControls() {
 }
 // Selector de notació, compartit per Escales (data-sc) i la Roda (data-whnot)
 const notSeg = kind => [['latin', 'Llatina', 'Do Re Mi'], ['english', 'Anglesa', 'C D E']].map(([v, t, ex]) =>
-  `<button ${kind === 'sc' ? 'data-sc="nt"' : 'data-whnot'} data-v="${v}" class="${scState.nt === v ? 'on' : ''}" aria-label="Notació ${t.toLowerCase()}">${t} <small>${ex}</small></button>`).join('');
+  `<button ${kind === 'sc' ? 'data-sc="nt"' : kind === 'pt' ? 'data-pt="nt"' : 'data-whnot'} data-v="${v}" class="${scState.nt === v ? 'on' : ''}" aria-label="Notació ${t.toLowerCase()}">${t} <small>${ex}</small></button>`).join('');
 
 // Armadura de l'escala actual (null si no n'hi ha cap d'estàndard)
 const scSignature = (sc, sp) => keySignature(scById(SIG_REF[sc.id] || sc.id), scState.key, sp.root);
@@ -2997,6 +3134,488 @@ function courseGo() {
 }
 
 /* =====================================================================
+   9b2. 12 PATRONS QUE TOT BAIXISTA HA DE SABER
+   ===================================================================== */
+// Escrits en La, amb la fonamental a la corda Mi, trast 5. Cada esdeveniment és "corda+trast/durada"
+// (durada en semicorxeres: 1 = semicorxera, 2 = corxera, 4 = negra, 8 = blanca), "x/1" nota morta
+// (a la corda de la nota anterior) o "r/8" silenci. T i P darrere el trast: polze i pop (slap).
+// "|" separa compassos de 4/4. chords: per a cada compàs, [semitons des de la tonalitat, grau].
+const PT = [
+  { id: 'root8', level: 1, name: 'Fonamental en corxeres', styles: ['Rock', 'Punk', 'Pop'], bpm: 110,
+    seq: 'E5/2 E5/2 E5/2 E5/2 E5/2 E5/2 E5/2 E5/2',
+    text: "La base de tot: la fonamental de l'acord en corxeres constants. Totes iguals de volum i de durada, amb la mà dreta alternant dits i la mà esquerra afluixant just abans de la següent." },
+  { id: 'root5', level: 1, name: 'Fonamental-quinta', styles: ['Country', 'Pop'], bpm: 90,
+    seq: 'E5/4 A7/4 E5/4 A7/4',
+    text: "Alterna la fonamental i la quinta, que és a la corda del costat i dos trasts enllà. Fa el paper del bombo i la caixa: fonamental als temps 1 i 3, quinta als temps 2 i 4." },
+  { id: 'root58', level: 1, name: 'Fonamental-quinta-octava', styles: ['Rock', 'Pop'], bpm: 90,
+    seq: 'E5/4 A7/4 D7/4 A7/4',
+    text: "Hi afegeix l'octava, dues cordes amunt i dos trasts enllà. La forma de la mà és la mateixa en totes les tonalitats: només cal moure-la." },
+  { id: 'octaves', level: 2, name: 'Octaves', styles: ['Disco'], bpm: 116,
+    seq: 'E5/2 D7/2 E5/2 D7/2 E5/2 D7/2 E5/2 D7/2',
+    text: "La fonamental greu al temps i l'octava a la contra, en corxeres. És el motor del disco. Salta de corda amb la mà dreta i apaga cada nota en deixar-la perquè no s'encavalquin." },
+  { id: 'triad', level: 2, name: 'Tríada major i menor', styles: ['Pop', 'Rock'], bpm: 80,
+    variants: [['Major', 'E5/4 A4/4 A7/4 D7/4'], ['Menor', 'E5/4 A3/4 A7/4 D7/4']],
+    text: "L'arpegi de l'acord: fonamental, tercera, quinta i octava. Només canvia la tercera: a 4 semitons de la fonamental és major, a 3 és menor. Escolta com canvia el color." },
+  { id: 'sixth', level: 2, name: 'Patró de la sexta', styles: ['Motown', 'Country'], bpm: 90,
+    seq: 'E5/4 A4/4 A7/4 D4/4',
+    text: "La tríada major amb la sexta al capdamunt en lloc de l'octava. Sona alegre i rodó, i és a la base de moltes línies de Motown i de country." },
+  { id: 'boogie', level: 3, name: 'Boogie/shuffle', styles: ["Rock'n'roll", 'Blues'], bpm: 120, swing: true,
+    seq: 'E5/2 A4/2 A7/2 D4/2 D5/2 D4/2 A7/2 A4/2',
+    text: "Puja per l'acord fins a la setena menor i torna a baixar, en corxeres de swing: la primera de cada parella dura el doble que la segona. És el baix del rock'n'roll i del blues de 12 compassos." },
+  { id: 'approach', level: 3, name: 'Aproximació cromàtica', styles: ['Pop', 'Rock', 'Blues'], bpm: 90,
+    seq: 'E5/4 E5/4 E5/4 A4/4 | A5/4 A5/4 A5/4 E4/4', chords: [[0, 1], [5, 4]],
+    text: "Abans de canviar d'acord, toca la nota que és a mig to per sota de la fonamental nova. Aquí la tercera del primer acord porta al segon, i la nota de l'últim temps torna al primer." },
+  { id: 'walking', level: 4, name: 'Walking bass', styles: ['Jazz', 'Blues'], bpm: 110,
+    seq: 'E5/4 E7/4 A4/4 A7/4 | A5/4 A7/4 D4/4 E4/4', chords: [[0, 1], [5, 4]],
+    text: "Una negra per temps, sense parar: la fonamental al temps 1, notes de l'acord o de l'escala pel mig i, a l'últim temps, una nota a mig to de l'acord següent. Totes iguals i lligades." },
+  { id: 'ghost', level: 4, name: 'Notes mortes', styles: ['Funk', 'Soul'], bpm: 90, gate: 0.8,
+    seq: 'E5/1 x/1 x/1 E5/1 x/1 E5/1 x/1 x/1 E5/1 x/1 x/1 E5/1 x/1 E5/1 x/1 x/1',
+    text: "Les x són notes mortes: la mà esquerra toca la corda sense prémer-la contra el trast i la mà dreta pinça igual. No tenen to, només ritme, i mantenen les semicorxeres constants." },
+  { id: 'onedrop', level: 4, name: 'Reggae one drop', styles: ['Reggae'], bpm: 76, gate: 0.6,
+    seq: 'r/8 E5/4 r/2 E5/2',
+    text: "El temps 1 queda buit i el pes va al temps 3, com el bombo del one drop; després, una corxera a la segona meitat del 4. Notes curtes, greus i rodones: el silenci forma part del patró." },
+  { id: 'slap', level: 5, name: 'Octaves de funk amb slap', styles: ['Funk'], bpm: 90, gate: 0.7,
+    seq: 'E5T/1 x/1 D7P/1 x/1 E5T/1 x/1 D7P/1 x/1 E5T/1 x/1 D7P/1 x/1 E5T/1 x/1 D7P/1 x/1',
+    text: "El polze (T) colpeja la corda greu contra l'últim trast i l'índex (P) estira la de l'octava i la deixa anar. Les notes mortes del mig mantenen les semicorxeres i el groove." },
+];
+const ptById = id => PT.find(p => p.id === id);
+const PT_STR = ['E', 'A', 'D', 'G'];
+const DEG_NUM = [1, 2, 2, 3, 3, 4, 4, 5, 6, 6, 7, 7]; // grau per a cada distància en semitons (♭3 → 3, ♭7 → 7…)
+const ptSeq = (p, v = 0) => (p.variants ? p.variants[Math.min(v, p.variants.length - 1)][1] : p.seq);
+
+function ptParse(seq) {
+  const bars = seq.split('|').map(b => b.trim().split(/\s+/));
+  const ev = [];
+  let u = 0, prev = null;
+  bars.forEach((toks, bar) => toks.forEach(tok => {
+    const [a, d] = tok.split('/'), dur = +d;
+    if (a === 'r') ev.push({ kind: 'rest', u, d: dur, bar });
+    else if (a === 'x') ev.push({ kind: 'dead', u, d: dur, bar, so: prev ? prev.so : 0, fo: prev ? prev.fo : 0 });
+    else {
+      const m = a.match(/^([EADG])(\d+)([TP]?)$/);
+      prev = { kind: 'note', u, d: dur, bar, so: PT_STR.indexOf(m[1]), fo: +m[2] - 5, tech: m[3] };
+      ev.push(prev);
+    }
+    u += dur;
+  }));
+  return { ev, len: u, bars: bars.length };
+}
+// Nom d'una nota a partir del grau: una lletra per grau des de la fonamental de la tonalitat
+function ptSpell(root, keyPc, num, semis) {
+  const letter = LETTERS[(LETTERS.indexOf(root.letter) + num - 1) % 7];
+  return { letter, acc: wrap12(keyPc + semis - LETTER_PC[letter]) };
+}
+// Transporta el patró: fonamental a la corda Mi (0) o La (1); si cauria per sota del trast 0, puja 12 trasts
+function ptLayout(p, keyPc, rootStr, v = 0) {
+  const { ev, len, bars } = ptParse(ptSeq(p, v));
+  const fos = ev.filter(e => e.kind !== 'rest').map(e => e.fo);
+  const open = openMidi(PT_STR[rootStr]);
+  let rf = pcOf(keyPc - open);
+  if (rf + Math.min(...fos) < 0) rf += 12;
+  const rootMidi = open + rf;
+  const root = spellScale(SC_MAJOR, keyPc, SC_FLAT).root;
+  let last = null;
+  const out = ev.map(e => {
+    if (e.kind === 'rest') return { ...e };
+    const s = PT_STR[rootStr + e.so], f = rf + e.fo, midi = openMidi(s) + f, semis = midi - rootMidi;
+    const num = semis === 12 ? 8 : DEG_NUM[pcOf(semis)];
+    const n = { ...e, s, f, midi, semis, num, deg: degreeLabel(num, semis === 12 ? 12 : pcOf(semis)) };
+    if (e.kind === 'note') { Object.assign(n, ptSpell(root, keyPc, num, semis)); last = n; }
+    else if (last) Object.assign(n, { letter: last.letter, acc: last.acc });
+    return n;
+  });
+  // Les notes mortes del principi agafen la grafia de la primera nota
+  const first = out.find(e => e.kind === 'note');
+  for (const e of out) if (e.kind === 'dead' && !e.letter) Object.assign(e, { letter: first.letter, acc: first.acc });
+  const chords = (p.chords || []).map(([semis, num]) => ptSpell(root, keyPc, num, semis));
+  return { ev: out, len, bars, rf, rootMidi, root, chords };
+}
+// Graus en ordre; si tots els compassos són iguals, només el cicle més curt (1 5 1 5 → 1 5)
+function ptDegrees(L) {
+  const per = [];
+  for (const e of L.ev) if (e.kind !== 'rest') (per[e.bar] = per[e.bar] || []).push(e.kind === 'dead' ? 'x' : e.deg);
+  const parts = per.map(b => b.join(' '));
+  if (parts.every(x => x === parts[0])) {
+    const a = per[0];
+    for (let k = 1; k <= a.length; k++) if (a.length % k === 0 && a.every((x, i) => x === a[i % k])) return a.slice(0, k).join(' ');
+  }
+  return parts.join(' | ');
+}
+
+function patternSelfTest() {
+  const errors = [];
+  for (const p of PT) for (let v = 0; v < (p.variants ? p.variants.length : 1); v++) {
+    const P = ptParse(ptSeq(p, v));
+    if (P.len !== P.bars * 16) errors.push(`${p.id}: ${P.len} semicorxeres en ${P.bars} compassos`);
+    for (let pc = 0; pc < 12; pc++) for (const rs of [0, 1]) {
+      const L = ptLayout(p, pc, rs, v);
+      for (const e of L.ev) if (e.kind !== 'rest' && (e.f < 0 || e.f > MAX_FRET || !e.s)) errors.push(`${p.id} en ${pc}/${rs}: posició fora del mànec`);
+      if (pcOf(L.rootMidi) !== pc) errors.push(`${p.id} en ${pc}/${rs}: fonamental incorrecta`);
+    }
+  }
+  const A = (id, v = 0) => ptLayout(ptById(id), 9, 0, v);
+  // En La, fonamental a la corda Mi trast 5 = A1 (MIDI 33)
+  if (A('root8').ev[0].midi !== 33) errors.push('La a la corda Mi no és A1');
+  const exp = { root8: '1', root5: '1 5', root58: '1 5 8 5', octaves: '1 8', sixth: '1 3 5 6', boogie: '1 3 5 6 ♭7 6 5 3',
+    approach: '1 1 1 3 | 4 4 4 7', walking: '1 2 3 5 | 4 5 6 7', ghost: '1 x x 1 x 1 x x', onedrop: '1', slap: '1 x 8 x' };
+  for (const [id, d] of Object.entries(exp)) { const got = ptDegrees(A(id)); if (got !== d) errors.push(`${id}: graus ${got}, esperat ${d}`); }
+  if (ptDegrees(A('triad', 1)) !== '1 ♭3 5 8') errors.push('tríada menor: ' + ptDegrees(A('triad', 1)));
+  const names = (id, pc, rs, v = 0) => ptLayout(ptById(id), pc, rs, v).ev.filter(e => e.kind === 'note').map(e => noteName(e, 'latin') + (Math.floor(e.midi / 12) - 1)).join(' ');
+  for (const [id, pc, rs, v, e] of [
+    ['sixth', 9, 0, 0, 'La1 Do♯2 Mi2 Fa♯2'], ['boogie', 9, 0, 0, 'La1 Do♯2 Mi2 Fa♯2 Sol2 Fa♯2 Mi2 Do♯2'],
+    ['triad', 9, 0, 1, 'La1 Do2 Mi2 La2'], ['approach', 9, 0, 0, 'La1 La1 La1 Do♯2 Re2 Re2 Re2 Sol♯1'],
+    ['walking', 9, 0, 0, 'La1 Si1 Do♯2 Mi2 Re2 Mi2 Fa♯2 Sol♯1'], ['root58', 2, 1, 0, 'Re2 La2 Re3 La2'],
+    ['boogie', 3, 1, 0, 'Mi♭2 Sol2 Si♭2 Do3 Re♭3 Do3 Si♭2 Sol2'], ['walking', 4, 0, 0, 'Mi2 Fa♯2 Sol♯2 Si2 La2 Si2 Do♯3 Re♯2'],
+  ]) { const got = names(id, pc, rs, v); if (got !== e) errors.push(`${id} en ${pc}/${rs}: ${got}, esperat ${e}`); }
+  const ch = ptLayout(ptById('approach'), 9, 0).chords.map(n => noteName(n, 'latin')).join(' ');
+  if (ch !== 'La Re') errors.push('acords de l\'aproximació: ' + ch);
+  if (errors.length) console.error('[Bass Lab] Patrons amb errors:\n' + errors.join('\n'));
+  else console.info('[Bass Lab] Patrons OK: compassos, transport, graus i noms.');
+}
+
+// ---- Estat (localStorage) ----
+const K_PT = 'basslab.patterns';
+const ptState = Object.assign({ learned: {}, level: 0, style: '', status: 'all', labels: 'deg', cards: {} }, LS.get(K_PT, {}));
+const savePt = () => LS.set(K_PT, ptState);
+function ptCard(id) {
+  const p = ptById(id), c = ptState.cards[id] || (ptState.cards[id] = {});
+  if (!(c.key >= 0 && c.key < 12)) c.key = 9;
+  if (![0, 1].includes(c.str)) c.str = 0;
+  if (!(c.bpm >= 30 && c.bpm <= 240)) c.bpm = p.bpm;
+  if (!(c.v >= 0)) c.v = 0;
+  return c;
+}
+const ptLayoutOf = id => { const c = ptCard(id); return ptLayout(ptById(id), c.key, c.str, c.v); };
+const ptLearnedN = () => PT.filter(p => ptState.learned[p.id]).length;
+const ptStyles = () => [...new Set(PT.flatMap(p => p.styles))];
+const ptVisible = () => PT.filter(p => (!ptState.level || p.level === ptState.level)
+  && (!ptState.style || p.styles.includes(ptState.style))
+  && (ptState.status === 'all' || (ptState.status === 'done') === !!ptState.learned[p.id]))
+  .sort((a, b) => a.level - b.level || PT.indexOf(a) - PT.indexOf(b));
+
+// Barra de progrés: un segment per patró, en ordre de nivell
+function ptProgressHTML() {
+  const n = ptLearnedN();
+  return `<div class="pt-progress"><div class="pt-bar" role="progressbar" aria-label="Patrons apresos" aria-valuemin="0" aria-valuemax="${PT.length}" aria-valuenow="${n}">${
+    PT.map(p => `<i class="${ptState.learned[p.id] ? 'on' : ''}" title="${p.name}"></i>`).join('')}</div>
+    <span>Apresos <b>${n}</b> de ${PT.length}</span></div>`;
+}
+
+// ---- Tablatura (SVG) ----
+const COUNTS = ['', 'e', '&', 'a'];
+function renderTab(host, L, { active = null, chords = [], swing = false }) {
+  const minD = Math.min(...L.ev.map(e => e.d));
+  const uw = minD === 1 ? 15 : minD === 2 ? 13 : 11, grid = Math.min(4, Math.max(1, minD));
+  const lineGap = 15, top = chords.length || swing || L.ev.some(e => e.tech) ? 30 : 14, left = 26, barW = 16 * uw + 12;
+  const W = left + 8 + L.bars * barW + 6, H = top + 3 * lineGap + 34;
+  const y = s => top + (3 - PT_STR.indexOf(s)) * lineGap;
+  const x = u => left + 8 + Math.floor(u / 16) * barW + (u % 16) * uw + uw / 2;
+  let s = `<svg class="tab" viewBox="0 0 ${W} ${H}" style="max-width:${Math.round(W * 1.5)}px" role="img" aria-label="Tablatura">`;
+  PT_STR.forEach(id => {
+    s += `<text class="tab-s" x="10" y="${y(id)}">${stringLabel(id)}</text>`;
+    s += `<line class="tab-line" x1="${left}" x2="${W - 6}" y1="${y(id)}" y2="${y(id)}"/>`;
+  });
+  for (let b = 0; b <= L.bars; b++) {
+    const bx = b === 0 ? left : left + 8 + b * barW - 6;
+    s += `<line class="tab-bar${b === L.bars ? ' end' : ''}" x1="${bx}" x2="${bx}" y1="${y('G')}" y2="${y('E')}"/>`;
+  }
+  chords.forEach((n, b) => (s += `<text class="tab-chord" x="${left + 8 + b * barW}" y="12">${noteName(n, dispNot())}</text>`));
+  if (swing) s += `<text class="tab-chord" x="${left + 8}" y="12">Swing</text>`;
+  L.ev.forEach((e, i) => {
+    if (e.kind === 'rest') return;
+    const cx = x(e.u), cy = y(e.s), label = e.kind === 'dead' ? 'x' : e.f;
+    const w = String(label).length > 1 ? 16 : 11;
+    s += `<g class="tab-n${i === active ? ' now' : ''}${e.kind === 'dead' ? ' dead' : ''}"><rect x="${cx - w / 2}" y="${cy - 8}" width="${w}" height="16" rx="4"/><text x="${cx}" y="${cy}">${label}</text></g>`;
+    if (e.tech) s += `<text class="tab-tech" x="${cx}" y="${top - 10}">${e.tech}</text>`;
+  });
+  // Comptes del ritme: 1 e & a… (en negreta on comença una nota)
+  const starts = new Set(L.ev.filter(e => e.kind !== 'rest').map(e => e.u));
+  for (let u = 0; u < L.len; u += grid) {
+    const c = u % 4 === 0 ? String((u % 16) / 4 + 1) : COUNTS[u % 4];
+    s += `<text class="tab-count${starts.has(u) ? ' on' : ''}" x="${x(u)}" y="${H - 10}">${c}</text>`;
+  }
+  host.innerHTML = s + '</svg>';
+}
+
+// ---- Partitura amb ritme (clau de fa, altura escrita) ----
+function restGlyph(d, x, y) {
+  if (d >= 8) return `<rect class="rest" x="${x - 6}" y="${y - 5}" width="12" height="5"/>`;
+  if (d === 4) return `<path class="rest-line" d="M${x - 2},${y - 13} L${x + 4},${y - 6} L${x - 2},${y} L${x + 4},${y + 6} C${x - 3},${y + 3} ${x - 3},${y + 10} ${x + 1},${y + 12}"/>`;
+  const dot = (dx, dy) => `<circle class="rest" cx="${x + dx}" cy="${y + dy}" r="2.3"/>`;
+  return `<path class="rest-line" d="M${x + 4},${y - 6} L${x - 1},${y + 9}"/>` + dot(-1, -5) + (d === 1 ? `<path class="rest-line" d="M${x + 4},${y - 6} L${x - 1},${y + 9}"/>` + dot(-3, 1) : '')
+    + `<path class="rest-line" d="M${x - 1},${y - 4} Q${x + 2},${y - 3} ${x + 4},${y - 6}"/>` + (d === 1 ? `<path class="rest-line" d="M${x - 3},${y + 2} Q${x},${y + 3} ${x + 2.5},${y}"/>` : '');
+}
+function renderPtStaff(host, L, { active = null, swing = false, chords = [] }) {
+  const half = 5, notes = L.ev.filter(e => e.kind !== 'rest');
+  const steps = new Map(notes.map(e => [e, spelledStep(e, e.midi)]));
+  const st = [...steps.values()];
+  const top = Math.max(Math.max(...st) + 8, STAFF_TOP + 4) + 3, bot = Math.min(Math.min(...st) - 8, STAFF_BOTTOM - 4);
+  const y = s => (top - s) * half + 6, H = (top - bot) * half + 12;
+  const minD = Math.min(...L.ev.map(e => e.d)), uw = minD === 1 ? 16 : minD === 2 ? 15 : 12;
+  const x0 = 82, barW = 16 * uw + 26, W = x0 + L.bars * barW + 4;
+  const x = u => x0 + Math.floor(u / 16) * barW + (u % 16) * uw;
+  let s = `<svg class="st pt-st" viewBox="0 0 ${W} ${H}" style="max-width:${Math.round(W * 1.45)}px" role="img" aria-label="Partitura en clau de fa">`;
+  for (let k = STAFF_BOTTOM; k <= STAFF_TOP; k += 2) s += `<line class="line" x1="6" x2="${W - 6}" y1="${y(k)}" y2="${y(k)}"/>`;
+  s += CLEF_SVG(12, y(24), 10);
+  s += `<text class="tsig" x="56" y="${y(24)}">4</text><text class="tsig" x="56" y="${y(20)}">4</text>`;
+  for (let b = 1; b <= L.bars; b++) {
+    const bx = x0 + b * barW - 10;
+    if (b < L.bars) s += `<line class="barline" x1="${bx}" x2="${bx}" y1="${y(STAFF_TOP)}" y2="${y(STAFF_BOTTOM)}"/>`;
+    else s += `<circle class="rest" cx="${bx - 9}" cy="${y(23)}" r="1.8"/><circle class="rest" cx="${bx - 9}" cy="${y(21)}" r="1.8"/>
+      <line class="barline" x1="${bx - 4}" x2="${bx - 4}" y1="${y(STAFF_TOP)}" y2="${y(STAFF_BOTTOM)}"/><rect class="rest" x="${bx - 1}" y="${y(STAFF_TOP)}" width="3.5" height="${y(STAFF_BOTTOM) - y(STAFF_TOP)}"/>`;
+  }
+  chords.forEach((n, b) => (s += `<text class="pt-chord" x="${x0 + b * barW}" y="12">${noteName(n, dispNot())}</text>`));
+  if (swing) s += `<text class="pt-chord" x="${x0}" y="12">Swing</text>`;
+
+  // Alteracions: valen fins al final del compàs, a la mateixa línia o espai
+  const accOf = new Map();
+  for (let b = 0; b < L.bars; b++) {
+    const inBar = notes.filter(e => e.bar === b && e.kind === 'note');
+    staffAccidentals(inBar, inBar.map(e => steps.get(e)), null).forEach((a, i) => accOf.set(inBar[i], a));
+  }
+  // Grups amb barra: notes seguides de la mateixa figura curta dins un mateix temps
+  const groups = [];
+  for (const e of notes) {
+    const g = groups[groups.length - 1], prev = g && g[g.length - 1];
+    if (e.d <= 2 && g && prev.d === e.d && Math.floor(prev.u / 4) === Math.floor(e.u / 4) && prev.u + prev.d === e.u) g.push(e);
+    else groups.push([e]);
+  }
+  for (const g of groups) {
+    const avg = g.reduce((a, e) => a + steps.get(e), 0) / g.length, up = avg < 22;
+    const ys = g.map(e => y(steps.get(e)));
+    const beamY = g.length > 1 ? (up ? Math.min(...ys) - 32 : Math.max(...ys) + 32) : null;
+    g.forEach((e, k) => {
+      const i = L.ev.indexOf(e), cx = x(e.u) + 8, cy = y(steps.get(e));
+      let n = `<g class="note${i === active ? ' now' : ''}">`;
+      for (const l of ledgerSteps(steps.get(e))) n += `<line class="ledger" x1="${cx - 11}" x2="${cx + 11}" y1="${y(l)}" y2="${y(l)}"/>`;
+      const a = accOf.get(e);
+      if (a != null) n += accGlyph(a, cx - 16, cy);
+      n += e.kind === 'dead'
+        ? `<path class="xhead" d="M${cx - 5},${cy - 4.5} L${cx + 5},${cy + 4.5} M${cx - 5},${cy + 4.5} L${cx + 5},${cy - 4.5}"/>`
+        : `<ellipse class="${e.d >= 8 ? 'head-open' : 'head'}" cx="${cx}" cy="${cy}" rx="6.2" ry="4.3" transform="rotate(-22 ${cx} ${cy})"/>`;
+      const sx = up ? cx + 5.6 : cx - 5.6, tip = beamY != null ? beamY : up ? cy - 34 : cy + 34;
+      n += `<line class="stem" x1="${sx}" x2="${sx}" y1="${cy + (up ? -1.5 : 1.5)}" y2="${tip}" stroke-width="1.3"/>`;
+      if (beamY == null && e.d <= 2) for (let f = 0; f < (e.d === 1 ? 2 : 1); f++) {
+        const fy = tip + (up ? f * 7 : -f * 7);
+        n += up ? `<path class="flag" d="M${sx},${fy} c1,6 9,8 7,17 c3,-9 -2,-12 -7,-13 Z"/>` : `<path class="flag" d="M${sx},${fy} c1,-6 9,-8 7,-17 c3,9 -2,12 -7,13 Z"/>`;
+      }
+      if (e.tech) n += `<text class="pt-tech" x="${cx}" y="${up ? Math.min(tip, y(STAFF_TOP)) - 8 : y(STAFF_TOP) - 8}">${e.tech}</text>`;
+      s += n + '</g>';
+      if (beamY != null && k < g.length - 1) {
+        const nx = x(g[k + 1].u) + 8 + (up ? 5.6 : -5.6);
+        for (let f = 0; f < (e.d === 1 ? 2 : 1); f++) {
+          const by = beamY + (up ? f * 7 : -f * 7);
+          s += `<path class="beam" d="M${sx},${by} L${nx},${by} L${nx},${by + (up ? 4.5 : -4.5)} L${sx},${by + (up ? 4.5 : -4.5)} Z"/>`;
+        }
+      }
+    });
+  }
+  for (const e of L.ev) if (e.kind === 'rest') s += restGlyph(e.d, x(e.u) + 8, y(22));
+  host.innerHTML = s + '</svg>';
+}
+
+// ---- Pantalla ----
+function renderPatterns() {
+  $('#ptProgress').innerHTML = ptProgressHTML();
+  const chips = (kind, list, cur) => list.map(([v, t]) => `<button data-pt="${kind}" data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${t}</button>`).join('');
+  $('#ptLevel').innerHTML = chips('level', [[0, 'Tots'], [1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5']], ptState.level);
+  $('#ptStyle').innerHTML = chips('style', [['', 'Tots'], ...ptStyles().map(x => [x, x])], ptState.style);
+  $('#ptStatus').innerHTML = chips('status', [['all', 'Tots'], ['todo', 'Per aprendre'], ['done', 'Apresos']], ptState.status);
+  $('#ptLabels').innerHTML = chips('labels', [['deg', 'Graus'], ['names', 'Notes']], ptState.labels);
+  $('#ptNot').innerHTML = notSeg('pt');
+  renderPtList();
+}
+function renderPtList() {
+  const list = ptVisible();
+  $('#ptList').innerHTML = list.length ? list.map(p => {
+    const n = PT.indexOf(p) + 1, done = !!ptState.learned[p.id];
+    return `<article class="card pt-card${done ? ' learned' : ''}" id="pt-${p.id}">
+      <header class="pt-head">
+        <div><p class="pt-meta"><span class="pt-level">Nivell ${p.level}</span>${p.styles.map(x => `<span class="pt-style">${x}</span>`).join('')}</p>
+          <h3 class="pt-name"><span>${n}</span>${p.name}</h3></div>
+        <button class="pt-learn${done ? ' on' : ''}" data-pt="learn" data-id="${p.id}" aria-pressed="${done}">${done ? '✓ Après' : 'Marca com a après'}</button>
+      </header>
+      <p class="pt-degs" id="ptDegs-${p.id}"></p>
+      <p class="pt-text">${p.text}</p>
+      <div class="pt-tab" id="ptTab-${p.id}"></div>
+      <div class="board-wrap pt-board" id="ptBoard-${p.id}"></div>
+      <details class="pt-staff" data-ptstaff="${p.id}"${ptCard(p.id).staff ? ' open' : ''}><summary>Partitura en clau de fa</summary><div class="sc-staff" id="ptStaff-${p.id}"></div></details>
+      <div class="pt-controls" id="ptCtl-${p.id}"></div>
+    </article>`;
+  }).join('') : `<div class="card"><p class="small">Cap patró amb aquests filtres.</p></div>`;
+  for (const p of list) renderPtCard(p.id);
+}
+function renderPtCard(id, onlyDynamic = false) {
+  const p = ptById(id), c = ptCard(id), L = ptLayoutOf(id), nt = dispNot();
+  const active = ptPlay.id === id ? ptPlay.now : null;
+  const ae = active != null ? L.ev[active] : null;
+  // Mànec: cada posició del patró un cop; la que sona ara, ressaltada
+  const seen = new Map();
+  for (const e of L.ev) if (e.kind === 'note' && !seen.has(e.s + e.f)) seen.set(e.s + e.f, e);
+  const dots = [...seen.values()].map(e => ({
+    s: e.s, f: e.f, key: e.s + e.f,
+    cls: ae && ae.s === e.s && ae.f === e.f ? 'target' : pcOf(e.semis) === 0 ? 'root' : '',
+    label: ptState.labels === 'deg' ? e.deg : noteName(e, nt),
+  }));
+  const fs = dots.map(d => d.f), host = $('#ptBoard-' + id);
+  renderFretboard(host, { dots, range: [0, MAX_FRET], strings: 4, onTap: (s, f) => { playMidi(midiAt(s, f)); vibrate(host, s, f); }, focus: Math.round((Math.min(...fs) + Math.max(...fs)) / 2) });
+  if (ae && ae.kind !== 'rest') vibrate(host, ae.s, ae.f);
+  renderTab($('#ptTab-' + id), L, { active, chords: L.chords, swing: p.swing });
+  if (c.staff) renderPtStaff($('#ptStaff-' + id), L, { active, chords: L.chords, swing: p.swing });
+  if (onlyDynamic) return;
+
+  $('#ptDegs-' + id).innerHTML = `<b>Graus</b> ${ptDegrees(L)}<span>En ${noteName(L.root, nt)}, fonamental a la corda ${SC_STR[c.str].name}, trast ${L.rf}${p.swing ? ' · swing' : ''}</span>`;
+  const playing = ptPlay.id === id && ptPlay.play, clicking = ptPlay.id === id && ptPlay.click;
+  const ico = on => on
+    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>`
+    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>`;
+  $('#ptCtl-' + id).innerHTML = `
+    ${p.variants ? `<div class="row"><span>Acord</span><div class="seg">${p.variants.map(([t], i) => `<button data-pt="v" data-id="${id}" data-v="${i}" class="${c.v === i ? 'on' : ''}">${t}</button>`).join('')}</div></div>` : ''}
+    <div class="row"><span>To</span><div class="pt-key">
+      <select class="pt-select" data-ptsel="key" data-id="${id}" aria-label="Tonalitat">${ALL_PCS.map(pc => `<option value="${pc}"${pc === c.key ? ' selected' : ''}>${keyName(pc, nt)}</option>`).join('')}</select>
+      <div class="seg">${[0, 1].map(i => `<button data-pt="str" data-id="${id}" data-v="${i}" class="${c.str === i ? 'on' : ''}">Corda ${SC_STR[i].name}</button>`).join('')}</div></div></div>
+    <div class="row pt-play">
+      <button class="btn primary" data-pt="play" data-id="${id}">${ico(playing)}${playing ? 'Atura' : 'Toca'}</button>
+      <button class="btn${clicking ? ' on' : ''}" data-pt="click" data-id="${id}" aria-pressed="${clicking}">Metrònom${clicking ? ' ✓' : ''}</button>
+      <div class="pt-bpm">
+        <button class="icon-btn" data-pt="bpm" data-id="${id}" data-v="-5" aria-label="5 BPM menys">−5</button>
+        <button class="icon-btn" data-pt="bpm" data-id="${id}" data-v="-1" aria-label="1 BPM menys">−1</button>
+        <b aria-live="polite">${c.bpm}</b><small>BPM</small>
+        <button class="icon-btn" data-pt="bpm" data-id="${id}" data-v="1" aria-label="1 BPM més">+1</button>
+        <button class="icon-btn" data-pt="bpm" data-id="${id}" data-v="5" aria-label="5 BPM més">+5</button>
+      </div>
+    </div>`;
+}
+
+// Targeta destacada de l'inici, sota el curs
+function renderPtFeature() {
+  const next = PT.slice().sort((a, b) => a.level - b.level).find(p => !ptState.learned[p.id]);
+  $('#ptFeature').innerHTML = `<div class="course-top"><p class="kicker">Patrons de baix</p><span class="tag">Nivells 1–5</span></div>
+    <h2 class="course-focus">12 patrons que tot baixista ha de saber</h2>
+    ${ptProgressHTML()}
+    <p class="course-task">${next ? `<b>Següent · nivell ${next.level}</b>${PT.indexOf(next) + 1}. ${next.name} · ${next.styles.join(', ')}` : "<b>Tots apresos</b>Repassa'ls en altres tonalitats i a més tempo."}</p>
+    <div class="course-foot">
+      ${next ? `<button class="btn primary" data-ptopen="${next.id}">Obre aquest patró</button>` : ''}
+      <button class="btn${next ? ' ghost' : ' primary'}" data-go="patterns">Tots els patrons</button>
+    </div>`;
+}
+function ptOpen(id) {
+  if (!ptVisible().some(p => p.id === id)) { Object.assign(ptState, { level: 0, style: '', status: 'all' }); savePt(); }
+  show('patterns', () => { const el = $('#pt-' + id); if (el) el.scrollIntoView({ block: 'start' }); });
+}
+
+// ---- So: un rellotge propi amb planificació anticipada (semicorxeres, swing i metrònom) ----
+const ptPlay = { id: null, play: false, click: false, timer: null, items: null, L: null, len: 16, k: 0, loop: 0, cu: 0, ct: 0, now: null, ui: [] };
+function ptClear() { clearInterval(ptPlay.timer); ptPlay.ui.forEach(clearTimeout); ptPlay.ui = []; ptPlay.timer = null; }
+function ptStop() {
+  if (!ptPlay.id) return;
+  const id = ptPlay.id;
+  ptClear();
+  Object.assign(ptPlay, { id: null, play: false, click: false, now: null });
+  if (!$('#view-patterns').hidden && $('#pt-' + id)) renderPtCard(id);
+}
+function ptStart(id) {
+  const c = ensureAudio(); if (!c) return false;
+  const L = ptLayoutOf(id), items = [];
+  for (let u = 0; u < L.len; u += 4) items.push({ u, click: true });
+  L.ev.forEach((e, i) => { if (e.kind !== 'rest') items.push({ u: e.u, i }); });
+  items.sort((a, b) => a.u - b.u || (a.click ? -1 : 1));
+  Object.assign(ptPlay, { id, items, L, len: L.len, k: 0, loop: 0, cu: 0, ct: c.currentTime + 0.1, now: null });
+  ptPlay.timer = setInterval(ptTick, 25);
+  return true;
+}
+function ptTick() {
+  if (!actx || !ptPlay.id) return;
+  const p = ptById(ptPlay.id), u = 60 / ptCard(p.id).bpm / 4;
+  for (;;) {
+    const it = ptPlay.items[ptPlay.k], absU = ptPlay.loop * ptPlay.len + it.u;
+    const t = ptPlay.ct + (absU - ptPlay.cu) * u;
+    if (t > actx.currentTime + 0.12) break;
+    ptPlay.cu = absU; ptPlay.ct = t;
+    const ts = t + (p.swing && it.u % 4 === 2 ? u * 2 / 3 : 0); // swing: la contra arriba a 2/3 del temps
+    if (it.click) { if (ptPlay.click) clickAt(ts, it.u === 0); }
+    else if (ptPlay.play && cfg.sound) {
+      const e = ptPlay.L.ev[it.i];
+      if (e.kind === 'dead') deadVoice(actx, master, freq(e.midi), ts);
+      else {
+        const v = e.tech ? slapVoice(actx, master, freq(e.midi), ts, e.tech === 'P') : bassVoice(actx, master, freq(e.midi), ts);
+        v.stop(ts + e.d * u * (p.gate || 0.92));
+      }
+      const id = p.id, i = it.i;
+      ptPlay.ui.push(setTimeout(() => { if (ptPlay.id === id && ptPlay.play) { ptPlay.now = i; renderPtCard(id, true); } }, Math.max(0, (ts - actx.currentTime) * 1000)));
+      if (ptPlay.ui.length > 64) ptPlay.ui.splice(0, 32);
+    }
+    if (++ptPlay.k >= ptPlay.items.length) { ptPlay.k = 0; ptPlay.loop++; }
+  }
+}
+// Si canvia el patró mentre sona (to, corda, acord), torna a començar amb les notes noves
+function ptRestart(id) {
+  if (ptPlay.id !== id) return;
+  const { play, click } = ptPlay;
+  ptClear(); ptPlay.id = null;
+  if (ptStart(id)) Object.assign(ptPlay, { play, click });
+}
+
+function ptAction(kind, id, v) {
+  const c = id ? ptCard(id) : null;
+  switch (kind) {
+    case 'level': ptState.level = +v; savePt(); renderPatterns(); break;
+    case 'style': ptState.style = v; savePt(); renderPatterns(); break;
+    case 'status': ptState.status = v; savePt(); renderPatterns(); break;
+    case 'labels': ptState.labels = v; savePt(); renderPatterns(); break;
+    case 'nt': scState.nt = v; saveSc(); $('#wheel').innerHTML = ''; renderPatterns(); break;
+    case 'learn': {
+      if (ptState.learned[id]) delete ptState.learned[id]; else ptState.learned[id] = true;
+      savePt();
+      if (ptState.status !== 'all') { renderPatterns(); break; }
+      $('#ptProgress').innerHTML = ptProgressHTML();
+      const el = $('#pt-' + id), b = el.querySelector('.pt-learn'), on = !!ptState.learned[id];
+      el.classList.toggle('learned', on); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.textContent = on ? '✓ Après' : 'Marca com a après';
+      break;
+    }
+    case 'v': c.v = +v; savePt(); ptRestart(id); renderPtCard(id); ptPreview(id); break;
+    case 'str': c.str = +v; savePt(); ptRestart(id); renderPtCard(id); ptPreview(id); break;
+    case 'bpm': c.bpm = Math.max(30, Math.min(240, c.bpm + +v)); savePt(); renderPtCard(id); break;
+    case 'play': case 'click': {
+      if (!cfg.sound) { toast('El so està desactivat. Activa\'l amb la icona de l\'altaveu.'); return; }
+      if (ptPlay.id && ptPlay.id !== id) ptStop();
+      if (!ptPlay.id && !ptStart(id)) return;
+      ptPlay[kind] = !ptPlay[kind];
+      if (!ptPlay.play) { ptPlay.now = null; ptPlay.ui.forEach(clearTimeout); ptPlay.ui = []; }
+      if (!ptPlay.play && !ptPlay.click) ptStop(); else { ptTick(); renderPtCard(id); }
+      break;
+    }
+  }
+  syncIndicators();
+}
+// En canviar de to, de corda o d'acord, sona la fonamental nova
+function ptPreview(id) {
+  if (ptPlay.id === id && ptPlay.play) return;
+  const e = ptLayoutOf(id).ev.find(x => x.kind === 'note');
+  playMidi(e.midi); vibrate($('#ptBoard-' + id), e.s, e.f);
+}
+document.addEventListener('change', e => {
+  const sel = e.target.closest && e.target.closest('[data-ptsel]');
+  if (!sel) return;
+  const id = sel.dataset.id;
+  ptCard(id).key = +sel.value; savePt(); ptRestart(id); renderPtCard(id); ptPreview(id); syncIndicators();
+});
+document.addEventListener('toggle', e => {
+  const d = e.target;
+  if (!d.dataset || !d.dataset.ptstaff) return;
+  const id = d.dataset.ptstaff;
+  ptCard(id).staff = d.open; savePt();
+  if (d.open) renderPtCard(id, true);
+}, true);
+document.addEventListener('visibilitychange', () => { if (document.hidden) ptStop(); });
+// Si canvia l'amplada (girar el mòbil), es tornen a dibuixar els mànecs
+let ptResizeT = null;
+window.addEventListener('resize', () => {
+  clearTimeout(ptResizeT);
+  ptResizeT = setTimeout(() => { if (!$('#view-patterns').hidden) ptVisible().forEach(p => renderPtCard(p.id, true)); }, 200);
+});
+
+/* =====================================================================
    9c. RODA HARMÒNICA (cercle de quintes)
    ===================================================================== */
 const SC_MAJOR = scById('major');
@@ -3161,6 +3780,10 @@ document.addEventListener('click', e => {
   if (whc) { const k = WH_KEYS[wh.i], c = diatonicChords(k, wh.minor)[+whc.dataset.whchord]; playMidi(lowMidi(pcOfNote(c.note))); return; }
   if (e.target.closest('[data-whgo]')) { whGo(); return; }
   if (e.target.closest('[data-course]')) { courseGo(); return; }
+  const pto = e.target.closest('[data-ptopen]');
+  if (pto) { ptOpen(pto.dataset.ptopen); return; }
+  const ptb = e.target.closest('[data-pt]');
+  if (ptb) { if (!ptb.disabled) ptAction(ptb.dataset.pt, ptb.dataset.id, ptb.dataset.v); return; }
 
   const scb = e.target.closest('[data-sc]');
   if (scb) { if (!scb.disabled) scAction(scb.dataset.sc, scb.dataset.v); return; }
@@ -3227,6 +3850,7 @@ window.addEventListener('resize', () => {
 document.addEventListener('touchstart', () => {}, { passive: true });
 selfTest();
 scaleSelfTest(SCD);
+patternSelfTest();
 wheelSelfTest(SC_MAJOR, SC_FLAT);
 applyTheme();
 show('home');
