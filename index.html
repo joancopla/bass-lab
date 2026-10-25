@@ -3044,7 +3044,7 @@ function scPlayToggle() {
 function metroToggle() {
   if (clock.click || clock.drums || scDrumWait) { metroStop(); return; }
   if (!cfg.sound) { toast('El so està desactivat. Activa\'l amb la icona de l\'altaveu.'); return; }
-  if (scState.drum && drHas(scState.drum)) { scDrumsStart(); return; }
+  if (scState.drum && drAvail(scState.drum)) { scDrumsStart(); return; }
   clock.click = true;
   if (!clockRun()) clock.click = false;
   renderMetro();
@@ -3078,9 +3078,10 @@ function renderMetro() {
   const W = PLAN[scView.w - 1], target = dayBpm(W, scView.d);
   $('#metroBpm').textContent = Math.round(scBpm);
   const srcs = [['', 'Clic'], ...drStyles().map(st => [st, drStyleName(st)])];
-  $('#metroSrc').innerHTML = srcs.map(([st, t]) => `<button data-sc="drum" data-v="${st}" class="${scState.drum === st ? 'on' : ''}"${st && !drHas(st) ? ' disabled' : ''}>${t}</button>`).join('');
+  $('#metroSrc').innerHTML = srcs.map(([st, t]) => `<button data-sc="drum" data-v="${st}" class="${scState.drum === st ? 'on' : ''}"${st && !drAvail(st) ? ' disabled' : ''}>${t}</button>`).join('');
   $('#metroDr').innerHTML = scState.drum
-    ? (dr.status !== 'ok' ? drumsNotice() : clock.drums ? drumsText(clock.drums) : scDrumWait ? 'Preparant la base…' : `Compte enrere d'un compàs i després la base. Tempo de ${scBpmRange().join(' a ')} BPM.`)
+    ? (clock.drums ? drumsText(clock.drums) : scDrumWait ? 'Preparant la base…' : `Compte enrere d'un compàs i després la base. Tempo de ${scBpmRange().join(' a ')} BPM.${
+      drHas(scState.drum) ? '' : ' Sense fitxers d\'aquest estil a /drums: sona una bateria sintètica.'}`)
     : '';
   $('#metroInfo').innerHTML = Math.round(scBpm) === target
     ? `BPM del dia ${scView.d} de la setmana ${scView.w}`
@@ -3093,7 +3094,7 @@ function renderMetro() {
 // Amb bateria, el tempo va de −30% a +10% del BPM del dia
 function scBpmRange() {
   const target = dayBpm(PLAN[scView.w - 1], scView.d);
-  return scState.drum && drHas(scState.drum) ? [Math.round(target * 0.7), Math.round(target * 1.1)] : [30, 240];
+  return scState.drum && drAvail(scState.drum) ? [Math.round(target * 0.7), Math.round(target * 1.1)] : [30, 240];
 }
 function scStopAll() {
   if (scSeq) stopSeq();
@@ -3236,9 +3237,9 @@ function drumsChanged() {
 // Avís quan no hi ha bases (amb el botó per triar la carpeta si s'ha obert el fitxer directament)
 function drumsNotice() {
   if (dr.status === 'loading') return 'Carregant les bases de bateria…';
-  if (dr.status === 'file') return `Obrint el fitxer directament, el navegador no deixa llegir /drums. <button class="link" data-drpick>Carrega la carpeta de bateries</button>`;
-  if (dr.status === 'error') return `No s'ha pogut llegir drums/drums.json. <button class="link" data-drpick>Tria la carpeta</button>`;
-  if (dr.status === 'empty') return 'Encara no hi ha bases: afegeix fitxers de bateria a /drums i descriu-los a drums.json.';
+  if (dr.status === 'file') return `Obrint el fitxer directament, el navegador no deixa llegir /drums: sona una bateria sintètica. <button class="link" data-drpick>Carrega la carpeta de bateries</button>`;
+  if (dr.status === 'error') return `No s'ha pogut llegir drums/drums.json: sona una bateria sintètica. <button class="link" data-drpick>Tria la carpeta</button>`;
+  if (dr.status === 'empty') return 'Encara no hi ha bases reals a /drums: sona una bateria sintètica.';
   return '';
 }
 
@@ -3347,10 +3348,76 @@ function wsola(c, buf, rate) {
   out.forEach((d, ch) => res.copyToChannel(d, ch));
   return res;
 }
+// ---- Bateria sintètica de reserva: només quan no hi ha cap fitxer real de l'estil a /drums ----
+// Un compàs de 4/4 per estil. Graella: 16 semicorxeres (12 tresets al shuffle).
+// Cada cop: [pas, velocitat]. k = bombo, s = caixa, r = cop de vora (reggae), h = hi-hat tancat, o = hi-hat obert.
+const DR_SYNTH = {
+  rock: { grid: 16, k: [[0, 1], [8, 0.95], [10, 0.8]], s: [[4, 1], [12, 1]],
+    h: [0, 2, 4, 6, 8, 10, 12, 14].map(i => [i, i % 4 ? 0.55 : 0.85]) },
+  funk: { grid: 16, k: [[0, 1], [7, 0.75], [10, 0.9]], s: [[4, 1], [12, 1], [9, 0.22], [15, 0.25]],
+    h: [...Array(16).keys()].filter(i => i !== 14).map(i => [i, i % 4 === 0 ? 0.8 : i % 2 ? 0.32 : 0.55]), o: [[14, 0.6]] },
+  reggae: { grid: 16, k: [[8, 1]], r: [[8, 0.9]], h: [0, 2, 4, 6, 8, 10, 12, 14].map(i => [i, i % 4 ? 0.65 : 0.4]) },
+  shuffle: { grid: 12, k: [[0, 1], [6, 0.9], [8, 0.6]], s: [[3, 1], [9, 1]],
+    h: [0, 2, 3, 5, 6, 8, 9, 11].map(i => [i, i % 3 ? 0.5 : 0.85]) },
+};
+const drAvail = st => drHas(st) || !!DR_SYNTH[st];
+let drNoise = null;
+function synthHit(c, kind, t, v) {
+  if (!drNoise || drNoise.sampleRate !== c.sampleRate) {
+    drNoise = c.createBuffer(1, c.sampleRate, c.sampleRate);
+    const d = drNoise.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const env = (node, peak, dur) => {
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + 0.002);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    node.connect(g).connect(c.destination);
+    return g;
+  };
+  const noise = (type, f, q, peak, dur) => {
+    const src = c.createBufferSource(); src.buffer = drNoise;
+    const flt = c.createBiquadFilter(); flt.type = type; flt.frequency.value = f; flt.Q.value = q;
+    src.connect(flt); env(flt, peak, dur);
+    src.start(t, Math.random() * 0.5); src.stop(t + dur + 0.02);
+  };
+  const tone = (type, f0, f1, peak, dur) => {
+    const o = c.createOscillator(); o.type = type;
+    o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur * 0.4);
+    env(o, peak, dur); o.start(t); o.stop(t + dur + 0.02);
+  };
+  if (kind === 'k') { tone('sine', 150, 46, 0.95 * v, 0.38); noise('lowpass', 900, 0.7, 0.18 * v, 0.012); }
+  if (kind === 's') { tone('triangle', 200, 170, 0.35 * v, 0.1); noise('bandpass', 1900, 0.6, 0.55 * v, 0.19); noise('highpass', 5000, 0.7, 0.2 * v, 0.12); }
+  if (kind === 'r') { tone('triangle', 1700, 1500, 0.3 * v, 0.03); noise('bandpass', 2500, 2, 0.45 * v, 0.04); }
+  if (kind === 'h') noise('highpass', 7500, 0.8, 0.22 * v, 0.045);
+  if (kind === 'o') noise('highpass', 7000, 0.8, 0.2 * v, 0.28);
+}
+// Renderitza un compàs al tempo exacte i plega les cues sobre el principi: el bucle no té cap tall
+async function synthLoop(style, bpm) {
+  const P = DR_SYNTH[style], sr = ensureAudio().sampleRate, bar = 4 * 60 / bpm, L = Math.round(bar * sr), tail = Math.round(sr * 0.5);
+  const c = new OfflineAudioContext(1, L + tail, sr);
+  for (const kind of ['k', 's', 'r', 'h', 'o']) for (const [i, v] of P[kind] || []) synthHit(c, kind, i * bar / P.grid, v);
+  const r = await c.startRendering(), d = r.getChannelData(0);
+  const ctx = ensureAudio(), out = ctx.createBuffer(1, L, sr), o = out.getChannelData(0);
+  for (let i = 0; i < L + tail; i++) o[i % L] += d[i];
+  // Pic a 0,8 perquè, amb el baix a sobre, no saturi
+  let peak = 0;
+  for (const v of o) peak = Math.max(peak, Math.abs(v));
+  if (peak > 0) for (let i = 0; i < L; i++) o[i] *= 0.8 / peak;
+  return out;
+}
+
 // Prepara la base per a un estil i un tempo: { buffer, bpm real, loop, clamped, beats, bars, dur }
 async function drumsPrepare(style, bpm) {
   const pick = drumsPick(style, bpm);
-  if (!pick) return null;
+  if (!pick) {
+    // Sense fitxers reals de l'estil: bateria sintètica al tempo exacte (no cal estirar-la)
+    if (!DR_SYNTH[style]) return null;
+    const key = 'synth|' + style + '|' + bpm.toFixed(2);
+    if (!dr.str.has(key)) dr.str.set(key, await synthLoop(style, bpm));
+    const buffer = dr.str.get(key);
+    return { buffer, loop: { name: 'Bateria sintètica', style, bpm, synth: true }, clamped: false, beats: 4, bars: 1, dur: buffer.duration, bpm: 4 * 60 / buffer.duration };
+  }
   const raw = await drumsRaw(pick.loop), c = ensureAudio();
   const key = pick.loop.file + '|' + pick.rate.toFixed(4);
   if (!dr.str.has(key)) dr.str.set(key, wsola(c, raw, pick.rate));
@@ -3379,6 +3446,7 @@ function drumsStop() {
 }
 // Text de la base que sona: nom, BPM original i ajust aplicat
 function drumsText(prep) {
+  if (prep.loop.synth) return `Bateria sintètica (${drStyleName(prep.loop.style).toLowerCase()}) a ${Math.round(prep.bpm)} BPM. Quan hi hagi fitxers d'aquest estil a /drums, sonarà la bateria real.`;
   const pct = Math.round((prep.bpm / prep.loop.bpm - 1) * 100);
   return `Base «${prep.loop.name}» (${prep.loop.bpm} BPM) a ${Math.round(prep.bpm)} BPM${pct ? ` (${pct > 0 ? '+' : ''}${pct}%)` : ''}${
     prep.clamped ? ". No n'hi ha cap més a prop: només s'ajusta ±15%." : '.'}`;
@@ -3541,7 +3609,7 @@ function ptCard(id) {
   if (typeof c.drum !== 'string') c.drum = '';
   return c;
 }
-const ptBpmRange = (p, c) => (c.drum && drHas(c.drum) ? [Math.round(p.bpm * 0.7), Math.round(p.bpm * 1.1)] : [30, 240]);
+const ptBpmRange = (p, c) => (c.drum && drAvail(c.drum) ? [Math.round(p.bpm * 0.7), Math.round(p.bpm * 1.1)] : [30, 240]);
 const ptLayoutOf = id => { const c = ptCard(id); return ptLayout(ptById(id), c.key, c.str, c.v); };
 const ptLearnedN = () => PT.filter(p => ptState.learned[p.id]).length;
 const ptStyles = () => [...new Set(PT.flatMap(p => p.styles))];
@@ -3747,12 +3815,13 @@ function renderPtCard(id, onlyDynamic = false) {
 
 function ptDrumRow(p, c) {
   const sug = PT_DRUM[p.id];
-  if (dr.status !== 'ok') return `<div class="row"><span>Bateria</span><p class="small pt-drinfo">${drumsNotice()}</p></div>`;
-  const btn = st => `<button data-pt="drum" data-id="${p.id}" data-v="${st}" class="${c.drum === st ? 'on' : ''}"${st && !drHas(st) ? ' disabled' : ''}>${st ? drStyleName(st) : 'Sense'}${st === sug ? ' <small>suggerida</small>' : ''}</button>`;
+  // Els estils es veuen sempre; sense fitxers a /drums queden desactivats i surt l'avís
+  const btn = st => `<button data-pt="drum" data-id="${p.id}" data-v="${st}" class="${c.drum === st ? 'on' : ''}"${st && !drAvail(st) ? ' disabled' : ''}>${st ? drStyleName(st) : 'Sense'}${st === sug ? ' <small>suggerida</small>' : ''}</button>`;
   const live = ptPlay.id === p.id && ptPlay.drums;
   const info = live ? drumsText(ptPlay.drums)
-    : c.drum ? `Compte enrere d'un compàs i baix i bateria alhora. Tempo de ${ptBpmRange(p, c).join(' a ')} BPM.`
-    : `Tria una base per tocar amb bateria real${drHas(sug) ? ` (la suggerida és ${drStyleName(sug).toLowerCase()})` : ''}.`;
+    : c.drum ? `Compte enrere d'un compàs i baix i bateria alhora. Tempo de ${ptBpmRange(p, c).join(' a ')} BPM.${
+      drHas(c.drum) ? '' : ` No hi ha fitxers de ${drStyleName(c.drum).toLowerCase()} a /drums: sona una bateria sintètica.`}`
+    : `Tria una base per tocar amb bateria (la suggerida és ${drStyleName(sug).toLowerCase()}).${dr.status !== 'ok' ? ' ' + drumsNotice() : ''}`;
   return `<div class="row"><span>Bateria</span><div class="seg">${['', ...drStyles()].map(btn).join('')}</div></div><p class="small pt-drinfo">${info}</p>`;
 }
 
@@ -3884,7 +3953,7 @@ async function ptAction(kind, id, v) {
       if (!cfg.sound) { toast('El so està desactivat. Activa\'l amb la icona de l\'altaveu.'); return; }
       if (ptPlay.id && ptPlay.id !== id) ptStop();
       // Amb una base triada, «Toca» fa sonar baix i bateria junts
-      if (kind === 'play' && c.drum && drHas(c.drum) && !ptPlay.play) { const click = ptPlay.id === id && ptPlay.click; await ptDrumStart(id); if (click && ptPlay.id === id) { ptPlay.click = true; renderPtCard(id); } break; }
+      if (kind === 'play' && c.drum && drAvail(c.drum) && !ptPlay.play) { const click = ptPlay.id === id && ptPlay.click; await ptDrumStart(id); if (click && ptPlay.id === id) { ptPlay.click = true; renderPtCard(id); } break; }
       if (kind === 'play' && ptPlay.wait) { ptStop(); break; }
       if (!ptPlay.id && !ptStart(id)) return;
       ptPlay[kind] = !ptPlay[kind];
