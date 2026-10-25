@@ -144,6 +144,31 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 
 /* ===================== Home ===================== */
 .home-head { padding: 8px 0 0; }
+/* Curs destacat a dalt de tot: escales i arpegis, amb la tasca d'avui */
+.course {
+  position: relative; display: grid; gap: 10px; margin: 8px 0 4px; padding: 20px 22px 22px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+  background:
+    radial-gradient(520px 220px at 0% 0%, var(--accent-soft), transparent 70%),
+    radial-gradient(380px 200px at 100% 100%, color-mix(in srgb, var(--oct-2) 10%, transparent), transparent 70%),
+    linear-gradient(135deg, var(--card-top), var(--card));
+  box-shadow: inset 0 1px 0 var(--edge-hi), 0 0 0 1px var(--accent-soft), var(--shadow);
+}
+.course::before { content: ''; position: absolute; left: 0; top: 18px; bottom: 18px; width: 3px; border-radius: 0 3px 3px 0; background: var(--accent); }
+.course-top { display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; }
+.course .kicker { margin: 0; font-size: 14px; font-weight: 700; color: var(--accent); letter-spacing: .02em; }
+.course-focus { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(26px, 4.6vw, 36px); line-height: 1.1; }
+.course-task { margin: 0; font-size: 16px; max-width: 70ch; }
+.course-task b { display: block; margin-bottom: 2px; font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--muted); }
+.course-foot { display: flex; align-items: center; gap: 10px 12px; flex-wrap: wrap; margin-top: 4px; }
+.course-bpm { display: flex; align-items: baseline; gap: 6px; margin-right: auto; }
+.course-bpm b { font-family: var(--font-display); font-weight: 700; font-size: 40px; line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; }
+.course-bpm small { font-size: 13px; font-weight: 700; color: var(--muted); }
+@media (max-width: 640px) {
+  .course { padding: 18px 16px 18px; }
+  .course-foot .btn { flex: 1 1 140px; }
+  .course-bpm { flex-basis: 100%; }
+}
 /* Mini hero: la nota del dia, amb una llum suau darrere */
 .hero-mini {
   position: relative; isolation: isolate; overflow: hidden;
@@ -598,6 +623,7 @@ body.in-quiz .topbar { display: none; }
 
   <!-- ============ INICI ============ -->
   <section id="view-home">
+    <div class="card course" id="course"></div>
     <div class="home-head">
       <div class="hero-mini" id="heroMini">
         <svg class="hero-strings" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
@@ -2417,6 +2443,7 @@ function renderHome() {
   $('#homeSummary').innerHTML = `Baix de ${cfg.strings} cordes (${activeStringIds().map(stringLabel).join(' ')}), ${ACC_LABEL[cfg.accidentals]}, ${
     NOT_LABEL[cfg.notation]}${cfg.allPositions ? ', totes les posicions' : ''}. <button class="link" data-go="config">Canvia</button>`;
   renderHero();
+  renderCourse();
 
   $('#modules').innerHTML = Object.entries(MODULES).map(([id, M]) => {
     const st = stats.modules[id];
@@ -2426,7 +2453,7 @@ function renderHome() {
       : '<span class="new">Comença</span>';
     const bar = pct != null ? `<span class="bar"><i style="--p:${pct}%"></i></span>` : '';
     return `<button class="mod" data-start="${id}"><span class="t">${M.title}</span><span class="d">${M.desc}</span><span class="s">${stat}</span>${bar}</button>`;
-  }).join('') + reviewRow() + scalesRow() + `<button class="mod alt" data-go="explore"><span class="t">Mapa de connexions</span><span class="d">Tria una nota i mira totes les seves posicions i formes d'octava.</span><span class="s"><span class="new">Obre</span></span></button>`
+  }).join('') + reviewRow() + `<button class="mod alt" data-go="explore"><span class="t">Mapa de connexions</span><span class="d">Tria una nota i mira totes les seves posicions i formes d'octava.</span><span class="s"><span class="new">Obre</span></span></button>`
     + `<button class="mod alt" data-go="play"><span class="t">Toca lliure</span><span class="d">Toca qualsevol posició i escolta com sona, amb el nom i la partitura.</span><span class="s"><span class="new">Obre</span></span></button>`
     + `<button class="mod alt" data-go="wheel"><span class="t">Roda harmònica</span><span class="d">El cercle de quintes: armadures, relatives menors i els 7 acords de cada tonalitat.</span><span class="s"><span class="new">Obre</span></span></button>`;
 }
@@ -2937,15 +2964,36 @@ $('#metroToggle').addEventListener('click', metroToggle);
 $('#scPlay').addEventListener('click', scPlayToggle);
 $('#scAll').addEventListener('toggle', () => { scState.allOpen = $('#scAll').open; saveSc(); syncIndicators(); });
 
-// Fila de l'inici: la tasca d'avui
-function scalesRow() {
-  const desc = 'Patrons al mànec amb els graus, pla de 52 setmanes i metrònom.';
-  if (!scState.start) return `<button class="mod" data-go="scales"><span class="t">Escales i arpegis</span><span class="d">${desc}</span><span class="s"><span class="new">Comença el pla</span></span></button>`;
+// Targeta destacada de l'inici: el curs d'escales i arpegis, amb la tasca d'avui
+function renderCourse() {
+  const head = (tag) => `<div class="course-top"><p class="kicker">Curs · Escales i arpegis</p>${tag ? `<span class="tag">${tag}</span>` : ''}</div>`;
+  if (!scState.start) {
+    $('#course').innerHTML = `${head('')}
+      <h2 class="course-focus">${PLAN.length} setmanes d'escales i arpegis</h2>
+      <p class="course-task">${SCD.practice_plan.principle} ${SCD.practice_plan.minutes_per_day} minuts al dia, amb els patrons al mànec, la partitura i el metrònom.</p>
+      <div class="course-foot"><button class="btn primary" data-go="scales">Comença el curs</button></div>`;
+    return;
+  }
   const t = planToday(), W = PLAN[t.w - 1], nt = dispNot();
   const keys = W.keys_pc.map(pc => keyName(pc, nt)).join(', ');
-  return `<button class="mod" data-go="scales"><span class="t">Escales i arpegis</span>`
-    + `<span class="d">Avui, setmana ${t.w} dia ${t.d}: ${W.focus}${keys && W.focus.indexOf(':') < 0 ? ' en ' + keys : ''}. ${W.daily[t.d - 1].task}</span>`
-    + `<span class="s"><b>${dayBpm(W, t.d)}</b><small>BPM</small></span></button>`;
+  $('#course').innerHTML = `${head(`Setmana ${t.w} de ${PLAN.length} · ${W.phase}`)}
+    <h2 class="course-focus">${W.focus}${keys && W.focus.indexOf(':') < 0 ? ' · ' + keys : ''}</h2>
+    <p class="course-task"><b>Avui · dia ${t.d} de 7</b>${W.daily[t.d - 1].task}</p>
+    ${t.done ? `<p class="small">Ja has arribat a l'últim dia del pla.</p>` : ''}
+    <div class="course-foot">
+      <div class="course-bpm"><b>${dayBpm(W, t.d)}</b><small>BPM</small></div>
+      ${W.scale_ids.length
+        ? `<button class="btn primary" data-course>Practica la d'avui</button><button class="btn ghost" data-go="scales">Veure el pla</button>`
+        : `<button class="btn primary" data-go="scales">Obre la lliçó d'avui</button>`}
+    </div>`;
+}
+// «Practica la d'avui»: obre Escales al dia d'avui i carrega l'escala i el to de la setmana al mànec
+function courseGo() {
+  scView = null;
+  show('scales', () => {
+    const W = PLAN[scView.w - 1];
+    if (W.scale_ids.length) scAction('load', `${W.scale_ids[0]}|${W.keys_pc[0] != null ? W.keys_pc[0] : ''}`);
+  });
 }
 
 /* =====================================================================
@@ -3112,6 +3160,7 @@ document.addEventListener('click', e => {
   const whc = e.target.closest('[data-whchord]');
   if (whc) { const k = WH_KEYS[wh.i], c = diatonicChords(k, wh.minor)[+whc.dataset.whchord]; playMidi(lowMidi(pcOfNote(c.note))); return; }
   if (e.target.closest('[data-whgo]')) { whGo(); return; }
+  if (e.target.closest('[data-course]')) { courseGo(); return; }
 
   const scb = e.target.closest('[data-sc]');
   if (scb) { if (!scb.disabled) scAction(scb.dataset.sc, scb.dataset.v); return; }

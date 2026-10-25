@@ -46,6 +46,7 @@ Idioma de la interfície: **català**.
   - Noms per grau (una lletra per grau). Si el to té dues grafies, s'agafa la que té menys alteracions (Re♭ menor → Do♯ menor) i, si empaten, la regla `flat_keys_pc`.
   - Si el patró cau per sota del trast 0, la fonamental puja al trast 12.
   - El pla compta des del primer dia que s'obre la pantalla; es pot marcar un altre dia com a avui.
+  - A l'inici és el **curs destacat**, a dalt de tot: setmana i fase, tema, tasca i BPM del dia. «Practica la d'avui» obre Escales amb l'escala i el to de la setmana carregats al mànec.
   - **Pentagrama enllaçat** sota el mànec: les notes del patró pujant, en clau de fa i a l'altura escrita (+12), amb la grafia de l'escala (Mi♯, Do♭…). Tocar una nota al mànec, al pentagrama o a la tira la ressalta als tres llocs, i «Toca l'escala» les recorre alhora.
   - Alteracions commutables: a cada nota (per defecte, amb becaire si la lletra torna natural) o amb armadura. L'armadura és la de la major o la menor natural de referència (els modes, la seva; el 7 de dominant, la del mixolidi). Re♭ menor melòdica no en té d'estàndard i va sense.
   - **Notació pròpia** (llatina o anglesa) compartida per Escales i la Roda, a part de la dels exercicis.
