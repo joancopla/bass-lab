@@ -2388,7 +2388,115 @@ const MODULES = {
     },
     failDots() { return []; },
   },
+
+  // Lectura de frases: 4–8 notes en clau de fa, en una tonalitat, per tocar seguides a l'altura exacta.
+  // El pes és per tonalitat; cada nota compta per al mapa de calor.
+  ph: {
+    title: 'Lectura de frases', desc: 'Llegeix 4–8 notes seguides en clau de fa i toca-les a l\'altura exacta.',
+    staff: true,
+    candidates() {
+      return phKeys().filter(k => phPool(k).length >= 5).map(k => ({ sid: k.sid, pc: k.pc, key: `ph|${k.sid}|${k.pc}` }));
+    },
+    render(q) {
+      const k = phKeys().find(x => x.sid === q.item.sid && x.pc === q.item.pc);
+      const nt = q.notation === 'english' ? 'english' : 'latin';
+      const midis = phMake(k), notes = midis.map(m => phNote(k, m));
+      const states = midis.map(() => null), labels = midis.map(() => '');
+      const range = staffStepRange();
+      let cur = 0, errors = 0;
+      const dots = [];
+      q.units = midis.length;
+      const keyTxt = `${noteName(k.sp.notes[0], nt)} ${k.sid === 'major' ? 'major' : 'menor'}`;
+      promptEl.innerHTML = `<h2>Llegeix i toca la frase</h2><div class="sub">${keyTxt} · ${midis.length} notes, a l'altura exacta</div>`;
+      answersEl.className = 'answers'; answersEl.innerHTML = ''; answersEl.onclick = null;
+      const staff = () => renderScaleStaff(staffEl, { notes, midis, sig: k.sig, labels, active: cur < midis.length ? cur : -1, nt, states, attr: 'data-ph', range, roots: false });
+      const draw = () => { const x = boardEl.scrollLeft; renderFretboard(boardEl, { dots, onTap, focus: null }); boardEl.scrollLeft = x; updateFade(boardEl); };
+      const listen = () => midis.forEach((m, i) => setTimeout(() => { if (sess && sess.q === q) playMidi(m); }, i * 450));
+
+      function finish() {
+        notes.forEach((n, i) => (labels[i] = noteName(n, nt)));
+        staff();
+        promptEl.querySelector('.sub').innerHTML = `${keyTxt} · <button class="link" id="phListen">Escolta la frase</button>`;
+        $('#phListen').onclick = listen;
+        const ok = midis.length - errors;
+        resolve(!errors, midis[midis.length - 1], errors ? `${ok} de ${midis.length} notes bé. Mira els noms sota el pentagrama.` : `Correcte: les ${midis.length} notes, ${keyTxt}`);
+      }
+      function onTap(s, f) {
+        if (q.done || cur >= midis.length) return;
+        const m = midiAt(s, f), want = midis[cur], name = noteName(notes[cur], nt);
+        if (!errors) setFeedback('', '');
+        dots.length = 0;
+        if (m === want) {
+          recordPos(s, f, true);
+          states[cur] = states[cur] || 'ok';
+          dots.push({ s, f, cls: 'ok', anim: 'pop', label: name });
+          playMidi(m); vibrate(boardEl, s, f);
+        } else {
+          // Nota fallada: es marca, sona la correcta i es passa a la següent
+          errors++;
+          states[cur] = 'err'; labels[cur] = name;
+          dots.push({ s, f, cls: 'err', anim: 'shake', label: pcShort(pcOf(m), q.notation, q.spelling) });
+          for (const t of exactPositions(want)) { recordPos(t.s, t.f, false); dots.push({ s: t.s, f: t.f, cls: 'reveal', label: name }); }
+          playMidi(want);
+          setFeedback('err', pcOf(m) === pcOf(want) ? `${name}, però una octava massa ${m > want ? 'aguda' : 'greu'}.` : `Era ${name}.`);
+        }
+        cur++;
+        draw();
+        if (cur >= midis.length) setTimeout(finish, 350); else staff();
+      }
+      staff();
+      draw();
+    },
+    failLabel(key) {
+      const [, sid, pc] = key.split('|');
+      const sp = spellScale(scById(sid), +pc, SC_FLAT);
+      return [`Frase en ${noteName(sp.notes[0], failNotation())} ${sid === 'major' ? 'major' : 'menor'}`, ''];
+    },
+    failDots() { return []; },
+  },
 };
+
+/* ---- Lectura de frases: tonalitats i generació ---- */
+// Tonalitats majors i menors que encaixen amb les alteracions de la configuració (fins a 5)
+function phKeys() {
+  const out = [];
+  for (const sid of ['major', 'natural_minor']) for (const pc of ALL_PCS) {
+    const sc = scById(sid), sp = spellScale(sc, pc, SC_FLAT), sig = keySignature(sc, pc, sp.root);
+    if (!sig || sig.letters.length > 5) continue;
+    if (cfg.accidentals === 'natural' && sig.type !== 0) continue;
+    if (cfg.accidentals === 'sharp' && sig.type < 0) continue;
+    if (cfg.accidentals === 'flat' && sig.type > 0) continue;
+    out.push({ sid, pc, sp, sig, pcs: sp.notes.slice(0, 7).map(n => (pc + n.iv) % 12) });
+  }
+  return out;
+}
+// Notes de l'escala que es poden tocar amb el rang i les cordes de la configuració
+const phPool = k => [...new Set(positionsInRange().map(p => p.midi))].filter(m => k.pcs.includes(pcOf(m))).sort((a, b) => a - b);
+const phNote = (k, m) => k.sp.notes[k.pcs.indexOf(pcOf(m))];
+// Una frase que sembli música: comença en una nota de l'acord, avança sobretot per graus conjunts
+// i salts petits, i acaba en la fonamental, la 3a o la 5a si en té una a prop.
+function phMake(k) {
+  const pool = phPool(k), deg = m => k.pcs.indexOf(pcOf(m)), chord = j => [0, 2, 4].includes(deg(pool[j]));
+  const len = 4 + Math.floor(Math.random() * 5);
+  const mid = (pool.length - 1) / 2;
+  const starts = pool.map((_, j) => j).filter(chord).sort((a, b) => Math.abs(a - mid) - Math.abs(b - mid));
+  let j = starts[Math.floor(Math.random() * Math.min(3, starts.length))];
+  const seq = [j];
+  for (let i = 1; i < len; i++) {
+    const r = Math.random(), step = r < 0.55 ? 1 : r < 0.85 ? 2 : r < 0.95 ? 3 : 4;
+    // Tendeix a tornar cap al centre del rang
+    let dir = Math.random() < 0.5 + (j - mid) / (pool.length * 1.5) ? -1 : 1;
+    if (j + dir * step < 0 || j + dir * step >= pool.length) dir = -dir;
+    let nx = Math.max(0, Math.min(pool.length - 1, j + dir * step));
+    if (nx === j) nx = j > 0 ? j - 1 : j + 1;
+    if (i === len - 1) {
+      const end = [-2, -1, 1, 2].map(d => j + d).filter(x => x >= 0 && x < pool.length && chord(x));
+      if (end.length) nx = end[Math.floor(Math.random() * end.length)];
+    }
+    seq.push(nx); j = nx;
+  }
+  return seq.map(x => pool[x]);
+}
 // Escales i arpegis de l'exercici de graus: les bàsiques del baixista
 const SD_SCALES = ['major', 'natural_minor', 'major_pentatonic', 'minor_pentatonic', 'major7', 'dominant7', 'minor7'];
 const SD_CHORD = { major7: 'maj7', dominant7: '7', minor7: 'm7' };
@@ -3019,11 +3127,13 @@ function sigText(sig, nt) {
 }
 
 // Pentagrama de l'escala: les notes del patró pujant, a l'altura escrita, amb la grafia de l'escala
-function renderScaleStaff(host, { notes, midis, sig, labels, active, nt }) {
+// També el fa servir la lectura de frases: states (ok/err per nota), attr (clic) i range (alçada fixa)
+function renderScaleStaff(host, { notes, midis, sig, labels, active, nt, states = null, attr = 'data-sc="note"', range = null, roots = true }) {
   const sp = 10, half = sp / 2;
   const steps = notes.map((n, i) => spelledStep(n, midis[i]));
   const accs = staffAccidentals(notes, steps, sig);
-  const top = Math.max(Math.max(...steps) + 3, STAFF_TOP + 3), bot = Math.min(Math.min(...steps) - 3, STAFF_BOTTOM - 3);
+  const lo = Math.min(...steps, range ? range[0] : Infinity), hi = Math.max(...steps, range ? range[1] : -Infinity);
+  const top = Math.max(hi + 3, STAFF_TOP + 3), bot = Math.min(lo - 3, STAFF_BOTTOM - 3);
   const y = st => (top - st) * half, staffH = (top - bot) * half, H = staffH + 22;
   const sigN = sig ? sig.letters.length : 0, sigX = 50, dx = 32;
   const x0 = sigX + sigN * 8 + 24, W = x0 + (notes.length - 1) * dx + 18;
@@ -3034,8 +3144,8 @@ function renderScaleStaff(host, { notes, midis, sig, labels, active, nt }) {
   if (sig) sig.letters.forEach((l, k) => (s += accGlyph(sig.type, sigX + 4 + k * 8, y(SIG_STEPS[sig.type][l]))));
   notes.forEach((n, i) => {
     const nx = x0 + i * dx, ny = y(steps[i]);
-    const cls = `${i === active ? ' now' : ''}${n.num % 7 === 1 ? ' root' : ''}`;
-    let g = `<g class="note${cls}" data-sc="note" data-v="${i}" role="button" aria-label="${n.deg}: ${noteName(n, nt)}, s'escriu ${noteName(n, 'english')}${oct(steps[i])}">`;
+    const cls = `${i === active ? ' now' : ''}${roots && n.num % 7 === 1 ? ' root' : ''}${states && states[i] ? ' ' + states[i] : ''}`;
+    let g = `<g class="note${cls}" ${attr} data-v="${i}" role="button" aria-label="${n.deg}: ${noteName(n, nt)}, s'escriu ${noteName(n, 'english')}${oct(steps[i])}">`;
     g += `<rect class="hit" x="${nx - dx / 2}" y="0" width="${dx}" height="${H}"/>`;
     for (const l of ledgerSteps(steps[i])) g += `<line class="ledger" x1="${nx - 11}" x2="${nx + 11}" y1="${y(l)}" y2="${y(l)}"/>`;
     if (accs[i] != null) g += accGlyph(accs[i], nx - (accs[i] === -2 ? 19 : 16), ny);
