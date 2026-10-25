@@ -224,6 +224,24 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 .mod.alt { background: transparent; box-shadow: none; border-style: dashed; }
 .explore { display: grid; gap: 14px; }
 .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 14px; color: var(--muted); }
+/* Afinador */
+.tuner { display: grid; justify-items: center; gap: 14px; text-align: center; }
+.tun-note { font-family: var(--font-display); font-weight: 700; font-size: clamp(48px, 12vw, 72px); line-height: 1; color: var(--text); min-height: 1em; }
+.tun-note small { display: block; font-size: 15px; font-weight: 600; color: var(--muted); margin-top: 6px; }
+.tun-note.in { color: var(--ok); }
+.tun-gauge { width: min(100%, 420px); height: auto; }
+.tun-gauge .tick { stroke: var(--line-strong); stroke-width: 1.5; }
+.tun-gauge .tick.big { stroke: var(--muted); stroke-width: 2; }
+.tun-gauge .zone { fill: var(--ok); opacity: .22; }
+.tun-gauge .lbl { fill: var(--muted); font-size: 10px; font-weight: 700; text-anchor: middle; }
+.tun-gauge .needle { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; transform-origin: 120px 120px; transition: transform .09s linear; }
+.tun-gauge .needle.in { stroke: var(--ok); }
+.tun-gauge .needle.off { opacity: .25; }
+.tun-gauge .hub { fill: var(--accent); }
+.tun-gauge .needle.in + .hub { fill: var(--ok); }
+.tun-read { font-variant-numeric: tabular-nums; color: var(--muted); font-weight: 700; min-height: 1.4em; }
+.tun-read.in { color: var(--ok); }
+@media (prefers-reduced-motion: reduce) { .tun-gauge .needle { transition: none; } }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
 
@@ -930,6 +948,25 @@ body.in-quiz .topbar { display: none; }
   </section>
 
   <input type="file" id="drumsPick" webkitdirectory multiple hidden>
+
+  <!-- ============ AFINADOR ============ -->
+  <section id="view-tuner" hidden>
+    <div class="page-head">
+      <button class="icon-btn" data-go="home" aria-label="Tornar a l'inici">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <h2>Afinador</h2>
+    </div>
+    <div class="card tuner">
+      <div class="seg" id="tunStrings" role="group" aria-label="Corda"></div>
+      <div class="seg" id="tunMode" role="group" aria-label="Què toques"></div>
+      <div class="tun-note" id="tunNote" aria-live="polite">—</div>
+      <svg class="tun-gauge" id="tunGauge" viewBox="0 -12 240 144" aria-hidden="true"></svg>
+      <div class="tun-read" id="tunRead">&nbsp;</div>
+      <button class="btn primary" id="tunToggle">Engega el micròfon</button>
+      <p class="small" id="tunInfo"></p>
+    </div>
+  </section>
 
   <!-- ============ 12 PATRONS ============ -->
   <section id="view-patterns" hidden>
@@ -2739,7 +2776,8 @@ function show(view, then) {
   const update = () => {
     if (view !== 'scales') scStopAll();
     if (view !== 'patterns') ptStop();
-    for (const v of ['home', 'config', 'explore', 'stats', 'play', 'scales', 'patterns', 'wheel', 'quiz', 'summary']) $('#view-' + v).hidden = v !== view;
+    if (view !== 'tuner') tunStop(); // el micròfon s'apaga en sortir de l'afinador
+    for (const v of ['home', 'config', 'explore', 'stats', 'play', 'scales', 'patterns', 'wheel', 'quiz', 'summary', 'tuner']) $('#view-' + v).hidden = v !== view;
     document.body.classList.toggle('in-quiz', view === 'quiz');
     if (view === 'home') renderHome();
     if (view === 'config') syncConfig();
@@ -2749,6 +2787,7 @@ function show(view, then) {
     if (view === 'scales') renderScales();
     if (view === 'wheel') renderWheel();
     if (view === 'patterns') renderPatterns();
+    if (view === 'tuner') renderTuner();
     window.scrollTo(0, 0);
     if (then) then();
     syncIndicators();
@@ -2873,6 +2912,7 @@ function renderHome() {
     return `<button class="mod" data-start="${id}"><span class="t">${M.title}</span><span class="d">${M.desc}</span><span class="s">${stat}</span>${bar}</button>`;
   }).join('') + reviewRow() + `<button class="mod alt" data-go="explore"><span class="t">Mapa de connexions</span><span class="d">Tria una nota i mira totes les seves posicions i formes d'octava.</span><span class="s"><span class="new">Obre</span></span></button>`
     + `<button class="mod alt" data-go="play"><span class="t">Toca lliure</span><span class="d">Toca qualsevol posició i escolta com sona, amb el nom i la partitura.</span><span class="s"><span class="new">Obre</span></span></button>`
+    + `<button class="mod alt" data-go="tuner"><span class="t">Afinador</span><span class="d">Afina el baix amb el micròfon, corda a corda o amb l'harmònic del trast 12.</span><span class="s"><span class="new">Obre</span></span></button>`
     + `<button class="mod alt" data-go="wheel"><span class="t">Roda harmònica</span><span class="d">El cercle de quintes: armadures, relatives menors i els 7 acords de cada tonalitat.</span><span class="s"><span class="new">Obre</span></span></button>`;
 }
 
@@ -3049,6 +3089,133 @@ function applyImport() {
   // Es torna a carregar l'app perquè tot l'estat surti de les dades noves
   location.reload();
 }
+
+/* ---- Afinador pel micròfon ----
+   YIN sobre el senyal delmat (×4) per trobar el període, i després afinat a la freqüència de mostreig
+   completa amb interpolació parabòlica. Per evitar errors d'octava se suposa la corda a l'aire més
+   propera (o la triada): una lectura a una octava de distància es plega cap a la corda. */
+const TUN_GREEN = 3, TUN_RANGE = 50;
+const tun = { stream: null, src: null, an: null, buf: null, timer: null, hist: [], str: 'auto', harm: false, test: null };
+function yinPitch(x, sr, fMin = 27, fMax = 450) {
+  const D = 4, n = Math.floor(x.length / D), y = new Float32Array(n);
+  for (let i = 0; i < n; i++) { let s = 0; for (let k = 0; k < D; k++) s += x[i * D + k]; y[i] = s / D; }
+  const srd = sr / D, tMin = Math.max(2, Math.floor(srd / fMax)), tMax = Math.min(Math.ceil(srd / fMin), Math.floor(n / 2));
+  const W = n - tMax, c = new Float32Array(tMax + 2);
+  let run = 0; c[0] = 1;
+  for (let t = 1; t <= tMax + 1; t++) {
+    let d = 0;
+    for (let i = 0; i < W; i++) { const v = y[i] - y[i + t]; d += v * v; }
+    run += d; c[t] = run ? d * t / run : 1;
+  }
+  // Primer mínim per sota del llindar; si no n'hi ha, el mínim global si és prou clar
+  let tau = -1;
+  for (let t = tMin; t <= tMax; t++) if (c[t] < 0.12) { while (t < tMax && c[t + 1] < c[t]) t++; tau = t; break; }
+  if (tau < 0) {
+    let b = tMin; for (let t = tMin; t <= tMax; t++) if (c[t] < c[b]) b = t;
+    if (c[b] > 0.3) return null;
+    tau = b;
+  }
+  // Afinat a la freqüència completa al voltant de tau·D
+  const T0 = tau * D, Wf = x.length - (T0 + D + 2);
+  if (Wf < 256) return null;
+  const df = t => { let s = 0; for (let i = 0; i < Wf; i++) { const v = x[i] - x[i + t]; s += v * v; } return s; };
+  let bt = T0, bv = df(T0);
+  for (let t = Math.max(2, T0 - D); t <= T0 + D; t++) { const v = df(t); if (v < bv) { bv = v; bt = t; } }
+  const a = df(bt - 1), cc = df(bt + 1), den = a - 2 * bv + cc;
+  const shift = den > 0 ? Math.max(-0.5, Math.min(0.5, 0.5 * (a - cc) / den)) : 0;
+  return { f: sr / (bt + shift), clarity: 1 - c[tau] };
+}
+const tunStrings = () => instrumentStrings(cfg.strings).map(s => ({ id: s.id, midi: s.midi, f: freq(s.midi) * (tun.harm ? 2 : 1) }));
+// Corda objectiu i desviació en cèntims; una lectura a una octava es plega cap a la corda
+function tunTarget(f) {
+  const list = tun.str === 'auto' ? tunStrings() : tunStrings().filter(s => s.id === tun.str);
+  let best = null;
+  for (const s of list) for (const k of [1, 0.5, 2]) {
+    const c = 1200 * Math.log2(f * k / s.f), score = Math.abs(c) + (k === 1 ? 0 : 40);
+    if (Math.abs(c) < 600 && (!best || score < best.score)) best = { s, c, score };
+  }
+  return best;
+}
+function tunGauge(c, state) {
+  const ang = v => (v / TUN_RANGE) * 60, pt = (v, r) => { const a = (ang(v) - 90) * Math.PI / 180; return [120 + r * Math.cos(a), 120 + r * Math.sin(a)]; };
+  let g = '';
+  const [z1x, z1y] = pt(-TUN_GREEN, 104), [z2x, z2y] = pt(TUN_GREEN, 104), [z3x, z3y] = pt(TUN_GREEN, 80), [z4x, z4y] = pt(-TUN_GREEN, 80);
+  g += `<path class="zone" d="M${z1x},${z1y} A104,104 0 0 1 ${z2x},${z2y} L${z3x},${z3y} A80,80 0 0 0 ${z4x},${z4y} Z"/>`;
+  for (let v = -50; v <= 50; v += 5) {
+    const big = v % 25 === 0, [x1, y1] = pt(v, big ? 86 : 92), [x2, y2] = pt(v, 104);
+    g += `<line class="tick${big ? ' big' : ''}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+    if (big) { const [lx, ly] = pt(v, 116); g += `<text class="lbl" x="${lx}" y="${ly}">${v > 0 ? '+' + v : v}</text>`; }
+  }
+  const rot = c == null ? 0 : ang(Math.max(-TUN_RANGE, Math.min(TUN_RANGE, c)));
+  g += `<line class="needle ${state}" x1="120" y1="120" x2="120" y2="26" style="transform:rotate(${rot}deg)"/><circle class="hub" cx="120" cy="120" r="5"/>`;
+  $('#tunGauge').innerHTML = g;
+}
+function renderTuner() {
+  const opts = [['auto', 'Automàtic'], ...instrumentStrings(cfg.strings).map(s => [s.id, stringLabel(s.id)])];
+  if (!opts.some(([v]) => v === tun.str)) tun.str = 'auto';
+  $('#tunStrings').innerHTML = opts.map(([v, t]) => `<button data-tun="str" data-v="${v}" class="${tun.str === v ? 'on' : ''}">${t}</button>`).join('');
+  $('#tunMode').innerHTML = [['0', "Corda a l'aire"], ['1', 'Harmònic del trast 12']].map(([v, t]) => `<button data-tun="harm" data-v="${v}" class="${(v === '1') === tun.harm ? 'on' : ''}">${t}</button>`).join('');
+  $('#tunToggle').textContent = tun.timer ? 'Atura el micròfon' : 'Engega el micròfon';
+  if (!tun.timer) {
+    $('#tunNote').innerHTML = '—'; $('#tunNote').className = 'tun-note'; $('#tunRead').innerHTML = '&nbsp;'; $('#tunRead').className = 'tun-read'; tunGauge(null, 'off');
+    $('#tunInfo').textContent = `Afinació estàndard (${tunStrings().map(s => stringLabel(s.id)).join(' ')}). Verd a ±${TUN_GREEN} cèntims. Amb l'harmònic del trast 12, posa el dit just damunt del trast sense prémer.`;
+  }
+}
+function tunTick() {
+  if (!tun.an) return;
+  tun.an.getFloatTimeDomainData(tun.buf);
+  let rms = 0; for (const v of tun.buf) rms += v * v; rms = Math.sqrt(rms / tun.buf.length);
+  const r = rms > 0.004 ? yinPitch(tun.buf, actx.sampleRate) : null;
+  const t = r && tunTarget(r.f);
+  if (!t) {
+    tun.hist = [];
+    $('#tunNote').innerHTML = rms > 0.004 ? '…' : '—'; $('#tunNote').className = 'tun-note';
+    $('#tunRead').textContent = rms > 0.004 ? 'No trobo la nota: toca una corda sola' : 'Toca una corda';
+    $('#tunRead').className = 'tun-read'; tunGauge(null, 'off');
+    return;
+  }
+  // Mitjana robusta: mediana de les últimes lectures de la mateixa corda
+  if (tun.hist.length && tun.hist[0].id !== t.s.id) tun.hist = [];
+  tun.hist.push({ id: t.s.id, c: t.c }); if (tun.hist.length > 5) tun.hist.shift();
+  const cs = tun.hist.map(h => h.c).sort((a, b) => a - b), c = cs[cs.length >> 1];
+  const inTune = Math.abs(c) <= TUN_GREEN, en = spell(pcOf(t.s.midi), 'sharp', 'english') + (Math.floor((t.s.midi + (tun.harm ? 12 : 0)) / 12) - 1);
+  $('#tunNote').innerHTML = `${stringLabel(t.s.id)}<small>${en} · ${t.s.f.toFixed(1)} Hz</small>`;
+  $('#tunNote').className = 'tun-note' + (inTune ? ' in' : '');
+  $('#tunRead').textContent = `${c > 0 ? '+' : ''}${c.toFixed(1)} cèntims · ${(t.s.f * Math.pow(2, c / 1200)).toFixed(2)} Hz${inTune ? ' · afinada' : Math.abs(c) > TUN_RANGE ? (c > 0 ? ' · massa alta' : ' · massa baixa') : c > 0 ? ' · baixa-la' : ' · puja-la'}`;
+  $('#tunRead').className = 'tun-read' + (inTune ? ' in' : '');
+  tunGauge(c, inTune ? 'in' : '');
+}
+async function tunStart(testNode = null) {
+  const c = ensureAudio();
+  if (!c) { toast('Aquest navegador no té àudio web.'); return; }
+  if (!testNode) {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { $('#tunInfo').textContent = "Aquest navegador no deixa fer servir el micròfon aquí. Obre l'app amb Bass Lab.bat o des de GitHub Pages."; return; }
+    try {
+      tun.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+    } catch (e) {
+      $('#tunInfo').textContent = e.name === 'NotAllowedError' ? 'Cal donar permís al micròfon per afinar. Ho pots canviar a la icona del cadenat de la barra d\'adreces.' : "No s'ha pogut obrir el micròfon: " + e.message;
+      return;
+    }
+    if ($('#view-tuner').hidden) { tunStop(); return; } // s'ha sortit mentre es demanava permís
+    tun.src = c.createMediaStreamSource(tun.stream);
+  } else tun.src = testNode;
+  tun.an = c.createAnalyser(); tun.an.fftSize = 8192;
+  tun.buf = new Float32Array(tun.an.fftSize);
+  tun.src.connect(tun.an); // no va a la sortida: no hi ha retroalimentació
+  tun.hist = [];
+  tun.timer = setInterval(tunTick, 60);
+  $('#tunInfo').textContent = 'Toca una corda i deixa-la sonar. Afina pujant des de sota de la nota.';
+  renderTuner();
+}
+function tunStop() {
+  if (!tun.timer && !tun.stream) return;
+  clearInterval(tun.timer); tun.timer = null;
+  try { if (tun.src) tun.src.disconnect(); } catch (e) { /* ja desconnectat */ }
+  if (tun.stream) tun.stream.getTracks().forEach(t => t.stop());
+  tun.stream = tun.src = tun.an = null; tun.hist = [];
+  if (!$('#view-tuner').hidden) renderTuner();
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) tunStop(); });
 
 // Toca lliure: tot el màstil i totes les cordes, sense preguntes
 let playLast = null;
@@ -4604,6 +4771,11 @@ document.addEventListener('click', e => {
     playMidi(exploreMode === 'iv' && exploreRoot ? midiAt(exploreRoot.s, exploreRoot.f) : lowestMidi(explorePc));
     return;
   }
+  const tb = e.target.closest('[data-tun]');
+  if (tb) {
+    if (tb.dataset.tun === 'str') tun.str = tb.dataset.v; else tun.harm = tb.dataset.v === '1';
+    tun.hist = []; renderTuner(); return;
+  }
   const exm = e.target.closest('[data-exmode]');
   if (exm) { exploreMode = exm.dataset.exmode; renderExplore(); return; }
   const exi = e.target.closest('[data-exiv]');
@@ -4637,6 +4809,7 @@ $('#fretMax').addEventListener('change', e => { cfg.fretMax = +e.target.value; i
 $('#btnNext').addEventListener('click', () => goNext());
 $('#btnReset').addEventListener('click', resetStats);
 $('#btnExport').addEventListener('click', exportProgress);
+$('#tunToggle').addEventListener('click', () => (tun.timer ? tunStop() : tunStart()));
 $('#btnImport').addEventListener('click', () => { $('#importFile').value = ''; $('#importFile').click(); });
 $('#importFile').addEventListener('change', e => { if (e.target.files[0]) readImport(e.target.files[0]); });
 $('#importConfirm').addEventListener('click', e => {
