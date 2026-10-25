@@ -2302,7 +2302,100 @@ const MODULES = {
     failLabel(key) { return [intervalName(+key.split('|')[1]), '']; },
     failDots() { return []; },
   },
+
+  // Graus de l'escala, amb les escales i arpegis de la pantalla d'Escales. Dos sentits:
+  // «toca la ♭3» des de la fonamental marcada, o «quin grau és?» amb un punt marcat a prop.
+  sd: {
+    title: "Graus de l'escala", desc: "A partir de la fonamental, toca un grau d'una escala o arpegi, o digues quin grau és.",
+    candidates() {
+      if (!sdRoots().length) return [];
+      const out = [];
+      for (const sid of SD_SCALES) scById(sid).intervals.forEach((iv, i) => {
+        if (iv === 0 || iv === 12) return;
+        for (const dir of ['t', 'n']) out.push({ sid, i, dir, key: `sd|${sid}|${i}|${dir}` });
+      });
+      return out;
+    },
+    render(q) {
+      const { sid, i, dir } = q.item, sc = scById(sid), iv = sc.intervals[i];
+      const nt = q.notation === 'english' ? 'english' : 'latin';
+      const pos = positionsInRange();
+      const si = id => STRINGS.findIndex(x => x.id === id);
+      // A prop = dins la caixa de l'escala: fins a 2 cordes i 4 trasts de la fonamental
+      const near = (r, p) => Math.abs(p.f - r.f) <= 4 && Math.abs(si(p.s) - si(r.s)) <= 2 && (p.s !== r.s || p.f !== r.f);
+      const tgts = r => pos.filter(p => pcOf(p.midi) === pcOf(r.midi + iv));
+      let roots = sdRoots().filter(r => tgts(r).some(p => near(r, p)));
+      if (!roots.length) roots = sdRoots();
+      const root = roots[Math.floor(Math.random() * roots.length)];
+      const targets = tgts(root);
+      const sp = spellScale(sc, pcOf(root.midi), SC_FLAT), n = sp.notes[i];
+      const rootName = noteName(sp.notes[0], nt), tName = noteName(n, nt), title = sdName(sc, rootName);
+      const ivName = scIntervalName(iv).toLowerCase();
+      const dots = [{ s: root.s, f: root.f, cls: 'root', key: 'r', label: '1' }];
+      const draw = () => renderFretboard(boardEl, { dots, onTap, focus: root.f });
+      answersEl.className = 'answers'; answersEl.innerHTML = ''; answersEl.onclick = null;
+
+      if (dir === 't') {
+        promptEl.innerHTML = `<div class="ask">${title}</div><div class="big">Toca la ${n.deg}</div><div class="sub">${ivName} des de la fonamental marcada</div>`;
+      } else {
+        // El punt marcat: millor la nota a l'altura del grau (fonamental + interval), dins la caixa
+        const close = targets.filter(p => near(root, p));
+        const pick = close.find(p => p.midi === root.midi + iv) || close[0] || targets[0];
+        dots.push({ s: pick.s, f: pick.f, cls: 'target', key: 'q' });
+        promptEl.innerHTML = `<div class="ask">${title}</div><div class="big">Quin grau és?</div><div class="sub">La fonamental és el punt marcat amb l'1</div>`;
+        const degs = sp.notes.filter(x => x.iv !== 0 && x.iv !== 12);
+        answersEl.innerHTML = degs.map(x => `<button class="ans" data-deg="${x.deg}">${x.deg}</button>`).join('');
+        answersEl.onclick = e => {
+          const b = e.target.closest('button[data-deg]');
+          if (!b || q.done) return;
+          const ok = b.dataset.deg === n.deg;
+          answersEl.querySelectorAll('button').forEach(x => { x.disabled = true; if (x.dataset.deg === n.deg) x.classList.add('ok'); });
+          if (!ok) b.classList.add('err');
+          recordPos(pick.s, pick.f, ok);
+          dots[1] = { s: pick.s, f: pick.f, cls: ok ? 'ok' : 'reveal', anim: ok ? 'pop' : 'shake', label: n.deg };
+          draw(); vibrate(boardEl, pick.s, pick.f);
+          resolve(ok, pick.midi, ok ? `Correcte: ${n.deg} ${de(title)}, ${tName} (${ivName})` : `És la ${n.deg} ${de(title)}: ${tName}, ${ivName}.`);
+        };
+      }
+
+      function onTap(s, f) {
+        if (q.done) return;
+        // Tocar la fonamental la fa sonar, com a referència
+        if (s === root.s && f === root.f) { playMidi(root.midi); vibrate(boardEl, s, f); return; }
+        if (dir !== 't') return;
+        const m = midiAt(s, f);
+        if (pcOf(m) === pcOf(root.midi + iv)) {
+          recordPos(s, f, true);
+          dots.push({ s, f, cls: 'ok', anim: 'pop', label: n.deg });
+          draw(); vibrate(boardEl, s, f);
+          resolve(true, m, `Correcte: ${n.deg} ${de(title)}, ${tName} (${posText(s, f, true)})`);
+          return;
+        }
+        recordPos(s, f, false);
+        dots.push({ s, f, cls: 'err', anim: 'shake', label: pcShort(pcOf(m), q.notation, q.spelling) });
+        for (const t of targets) dots.push({ s: t.s, f: t.f, cls: 'reveal', label: n.deg });
+        draw();
+        const nr = nearest(targets.filter(p => near(root, p)).length ? targets.filter(p => near(root, p)) : targets, root.s, root.f);
+        vibrate(boardEl, nr.s, nr.f);
+        resolve(false, nr.midi, `La ${n.deg} ${de(title)} és ${tName} (${ivName}): les posicions marcades.`);
+      }
+      draw();
+    },
+    failLabel(key) {
+      const [, sid, i, dir] = key.split('|'), sc = scById(sid);
+      const deg = spellScale(sc, 0, SC_FLAT).notes[+i].deg;
+      return [`${deg} · ${SD_CHORD[sid] ? 'arpegi ' + scShort(sc).toLowerCase() : 'escala ' + scShort(sc).toLowerCase()}`, dir === 't' ? '(tocar-la)' : '(dir el grau)'];
+    },
+    failDots() { return []; },
+  },
 };
+// Escales i arpegis de l'exercici de graus: les bàsiques del baixista
+const SD_SCALES = ['major', 'natural_minor', 'major_pentatonic', 'minor_pentatonic', 'major7', 'dominant7', 'minor7'];
+const SD_CHORD = { major7: 'maj7', dominant7: '7', minor7: 'm7' };
+const sdName = (sc, root) => (SD_CHORD[sc.id] ? `Arpegi ${de(root + SD_CHORD[sc.id])}` : `${root} ${scShort(sc).toLowerCase()}`);
+// «de» o «d'» segons la paraula que segueix (d'E, d'A, de Mi…)
+const de = x => (x.startsWith('Arpegi') ? "de l'a" + x.slice(1) : (/^[AEIOU]/.test(x) ? "d'" : 'de ') + x);
+const sdRoots = () => positionsInRange().filter(p => allowedPc(pcOf(p.midi)));
 
 const INTERVALS = ['', 'segona menor', 'segona major', 'tercera menor', 'tercera major', 'quarta justa', 'tritò', 'quinta justa'];
 const intervalName = iv => `${INTERVALS[Math.abs(iv)]} ${iv > 0 ? 'amunt' : 'avall'}`;
