@@ -360,6 +360,8 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 .sc-board { display: grid; gap: 12px; padding: 16px 8px 14px; }
 .sc-board > :not(.board-wrap):not(.board-hint) { padding: 0 8px; }
 .sc-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.sc-play { display: flex; gap: 8px; flex-wrap: wrap; }
+@media (max-width: 640px) { .sc-play { width: 100%; } .sc-play .btn { flex: 1 1 140px; } }
 .sc-root { margin: 2px 0 2px; display: flex; align-items: baseline; gap: 12px; font-family: var(--font-display); font-weight: 700; font-size: clamp(40px, 8vw, 56px); line-height: 1; color: var(--accent); }
 .sc-root small { font-size: .42em; font-weight: 600; color: var(--muted); }
 .sc-notes { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -1057,7 +1059,7 @@ body.in-quiz .topbar { display: none; }
     <div class="card board-card sc-board">
       <div class="sc-head">
         <div id="scTitle"></div>
-        <button class="btn" id="scPlay"></button>
+        <div class="sc-play"><button class="btn" id="scPlay"></button><button class="btn" id="scPlay3"></button></div>
       </div>
       <div class="board-wrap" id="scalesBoard"></div>
       <p class="board-hint" hidden>Llisca per veure més trasts</p>
@@ -3586,6 +3588,7 @@ let scBpm = 60;
 let scPlayIdx = null;     // nota que sona ara mateix a «Toca l'escala»
 let scSel = null;         // nota triada al mànec o al pentagrama (es ressalta a tots dos)
 let scSeq = null;
+let scLink = null;        // «Toca per terceres»: la parella que sona, unida al mànec
 
 function scCurrent() {
   const sc = scById(scState.id);
@@ -3734,7 +3737,7 @@ function renderScaleBoard(appear = false) {
     };
   });
   const fs = pos.map(p => p.f), focus = Math.round((Math.min(...fs) + Math.max(...fs)) / 2);
-  renderFretboard(host, { dots, range: [0, SC_FRETS], strings: 4, onTap: scTap, focus });
+  renderFretboard(host, { dots, links: scLink ? [scLink] : [], range: [0, SC_FRETS], strings: 4, onTap: scTap, focus });
 
   const sig = scState.sig ? scSignature(sc, sp) : null;
   renderScaleStaff($('#scStaff'), { notes: sp.notes, midis: pos.map(p => p.midi), sig, labels, active, nt });
@@ -3749,7 +3752,12 @@ function renderScaleBoard(appear = false) {
       sp.respelled ? `. S'escriu des de ${noteName(root, nt)} i no des de ${noteName(sp.preferred, nt)}: així té menys alteracions.` : ''}</p>`;
   $('#scNotes').innerHTML = sp.notes.map((n, i) =>
     `<button class="sc-note${n.num % 7 === 1 ? ' root' : ''}${active === i ? ' now' : ''}" data-sc="note" data-v="${i}" aria-label="${n.deg}: ${noteName(n, nt)}"><small>${n.deg}</small><b>${noteName(n, nt)}</b><span>${noteName(n, ot)}</span></button>`).join('');
-  $('#scPlay').innerHTML = scSeq
+  const PLAY_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>';
+  const STOP_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
+  // Per terceres, només a les escales de 5 notes o més (als arpegis no té sentit)
+  $('#scPlay3').hidden = kind === 'arpegi' || pos.length < 6;
+  $('#scPlay3').innerHTML = scSeq && scSeq.thirds ? STOP_ICON + 'Atura' : PLAY_ICON + 'Toca per terceres';
+  $('#scPlay').innerHTML = scSeq && !scSeq.thirds
     ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>Atura`
     : `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>Toca ${kind === 'arpegi' ? "l'arpegi" : "l'escala"}`;
   warmMidis(pos.map(p => p.midi));
@@ -3854,6 +3862,10 @@ function beatUI(n, click, q, step) {
   if (!q || q !== scSeq || $('#view-scales').hidden) return;
   if (step === 'end') { stopSeq(); return; }
   scPlayIdx = step;
+  // Per terceres: a la segona nota de cada parella, la forma de la tercera
+  q.shown = (q.shown || 0) + 1;
+  const k = q.shown - 1;
+  scLink = q.thirds && k % 2 === 1 ? { a: q.notes[q.order[k - 1]], b: q.notes[step], cls: 'shape' } : null;
   renderScaleBoard();
   const p = q.notes[step];
   vibrate($('#scalesBoard'), p.s, p.f);
@@ -3861,19 +3873,26 @@ function beatUI(n, click, q, step) {
 }
 function stopSeq() {
   const was = scSeq;
-  scSeq = null; clock.seq = null; scPlayIdx = null;
+  scSeq = null; clock.seq = null; scPlayIdx = null; scLink = null;
   clockIdle();
   if (was && !$('#view-scales').hidden) renderScaleBoard();
 }
-function scPlayToggle() {
-  if (scSeq) { stopSeq(); return; }
+function scPlayToggle(thirds = false) {
+  const was = scSeq && !!scSeq.thirds;
+  if (scSeq) { stopSeq(); if (was === thirds) return; }
   if (!cfg.sound) { toast('El so està desactivat. Activa\'l amb la icona de l\'altaveu.'); return; }
   const { pos } = scCurrent(), n = pos.length;
-  // Pujant i baixant, una nota per temps
-  const order = [...Array(n).keys(), ...Array.from({ length: n - 1 }, (_, i) => n - 2 - i)];
-  scSeq = clock.seq = { notes: pos, order, pos: 0, wait: !!clock.drums };
+  // Pujant i baixant, una nota per temps. Per terceres, dins el patró: 1-3, 2-4… 6-8 pujant i 8-6, 7-5… 3-1 baixant.
+  const order = thirds ? scThirdsOrder(n) : [...Array(n).keys(), ...Array.from({ length: n - 1 }, (_, i) => n - 2 - i)];
+  scSeq = clock.seq = { notes: pos, order, pos: 0, wait: !!clock.drums, thirds };
   if (!clockRun()) { scSeq = clock.seq = null; return; }
   renderScaleBoard();
+}
+function scThirdsOrder(n) {
+  const o = [];
+  for (let i = 0; i + 2 < n; i++) o.push(i, i + 2);
+  for (let i = n - 1; i - 2 >= 0; i--) o.push(i, i - 2); // acaba en 3-1: ja és a la fonamental
+  return o;
 }
 function metroToggle() {
   if (clock.click || clock.drums || scDrumWait) { metroStop(); return; }
@@ -4006,7 +4025,8 @@ function scAction(kind, v) {
   syncIndicators();
 }
 $('#metroToggle').addEventListener('click', metroToggle);
-$('#scPlay').addEventListener('click', scPlayToggle);
+$('#scPlay').addEventListener('click', () => scPlayToggle(false));
+$('#scPlay3').addEventListener('click', () => scPlayToggle(true));
 $('#scAll').addEventListener('toggle', () => { scState.allOpen = $('#scAll').open; saveSc(); syncIndicators(); });
 
 // Targeta destacada de l'inici: el curs d'escales i arpegis, amb la tasca d'avui
