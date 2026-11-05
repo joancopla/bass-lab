@@ -617,6 +617,12 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 @media (max-width: 640px) { .t3-strip { gap: 4px; } .t3-pair i { min-width: 22px; font-size: 14px; padding: 2px 3px; } }
 @media (prefers-reduced-motion: reduce) { .t3-pair i { transition: none; } }
 .fb .dot.hint { fill: var(--muted); opacity: .38; }
+.answers.t3-ctl { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.t3-row { display: flex; align-items: flex-start; gap: 12px; }
+.t3-row > span { min-width: 64px; padding-top: 12px; font-size: 14px; font-weight: 700; color: var(--muted); }
+.t3-row > .seg { flex: 1; min-width: 0; }
+.t3-row button:disabled { opacity: .35; cursor: default; }
+@media (max-width: 640px) { .t3-row { flex-direction: column; gap: 6px; } .t3-row > span { padding-top: 0; } }
 
 .dock { margin-top: 16px; }
 .answers { display: grid; gap: 8px; grid-template-columns: repeat(7, 1fr); }
@@ -1477,6 +1483,7 @@ const DEFAULT_CFG = {
   sound: true, sessionSize: 20, allPositions: false, theme: 'dark',
   bassVol: 1, // volum del baix que toca l'app (patrons i escales), per tocar-hi a sobre
   t3Hint: false, // Escales per terceres: notes de l'escala tènues al mànec
+  t3Dir: 'any', t3Sc: 'any', t3Key: -1, // Escales per terceres: sentit, escala i to triats (-1 = a l'atzar)
 };
 const RANGE_PRESETS = [[0, 5], [0, 12], [0, 20]];
 const ZONE_PRESETS = [[0, 4], [5, 9], [10, 15], [12, 20]]; // mòdul 7
@@ -1493,6 +1500,9 @@ function sanitize(c) {
   if (!['latin', 'english', 'mixed'].includes(c.notation)) c.notation = 'latin';
   if (![0, 10, 20, 50].includes(c.sessionSize)) c.sessionSize = 20;
   c.sound = !!c.sound; c.allPositions = !!c.allPositions; c.t3Hint = !!c.t3Hint;
+  if (!['any', 'up', 'down'].includes(c.t3Dir)) c.t3Dir = 'any';
+  if (!['any', 'major', 'natural_minor'].includes(c.t3Sc)) c.t3Sc = 'any';
+  c.t3Key = Number.isInteger(c.t3Key) && c.t3Key >= -1 && c.t3Key < 12 ? c.t3Key : -1;
   if (!['dark', 'light', 'auto'].includes(c.theme)) c.theme = 'dark';
   if (![1, 0.5, 0.25, 0].includes(c.bassVol)) c.bassVol = 1;
   if (!instrumentStrings(c.strings).some(s => c.active[s.id])) STRINGS.forEach(s => (c.active[s.id] = true));
@@ -2562,15 +2572,19 @@ const MODULES = {
   // El pes és per tonalitat i sentit; cada nota compta per al mapa de calor.
   t3: {
     title: 'Escales per terceres', desc: "Toca l'escala per parelles de terceres (1-3, 2-4, 3-5…), pujant o baixant.",
-    candidates() {
-      const out = [];
-      for (const k of phKeys()) for (const dir of ['up', 'down'])
-        if (t3Roots(k, dir).length) out.push({ sid: k.sid, pc: k.pc, dir, key: `t3|${k.sid}|${k.pc}|${dir}` });
-      return out;
+    // Dins la sessió pròpia s'apliquen els selectors de sota el mànec; al Repàs d'errors, no.
+    // Si la tria desada ja no hi cap (s'ha canviat el rang), els selectors tornen a «a l'atzar».
+    candidates(sel) {
+      if (sel !== undefined) return t3Cands(sel);
+      if (!sess || sess.mid !== 't3') return t3Cands(null);
+      const out = t3Cands(t3Sel());
+      if (out.length) return out;
+      cfg.t3Dir = 'any'; cfg.t3Sc = 'any'; cfg.t3Key = -1; saveCfg();
+      return t3Cands(null);
     },
     render(q) {
       const { sid, pc, dir } = q.item;
-      const k = phKeys().find(x => x.sid === sid && x.pc === pc);
+      const k = t3Key(sid, pc);
       const nt = q.notation === 'english' ? 'english' : 'latin';
       const roots = t3Roots(k, dir), rootMidi = roots[Math.floor(Math.random() * roots.length)];
       const steps = T3_SEQ[dir], midis = steps.map(j => t3Midi(k, rootMidi, j));
@@ -2583,6 +2597,7 @@ const MODULES = {
       const dots = [], links = [];
       q.units = midis.length;
       answersEl.className = 'answers'; answersEl.innerHTML = ''; answersEl.onclick = null;
+      if (sess.mid === 't3') t3Controls(nt);
 
       const lo = Math.min(...midis), hi = Math.max(...midis);
       const hintDots = () => !cfg.t3Hint || done ? [] : positionsInRange()
@@ -2699,6 +2714,48 @@ const T3_SEQ = {
   up: [0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7],
   down: [7, 5, 6, 4, 5, 3, 4, 2, 3, 1, 2, 0, 1, -1, 0],
 };
+const T3_SIDS = ['major', 'natural_minor'];
+// Una tonalitat triada a mà: qualsevol dels 12 tons, encara que el filtre d'alteracions no l'inclogui
+function t3Key(sid, pc) {
+  const sp = spellScale(scById(sid), pc, SC_FLAT);
+  return { sid, pc, sp, pcs: sp.notes.slice(0, 7).map(n => (pc + n.iv) % 12) };
+}
+const t3Sel = () => ({ sid: cfg.t3Sc, dir: cfg.t3Dir, pc: cfg.t3Key });
+// Preguntes possibles. Sense tria (sel = null), totes les tonalitats del filtre d'alteracions.
+function t3Cands(sel) {
+  const out = [];
+  const keys = sel && sel.pc >= 0 ? T3_SIDS.map(sid => t3Key(sid, sel.pc)) : phKeys();
+  for (const k of keys) for (const dir of ['up', 'down']) {
+    if (sel && ((sel.sid !== 'any' && sel.sid !== k.sid) || (sel.dir !== 'any' && sel.dir !== dir))) continue;
+    if (t3Roots(k, dir).length) out.push({ sid: k.sid, pc: k.pc, dir, key: `t3|${k.sid}|${k.pc}|${dir}` });
+  }
+  return out;
+}
+// Botonera de sota el mànec: escala, sentit i to. Un canvi passa a una pregunta nova (no compta).
+function t3Controls(nt) {
+  const sel = t3Sel();
+  const fits = s => MODULES.t3.candidates({ ...sel, ...s }).length > 0;
+  const btn = (k, v, t) => {
+    const on = sel[k] === v, ok = on || fits({ [k]: v });
+    return `<button data-t3k="${k}" data-v="${v}" class="${on ? 'on' : ''}"${ok ? '' : ' disabled title="No hi cap al rang de trasts i cordes"'}>${t}</button>`;
+  };
+  const keyName = pc => noteName(spellScale(scById(sel.sid === 'natural_minor' ? 'natural_minor' : 'major'), pc, SC_FLAT).notes[0], nt);
+  answersEl.className = 'answers t3-ctl';
+  answersEl.innerHTML =
+    `<div class="t3-row"><span>Sentit</span><div class="seg">${btn('dir', 'any', 'Tots dos')}${btn('dir', 'up', 'Pujant')}${btn('dir', 'down', 'Baixant')}</div></div>`
+    + `<div class="t3-row"><span>Escala</span><div class="seg">${btn('sid', 'any', 'Totes dues')}${btn('sid', 'major', 'Major')}${btn('sid', 'natural_minor', 'Menor')}</div></div>`
+    + `<div class="t3-row"><span>To</span><div class="seg">${btn('pc', -1, "A l'atzar")}${ALL_PCS.map(pc => btn('pc', pc, keyName(pc))).join('')}</div></div>`;
+  answersEl.onclick = e => {
+    const b = e.target.closest('button[data-t3k]');
+    if (!b || b.disabled || b.classList.contains('on')) return;
+    const k = b.dataset.t3k, v = k === 'pc' ? +b.dataset.v : b.dataset.v;
+    cfg[{ dir: 't3Dir', sid: 't3Sc', pc: 't3Key' }[k]] = v;
+    saveCfg();
+    sess.lastKey = null;
+    nextQuestion();
+  };
+  requestAnimationFrame(syncIndicators);
+}
 const t3Midi = (k, root, j) => root + 12 * Math.floor(j / 7) + scById(k.sid).intervals[((j % 7) + 7) % 7];
 // Fonamentals (altura real) amb què tota la seqüència cap dins el rang i les cordes
 function t3Roots(k, dir) {
