@@ -2591,12 +2591,20 @@ const MODULES = {
       const startDot = () => (cur === 0 && !done ? [{ s: start.s, f: start.f, cls: 'root', label: dir === 'up' ? '1' : '8' }] : []);
       const draw = () => {
         const x = boardEl.scrollLeft;
+        if (demo >= 0) {
+          // Durant la reproducció: la nota que sona i l'anterior de la parella, units per la forma
+          const p = path[demo], pair = demo % 2 === 1 ? path[demo - 1] : null;
+          const dd = [{ s: p.s, f: p.f, cls: 'root', key: 'demo', label: names[demo] }];
+          if (pair) dd.unshift({ s: pair.s, f: pair.f, cls: 'hint', label: names[demo - 1] });
+          renderFretboard(boardEl, { dots: [...hintDots(), ...dd], links: pair ? [{ a: pair, b: p, cls: 'shape' }] : [], onTap, focus: p.f });
+          return;
+        }
         renderFretboard(boardEl, { dots: [...hintDots(), ...startDot(), ...dots], links, onTap, focus: cur === 0 ? start.f : null });
         if (cur) { boardEl.scrollLeft = x; updateFade(boardEl); }
       };
       // Tira de parelles: graus mentre toques, noms en acabar
       const cell = ix => {
-        const cls = [states[ix], ix === cur && !done ? 'cur' : ''].filter(Boolean).join(' ');
+        const cls = demo >= 0 ? (ix === demo ? 'cur' : '') : [states[ix], ix === cur && !done ? 'cur' : ''].filter(Boolean).join(' ');
         const j = steps[ix];
         return `<i class="${cls}">${done ? names[ix] : j >= 0 ? j + 1 : j + 8}</i>`;
       };
@@ -2605,17 +2613,34 @@ const MODULES = {
         for (let i = 0; i < steps.length; i += 2) h += `<span class="t3-pair">${cell(i)}${i + 1 < steps.length ? cell(i + 1) : ''}</span>`;
         return h;
       };
-      const listen = () => midis.forEach((m, i) => setTimeout(() => { if (sess && sess.q === q) playMidi(m); }, i * 380));
+      // Reproducció automàtica: toca la seqüència i la mostra al mànec i a la tira, nota a nota.
+      // El camí va de la nota marcada a la posició més propera de cada nota següent.
+      const path = [start];
+      for (let i = 1; i < midis.length; i++) { const p = path[i - 1]; path.push(nearest(exactPositions(midis[i]), p.s, p.f)); }
+      let demo = -1, demoTimers = [];
+      const stopDemo = () => { demoTimers.forEach(clearTimeout); demoTimers = []; if (demo >= 0) { demo = -1; prompt(); draw(); } };
+      const playDemo = () => {
+        if (demo >= 0) { stopDemo(); return; }
+        if (!cfg.sound) toast("El so està desactivat: només es veurà al mànec. Activa'l amb la icona de l'altaveu.");
+        demo = 0;
+        const STEP = 430;
+        midis.forEach((m, i) => demoTimers.push(setTimeout(() => {
+          if (!sess || sess.q !== q) return;
+          demo = i; prompt(); draw();
+          playMidi(m); vibrate(boardEl, path[i].s, path[i].f);
+        }, i * STEP)));
+        demoTimers.push(setTimeout(() => { if (sess && sess.q === q) stopDemo(); }, midis.length * STEP + 250));
+      };
       const hintBtn = () => `<button class="link" id="t3Hint">${cfg.t3Hint ? "Amaga l'escala" : "Mostra l'escala"}</button>`;
+      const demoBtn = () => `<button class="link" id="t3Demo">${demo >= 0 ? '■ Atura' : '▶ Reprodueix'}</button>`;
       const prompt = () => {
         promptEl.innerHTML = `<div class="ask">${keyTxt} per terceres · ${dir === 'up' ? 'pujant' : 'baixant'}</div>`
           + `<div class="t3-strip">${strip()}</div>`
-          + `<div class="sub">${done ? `<button class="link" id="t3Listen">Escolta-la</button>`
-            : `${dir === 'up' ? 'Comença a la fonamental marcada' : "Comença a l'octava marcada"}, a l'altura exacta · ${hintBtn()}`}</div>`;
+          + `<div class="sub">${done ? demoBtn()
+            : `${dir === 'up' ? 'Comença a la fonamental marcada' : "Comença a l'octava marcada"}, a l'altura exacta · ${hintBtn()} · ${demoBtn()}`}</div>`;
         const hb = $('#t3Hint');
         if (hb) hb.onclick = () => { cfg.t3Hint = !cfg.t3Hint; saveCfg(); prompt(); draw(); };
-        const lb = $('#t3Listen');
-        if (lb) lb.onclick = listen;
+        $('#t3Demo').onclick = playDemo;
       };
 
       function finish() {
@@ -2626,6 +2651,7 @@ const MODULES = {
       }
       function onTap(s, f) {
         if (q.done || done) return;
+        if (demo >= 0) stopDemo(); // tocar el mànec atura la reproducció
         const m = midiAt(s, f), want = midis[cur], name = names[cur];
         if (!errors) setFeedback('', '');
         // Cada parella comença de nou: es veuen les dues notes i la forma de la tercera
