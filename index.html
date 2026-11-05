@@ -604,6 +604,19 @@ h3 { font-size: 15px; font-weight: 750; margin: 0; }
 .prompt h2 { margin: 0 0 4px; }
 .prompt .sub { color: var(--muted); font-size: 14px; font-weight: 600; }
 .prompt .sub b { font-family: var(--font-display); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+/* Escales per terceres: tira de parelles */
+.t3-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 10px 0 8px; }
+.t3-pair { display: flex; gap: 2px; padding: 3px; border-radius: var(--r-sm); background: var(--card-2); border: 1px solid var(--line); }
+.t3-pair i {
+  font-style: normal; font-family: var(--font-display); font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums;
+  min-width: 26px; padding: 3px 4px; border-radius: 6px; color: var(--muted); transition: background .15s, color .15s;
+}
+.t3-pair i.cur { color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+.t3-pair i.ok { color: var(--ok); }
+.t3-pair i.err { color: var(--err); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 640px) { .t3-strip { gap: 4px; } .t3-pair i { min-width: 22px; font-size: 14px; padding: 2px 3px; } }
+@media (prefers-reduced-motion: reduce) { .t3-pair i { transition: none; } }
+.fb .dot.hint { fill: var(--muted); opacity: .38; }
 
 .dock { margin-top: 16px; }
 .answers { display: grid; gap: 8px; grid-template-columns: repeat(7, 1fr); }
@@ -1463,6 +1476,7 @@ const DEFAULT_CFG = {
   fretMin: 0, fretMax: 12, accidentals: 'natural', notation: 'mixed',
   sound: true, sessionSize: 20, allPositions: false, theme: 'dark',
   bassVol: 1, // volum del baix que toca l'app (patrons i escales), per tocar-hi a sobre
+  t3Hint: false, // Escales per terceres: notes de l'escala tènues al mànec
 };
 const RANGE_PRESETS = [[0, 5], [0, 12], [0, 20]];
 const ZONE_PRESETS = [[0, 4], [5, 9], [10, 15], [12, 20]]; // mòdul 7
@@ -1478,7 +1492,7 @@ function sanitize(c) {
   if (!['natural', 'sharp', 'flat', 'both'].includes(c.accidentals)) c.accidentals = 'natural';
   if (!['latin', 'english', 'mixed'].includes(c.notation)) c.notation = 'latin';
   if (![0, 10, 20, 50].includes(c.sessionSize)) c.sessionSize = 20;
-  c.sound = !!c.sound; c.allPositions = !!c.allPositions;
+  c.sound = !!c.sound; c.allPositions = !!c.allPositions; c.t3Hint = !!c.t3Hint;
   if (!['dark', 'light', 'auto'].includes(c.theme)) c.theme = 'dark';
   if (![1, 0.5, 0.25, 0].includes(c.bassVol)) c.bassVol = 1;
   if (!instrumentStrings(c.strings).some(s => c.active[s.id])) STRINGS.forEach(s => (c.active[s.id] = true));
@@ -2543,7 +2557,128 @@ const MODULES = {
     failLabel(key) { return [intervalName(+key.split('|')[1]), '']; },
     failDots() { return []; },
   },
+
+  // Escales per terceres: 1-3, 2-4, 3-5… pujant (o 8-6, 7-5… baixant), nota a nota a l'altura exacta.
+  // El pes és per tonalitat i sentit; cada nota compta per al mapa de calor.
+  t3: {
+    title: 'Escales per terceres', desc: "Toca l'escala per parelles de terceres (1-3, 2-4, 3-5…), pujant o baixant.",
+    candidates() {
+      const out = [];
+      for (const k of phKeys()) for (const dir of ['up', 'down'])
+        if (t3Roots(k, dir).length) out.push({ sid: k.sid, pc: k.pc, dir, key: `t3|${k.sid}|${k.pc}|${dir}` });
+      return out;
+    },
+    render(q) {
+      const { sid, pc, dir } = q.item;
+      const k = phKeys().find(x => x.sid === sid && x.pc === pc);
+      const nt = q.notation === 'english' ? 'english' : 'latin';
+      const roots = t3Roots(k, dir), rootMidi = roots[Math.floor(Math.random() * roots.length)];
+      const steps = T3_SEQ[dir], midis = steps.map(j => t3Midi(k, rootMidi, j));
+      const names = steps.map(j => noteName(k.sp.notes[((j % 7) + 7) % 7], nt));
+      const states = midis.map(() => null);
+      // La nota de sortida, marcada: la fonamental (pujant) o l'octava (baixant)
+      const startPs = exactPositions(midis[0]), start = startPs[Math.floor(Math.random() * startPs.length)];
+      const keyTxt = `${noteName(k.sp.notes[0], nt)} ${sid === 'major' ? 'major' : 'menor'}`;
+      let cur = 0, errors = 0, done = false, prev = null;
+      const dots = [], links = [];
+      q.units = midis.length;
+      answersEl.className = 'answers'; answersEl.innerHTML = ''; answersEl.onclick = null;
+
+      const lo = Math.min(...midis), hi = Math.max(...midis);
+      const hintDots = () => !cfg.t3Hint || done ? [] : positionsInRange()
+        .filter(p => p.midi >= lo && p.midi <= hi && k.pcs.includes(pcOf(p.midi)))
+        .map(p => ({ s: p.s, f: p.f, cls: 'hint', label: String(k.pcs.indexOf(pcOf(p.midi)) + 1) }));
+      const startDot = () => (cur === 0 && !done ? [{ s: start.s, f: start.f, cls: 'root', label: dir === 'up' ? '1' : '8' }] : []);
+      const draw = () => {
+        const x = boardEl.scrollLeft;
+        renderFretboard(boardEl, { dots: [...hintDots(), ...startDot(), ...dots], links, onTap, focus: cur === 0 ? start.f : null });
+        if (cur) { boardEl.scrollLeft = x; updateFade(boardEl); }
+      };
+      // Tira de parelles: graus mentre toques, noms en acabar
+      const cell = ix => {
+        const cls = [states[ix], ix === cur && !done ? 'cur' : ''].filter(Boolean).join(' ');
+        const j = steps[ix];
+        return `<i class="${cls}">${done ? names[ix] : j >= 0 ? j + 1 : j + 8}</i>`;
+      };
+      const strip = () => {
+        let h = '';
+        for (let i = 0; i < steps.length; i += 2) h += `<span class="t3-pair">${cell(i)}${i + 1 < steps.length ? cell(i + 1) : ''}</span>`;
+        return h;
+      };
+      const listen = () => midis.forEach((m, i) => setTimeout(() => { if (sess && sess.q === q) playMidi(m); }, i * 380));
+      const hintBtn = () => `<button class="link" id="t3Hint">${cfg.t3Hint ? "Amaga l'escala" : "Mostra l'escala"}</button>`;
+      const prompt = () => {
+        promptEl.innerHTML = `<div class="ask">${keyTxt} per terceres · ${dir === 'up' ? 'pujant' : 'baixant'}</div>`
+          + `<div class="t3-strip">${strip()}</div>`
+          + `<div class="sub">${done ? `<button class="link" id="t3Listen">Escolta-la</button>`
+            : `${dir === 'up' ? 'Comença a la fonamental marcada' : "Comença a l'octava marcada"}, a l'altura exacta · ${hintBtn()}`}</div>`;
+        const hb = $('#t3Hint');
+        if (hb) hb.onclick = () => { cfg.t3Hint = !cfg.t3Hint; saveCfg(); prompt(); draw(); };
+        const lb = $('#t3Listen');
+        if (lb) lb.onclick = listen;
+      };
+
+      function finish() {
+        done = true;
+        prompt(); draw();
+        const ok = midis.length - errors;
+        resolve(!errors, midis[midis.length - 1], errors ? `${ok} de ${midis.length} notes bé. Mira els noms a la tira.` : `Correcte: ${keyTxt} per terceres, ${dir === 'up' ? 'pujant' : 'baixant'}`);
+      }
+      function onTap(s, f) {
+        if (q.done || done) return;
+        const m = midiAt(s, f), want = midis[cur], name = names[cur];
+        if (!errors) setFeedback('', '');
+        // Cada parella comença de nou: es veuen les dues notes i la forma de la tercera
+        if (cur % 2 === 0) { dots.length = 0; links.length = 0; prev = null; }
+        let here;
+        if (m === want) {
+          recordPos(s, f, true);
+          states[cur] = 'ok';
+          here = { s, f };
+          dots.push({ s, f, cls: 'ok', anim: 'pop', label: name });
+          playMidi(m); vibrate(boardEl, s, f);
+        } else {
+          // Nota fallada: es marca, sona la correcta i es continua
+          errors++;
+          states[cur] = 'err';
+          dots.push({ s, f, cls: 'err', anim: 'shake', label: pcShort(pcOf(m), q.notation, q.spelling) });
+          const ts = exactPositions(want);
+          for (const t of ts) { recordPos(t.s, t.f, false); dots.push({ s: t.s, f: t.f, cls: 'reveal', label: name }); }
+          here = prev ? nearest(ts, prev.s, prev.f) : nearest(ts, s, f);
+          playMidi(want);
+          setFeedback('err', pcOf(m) === pcOf(want) ? `${name}, però una octava massa ${m > want ? 'aguda' : 'greu'}.` : `Era ${name}.`);
+        }
+        if (prev && cur % 2 === 1) links.push({ a: prev, b: here, cls: states[cur] === 'ok' && states[cur - 1] === 'ok' ? 'ok' : 'shape' });
+        prev = here;
+        cur++;
+        if (cur >= midis.length) { draw(); setTimeout(finish, 350); return; }
+        prompt(); draw();
+      }
+      prompt();
+      draw();
+      if (cfg.sound) playMidi(midis[0]);
+    },
+    failLabel(key) {
+      const [, sid, pc, dir] = key.split('|');
+      const sp = spellScale(scById(sid), +pc, SC_FLAT);
+      return [`${noteName(sp.notes[0], failNotation())} ${sid === 'major' ? 'major' : 'menor'} per terceres`, dir === 'up' ? '(pujant)' : '(baixant)'];
+    },
+    failDots() { return []; },
+  },
 };
+
+/* ---- Escales per terceres ---- */
+// Graus en ordre (0 = fonamental, 7 = octava, -1 = la 7a de sota)
+const T3_SEQ = {
+  up: [0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7],
+  down: [7, 5, 6, 4, 5, 3, 4, 2, 3, 1, 2, 0, 1, -1, 0],
+};
+const t3Midi = (k, root, j) => root + 12 * Math.floor(j / 7) + scById(k.sid).intervals[((j % 7) + 7) % 7];
+// Fonamentals (altura real) amb què tota la seqüència cap dins el rang i les cordes
+function t3Roots(k, dir) {
+  const mids = new Set(positionsInRange().map(p => p.midi));
+  return [...mids].filter(m => pcOf(m) === k.pc && T3_SEQ[dir].every(j => mids.has(t3Midi(k, m, j)))).sort((a, b) => a - b);
+}
 
 /* ---- Lectura de frases: tonalitats i generació ---- */
 // Tonalitats majors i menors que encaixen amb les alteracions de la configuració (fins a 5)
